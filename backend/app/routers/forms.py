@@ -1,0 +1,92 @@
+"""
+CRUD endpoints for managing Forms (versions of the question set,
+e.g. 'BRET v1', 'BRET Executive 2027').
+"""
+
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models.models import Form, BehaviouralType, AssessmentSession
+from app.schemas import FormCreate, FormUpdate, FormOut
+
+router = APIRouter(prefix="/forms", tags=["Forms"])
+
+
+@router.post("/", response_model=FormOut, status_code=201)
+def create_form(
+    payload: FormCreate,
+    db: Session = Depends(get_db),
+):
+    form = Form(**payload.model_dump())
+    db.add(form)
+    db.flush()  # To get the form ID without committing
+
+    # Pre-populate 3 subsections
+    subsections = [
+        BehaviouralType(form_id=form.id, code="A", name="Subsection A", order_index=0),
+        BehaviouralType(form_id=form.id, code="B", name="Subsection B", order_index=1),
+        BehaviouralType(form_id=form.id, code="C", name="Subsection C", order_index=2),
+    ]
+    db.add_all(subsections)
+    
+    db.commit()
+    db.refresh(form)
+    return form
+
+
+@router.get("/", response_model=list[FormOut])
+def list_forms(db: Session = Depends(get_db)):
+    return db.query(Form).order_by(Form.created_at.desc()).all()
+
+
+@router.get("/{form_id}", response_model=FormOut)
+def get_form(form_id: int, db: Session = Depends(get_db)):
+    form = db.get(Form, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+    return form
+
+
+@router.put("/{form_id}", response_model=FormOut)
+def update_form(
+    form_id: int,
+    payload: FormUpdate,
+    db: Session = Depends(get_db),
+):
+    form = db.get(Form, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    updates = payload.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(form, field, value)
+
+    db.commit()
+    db.refresh(form)
+    return form
+
+
+@router.delete("/{form_id}", status_code=204)
+def delete_form(
+    form_id: int,
+    db: Session = Depends(get_db),
+):
+    form = db.get(Form, form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    # Block deletion if any sessions are attached to this form
+    session_count = (
+        db.query(AssessmentSession)
+        .filter(AssessmentSession.form_id == form_id)
+        .count()
+    )
+    if session_count > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete: {session_count} session(s) are linked to this form. Delete the sessions first.",
+        )
+
+    db.delete(form)
+    db.commit()
