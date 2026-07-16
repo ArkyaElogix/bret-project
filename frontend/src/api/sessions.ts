@@ -9,6 +9,20 @@ export interface Session {
 }
 
 /**
+ * Start (or resume) an assessment session for the logged-in user + a form.
+ * Reuses an existing in-progress session for the same user+form if present.
+ */
+export async function startSession(
+  formId: number,
+  productType: 'BASIC' | 'EXECUTIVE'
+): Promise<Session> {
+  return apiRequest<Session>('/sessions/start', {
+    method: 'POST',
+    body: { form_id: formId, product_type: productType },
+  })
+}
+
+/**
  * Admin-only: list all sessions, with optional filters.
  */
 export async function listSessions(filters?: {

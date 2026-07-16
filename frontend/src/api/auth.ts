@@ -1,8 +1,10 @@
 import { apiRequest } from './client'
+import type { User } from './users'
 
 interface LoginResponse {
   access_token: string
   token_type: string
+  role: 'ADMIN' | 'USER'
 }
 
 export async function login(email: string, password: string): Promise<LoginResponse> {
@@ -10,4 +12,11 @@ export async function login(email: string, password: string): Promise<LoginRespo
     method: 'POST',
     body: { email, password },
   })
+}
+
+/**
+ * Fetch the currently logged-in user's profile (id, name, email, role).
+ */
+export async function getMe(): Promise<User> {
+  return apiRequest<User>('/auth/me')
 }

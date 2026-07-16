@@ -17,6 +17,36 @@ export function clearToken() {
   localStorage.removeItem(TOKEN_KEY)
 }
 
+export type Role = 'ADMIN' | 'USER'
+
+/**
+ * Decode the JWT's "role" claim client-side. Used by route guards for an
+ * instant, synchronous role check without a network call. Returns null if
+ * there's no token or the role claim is missing (e.g. legacy tokens issued
+ * before the role claim was added — the API still authenticates these).
+ */
+export function getRoleFromToken(): Role | null {
+  const token = getToken()
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  try {
+    // JWT payload is base64url; pad and convert to JSON
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    const payload = JSON.parse(json)
+    const role = payload?.role
+    return role === 'ADMIN' || role === 'USER' ? role : null
+  } catch {
+    return null
+  }
+}
+
 interface RequestOptions {
   method?: string
   body?: unknown

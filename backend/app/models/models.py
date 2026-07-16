@@ -61,9 +61,9 @@ class Form(Base):
     is_active = Column(Boolean, nullable=False, default=False)  # only one should be True at a time
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    questions = relationship("Question", back_populates="form")
+    questions = relationship("Question", back_populates="form", cascade="all, delete-orphan")
     sessions = relationship("AssessmentSession", back_populates="form")
-    behavioural_types = relationship("BehaviouralType", back_populates="form")
+    behavioural_types = relationship("BehaviouralType", back_populates="form", cascade="all, delete-orphan")
 
 
 class BehaviouralType(Base):
@@ -71,7 +71,7 @@ class BehaviouralType(Base):
     __tablename__ = "behavioural_types"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
+    form_id = Column(Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False)
     code = Column(String(1), nullable=False)  # 'A', 'B', 'C'
     name = Column(String(100), nullable=False)
     instructions = Column(Text, nullable=True)
@@ -111,9 +111,9 @@ class Question(Base):
     __tablename__ = "questions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
+    form_id = Column(Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False)
     behavioural_type_id = Column(
-        Integer, ForeignKey("behavioural_types.id"), nullable=False
+        Integer, ForeignKey("behavioural_types.id", ondelete="CASCADE"), nullable=False
     )
     number = Column(Integer, nullable=False)  # position within its behavioural_type
     option_a_text = Column(Text, nullable=False)
@@ -121,10 +121,10 @@ class Question(Base):
 
     # merged in from scoring_rules; nullable = that option scores nothing
     option_a_factor_id = Column(
-        Integer, ForeignKey("behavioural_factors.id"), nullable=True
+        Integer, ForeignKey("behavioural_factors.id", ondelete="CASCADE"), nullable=True
     )
     option_b_factor_id = Column(
-        Integer, ForeignKey("behavioural_factors.id"), nullable=True
+        Integer, ForeignKey("behavioural_factors.id", ondelete="CASCADE"), nullable=True
     )
 
     form = relationship("Form", back_populates="questions")

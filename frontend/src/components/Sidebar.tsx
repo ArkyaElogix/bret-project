@@ -1,14 +1,16 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { clearToken } from '../api/client'
 
 export default function Sidebar() {
   const navigate = useNavigate()
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { to: '/forms', label: 'Forms' },
-    { to: '/behavioural-factors', label: 'Behavioural Factors' },
-    { to: '/users', label: 'Users' },
-    { to: '/sessions', label: 'Sessions' },
+    { to: '/users', label: 'Users', icon: '👥' },
+    { to: '/forms', label: 'Forms', icon: '📋' },
+    { to: '/behavioural-factors', label: 'Behavioural Factors', icon: '🧠' },
+    { to: '/sessions', label: 'Sessions', icon: '📊' },
   ]
 
   function handleLogout() {
@@ -17,10 +19,14 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="w-64 min-h-screen bg-slate-900 text-white flex flex-col">
+    <aside className={`${isCollapsed ? 'w-20' : 'w-50'} min-h-screen bg-slate-900 text-white flex flex-col transition-all duration-300`}>
       <div className="px-6 py-5 border-b border-slate-700">
-        <h1 className="text-2xl font-bold">BRET</h1>
-        <p className="text-sm text-slate-400">Admin Portal</p>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="text-white hover:bg-slate-800 p-2 rounded"
+        >
+          {isCollapsed ? 'AP →' : '← Admin Portal'}
+        </button>
       </div>
 
       <nav className="flex-1 p-3">
@@ -30,13 +36,13 @@ export default function Sidebar() {
             to={link.to}
             className={({ isActive }) =>
               `block rounded-md px-3 py-2 mb-2 transition ${
-                isActive
-                  ? 'bg-slate-700 text-white'
-                  : 'text-slate-300 hover:bg-slate-800'
+                isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800'
               }`
             }
+            title={isCollapsed ? link.label : ''}
           >
-            {link.label}
+            <span className="mr-2">{link.icon}</span>
+            {!isCollapsed && link.label}
           </NavLink>
         ))}
       </nav>
@@ -46,7 +52,7 @@ export default function Sidebar() {
           onClick={handleLogout}
           className="w-full rounded-md bg-red-600 py-2 text-sm font-medium hover:bg-red-700"
         >
-          Logout
+          {isCollapsed ? '→' : 'Logout'}
         </button>
       </div>
     </aside>

@@ -18,7 +18,8 @@ export default function LoginPage() {
     try {
       const result = await login(email, password)
       setToken(result.access_token)
-      navigate('/forms')
+      // Route to the right portal based on role
+      navigate(result.role === 'ADMIN' ? '/forms' : '/portal')
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)

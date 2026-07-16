@@ -1,7 +1,8 @@
 import { useEffect, useState, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { listForms, createForm, deleteForm, Form } from '../api/forms'
+import { listForms, createForm, deleteForm, updateForm, Form } from '../api/forms'
 import { ApiError } from '../api/client'
+
 import AdminLayout from '../components/AdminLayout'
 
 export default function FormsPage() {
@@ -17,6 +18,19 @@ export default function FormsPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<{ id: number; message: string } | null>(null)
+  const [togglingId, setTogglingId] = useState<number | null>(null)
+
+  async function handleToggleActive(form:Form){
+    setTogglingId(form.id)
+    try {
+      await updateForm(form.id, form.name,!form.is_active )
+      await loadForms()
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to toggle active status.')
+    } finally {
+      setTogglingId(null)
+    }
+  }
 
   async function loadForms() {
     setLoading(true)
@@ -122,11 +136,17 @@ export default function FormsPage() {
                   <p className="text-xs text-gray-500">ID: {form.id}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {form.is_active && (
+                  {/*form.is_active && (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                       Active
                     </span>
-                  )}
+                  )*/}
+                  <button
+                    onClick={() => handleToggleActive(form)}
+                    disabled={togglingId === form.id}
+                    className={`text-xs px-3 py-1 rounded ${form.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} disabled:opacity-50`}
+                  > Active: {form.is_active ? 'Yes' : 'No'}
+                  </button>
                   <Link
                     to={`/forms/${form.id}`}
                     className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50"

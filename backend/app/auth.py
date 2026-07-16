@@ -24,9 +24,17 @@ JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "120"))
 bearer_scheme = HTTPBearer()
 
 
-def create_access_token(user_id: int) -> str:
+def create_access_token(user: User) -> str:
     expire = datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_MINUTES)
-    payload = {"sub": str(user_id), "exp": expire}
+    # "role" is included so the frontend can branch on it without an extra
+    # network call, but the DB-loaded user remains the source of truth —
+    # get_current_user reloads it on every request, so a stale/old token
+    # without "role" still authenticates correctly until it expires.
+    payload = {
+        "sub": str(user.id),
+        "role": user.role.value,
+        "exp": expire,
+    }
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 

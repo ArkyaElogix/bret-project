@@ -7,10 +7,12 @@ export interface Form {
 }
 
 /**
- * Fetch all forms.
+ * Fetch forms. Pass active_only=true for the candidate portal (only forms
+ * an admin has marked active). Any logged-in user may call this.
  */
-export async function listForms(): Promise<Form[]> {
-  return apiRequest<Form[]>('/forms/')
+export async function listForms(activeOnly?: boolean): Promise<Form[]> {
+  const query = activeOnly ? '?active_only=true' : ''
+  return apiRequest<Form[]>(`/forms/${query}`)
 }
 
 export async function getForm(id: number): Promise<Form> {
