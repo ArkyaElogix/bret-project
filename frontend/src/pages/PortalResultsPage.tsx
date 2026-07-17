@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getSessionResults, SectionResult } from '../api/sessions'
 import { ApiError } from '../api/client'
-import AdminLayout from '../components/AdminLayout'
+import PortalLayout from '../components/PortalLayout'
 
 const PALETTE = [
   { bar: 'bg-blue-500', badge: 'bg-blue-100 text-blue-800' },
@@ -19,7 +19,7 @@ function colour(index: number) {
   return PALETTE[index % PALETTE.length]
 }
 
-export default function SessionResultsPage() {
+export default function PortalResultsPage() {
   const { id } = useParams()
   const sessionId = id ? parseInt(id, 10) : 0
 
@@ -33,48 +33,56 @@ export default function SessionResultsPage() {
     setError(null)
     getSessionResults(sessionId)
       .then(setSections)
-      .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load results.'))
+      .catch((err) =>
+        setError(err instanceof ApiError ? err.message : 'Failed to load results.')
+      )
       .finally(() => setLoading(false))
   }, [sessionId])
 
   if (loading) {
     return (
-      <AdminLayout title="Session Results">
+      <PortalLayout title="Your Results">
         <p className="text-sm text-gray-500">Loading results...</p>
-      </AdminLayout>
+      </PortalLayout>
     )
   }
 
   if (error) {
     return (
-      <AdminLayout title="Session Results">
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm mb-4">{error}</div>
-        <Link to="/sessions" className="text-blue-600 hover:underline text-sm">← Back to Sessions</Link>
-      </AdminLayout>
+      <PortalLayout title="Your Results">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm mb-4">
+          {error}
+        </div>
+        <Link to="/portal" className="text-blue-600 hover:underline text-sm">← Back to Forms</Link>
+      </PortalLayout>
     )
   }
 
   if (sections.length === 0) {
     return (
-      <AdminLayout title="Session Results">
+      <PortalLayout title="Your Results">
         <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
-          No results available for this session yet. The session may not be submitted, or no questions had factor mappings.
+          No results are available for this session yet.
         </div>
-        <Link to="/sessions" className="text-blue-600 hover:underline text-sm mt-4 inline-block">← Back to Sessions</Link>
-      </AdminLayout>
+        <Link to="/portal" className="text-blue-600 hover:underline text-sm mt-4 inline-block">
+          ← Back to Forms
+        </Link>
+      </PortalLayout>
     )
   }
 
   return (
-    <AdminLayout title="Session Results">
-      <div className="max-w-4xl space-y-8">
-        <Link to="/sessions" className="text-blue-600 hover:underline text-sm inline-block">← Back to Sessions</Link>
+    <PortalLayout title="Your Results">
+      <div className="space-y-8">
+        <Link to="/portal" className="text-blue-600 hover:underline text-sm inline-block">
+          ← Back to Forms
+        </Link>
 
         <div className="bg-white rounded-xl shadow border border-gray-100 p-6">
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Session #{sessionId}</p>
-          <h1 className="text-2xl font-bold text-gray-900">Behavioural Profile</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Your Behavioural Profile</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Results are grouped by section. Each section has its own set of behavioural factors; the dominant factor in each section is highlighted.
+            Results are grouped by section. Each section has its own set of factors; the dominant factor in each section is highlighted.
           </p>
         </div>
 
@@ -105,7 +113,9 @@ export default function SessionResultsPage() {
                       </span>
                       <div className="flex items-center gap-3 shrink-0 text-right">
                         <span className="text-xs text-gray-500">{factor.score} pts</span>
-                        <span className="text-sm font-bold text-gray-800 w-12 text-right">{factor.percentage}%</span>
+                        <span className="text-sm font-bold text-gray-800 w-12 text-right">
+                          {factor.percentage}%
+                        </span>
                       </div>
                     </div>
                     <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -121,6 +131,6 @@ export default function SessionResultsPage() {
           )
         })}
       </div>
-    </AdminLayout>
+    </PortalLayout>
   )
 }

@@ -28,7 +28,7 @@ def create_question(
         raise HTTPException(status_code=404, detail="Behavioural type not found")
 
     for factor_id in (payload.option_a_factor_id, payload.option_b_factor_id):
-        if factor_id is not None and not db.get(BehaviouralFactor, factor_id):
+        if not db.get(BehaviouralFactor, factor_id):
             raise HTTPException(
                 status_code=404, detail=f"Behavioural factor {factor_id} not found"
             )
@@ -81,7 +81,7 @@ def update_question(
         raise HTTPException(status_code=404, detail="Question not found")
 
     for factor_id in (payload.option_a_factor_id, payload.option_b_factor_id):
-        if factor_id is not None and not db.get(BehaviouralFactor, factor_id):
+        if not db.get(BehaviouralFactor, factor_id):
             raise HTTPException(
                 status_code=404, detail=f"Behavioural factor {factor_id} not found"
             )

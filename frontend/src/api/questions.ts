@@ -30,8 +30,8 @@ export async function createQuestion(
   number: number,
   option_a_text: string,
   option_b_text: string,
-  option_a_factor_id?: number | null,
-  option_b_factor_id?: number | null
+  option_a_factor_id: number,
+  option_b_factor_id: number
 ): Promise<Question> {
   return apiRequest<Question>('/questions/', {
     method: 'POST',
@@ -53,8 +53,8 @@ export async function updateQuestion(
     number?: number
     option_a_text?: string
     option_b_text?: string
-    option_a_factor_id?: number | null
-    option_b_factor_id?: number | null
+    option_a_factor_id: number
+    option_b_factor_id: number
   }
 ): Promise<Question> {
   return apiRequest<Question>(`/questions/${id}`, {

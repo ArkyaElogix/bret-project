@@ -1,76 +1,117 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import LoginPage from './pages/LoginPage'
+import AdminLoginPage from './pages/AdminLoginPage'
 import FormsPage from './pages/FormsPage'
-import ProtectedRoute from './components/ProtectedRoute'
+import { AdminRoute, UserRoute } from './components/ProtectedRoute'
 import FormDetailsPage from './pages/FormDetailsPage'
 import QuestionsPage from './pages/QuestionsPage'
 import BehaviouralFactorsPage from './pages/BehavioralFactorsPage'
 import UsersPage from './pages/UsersPage'
 import SessionsPage from './pages/SessionsPage'
 import SessionResultsPage from './pages/SessionResultsPage'
+import PortalFormsPage from './pages/PortalFormsPage'
+import PortalProfilePage from './pages/PortalProfilePage'
+import PortalAssessmentPage from './pages/PortalAssessmentPage'
+import PortalResultsPage from './pages/PortalResultsPage'
 
 export default function App() {
   return (
     <Routes>
+      {/* Admin portal */}
       <Route
         path="/behavioural-factors"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <BehaviouralFactorsPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
-
       <Route
         path="/users"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <UsersPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
-
       <Route
         path="/sessions"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <SessionsPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
         path="/sessions/:id/results"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <SessionResultsPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
-      <Route path="/login" element={<LoginPage />} />
       <Route
         path="/forms"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <FormsPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
         path="/forms/:id"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <FormDetailsPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
       <Route
         path="/forms/:id/edit"
         element={
-          <ProtectedRoute>
+          <AdminRoute>
             <QuestionsPage />
-          </ProtectedRoute>
+          </AdminRoute>
         }
       />
+
+      {/* Candidate portal */}
+      <Route
+        path="/portal"
+        element={
+          <UserRoute>
+            <PortalFormsPage />
+          </UserRoute>
+        }
+      />
+      <Route
+        path="/portal/profile"
+        element={
+          <UserRoute>
+            <PortalProfilePage />
+          </UserRoute>
+        }
+      />
+      <Route
+        path="/portal/sessions/:id"
+        element={
+          <UserRoute>
+            <PortalAssessmentPage />
+          </UserRoute>
+        }
+      />
+      <Route
+        path="/portal/sessions/:id/results"
+        element={
+          <UserRoute>
+            <PortalResultsPage />
+          </UserRoute>
+        }
+      />
+
+      {/* Public */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path ="/admin/login" element={<AdminLoginPage />} />
       <Route path="/" element={<Navigate to="/forms" replace />} />
     </Routes>
   )

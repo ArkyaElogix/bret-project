@@ -121,10 +121,10 @@ class Question(Base):
 
     # merged in from scoring_rules; nullable = that option scores nothing
     option_a_factor_id = Column(
-        Integer, ForeignKey("behavioural_factors.id", ondelete="CASCADE"), nullable=True
+        Integer, ForeignKey("behavioural_factors.id", ondelete="CASCADE"), nullable=False
     )
     option_b_factor_id = Column(
-        Integer, ForeignKey("behavioural_factors.id", ondelete="CASCADE"), nullable=True
+        Integer, ForeignKey("behavioural_factors.id", ondelete="CASCADE"), nullable=False
     )
 
     form = relationship("Form", back_populates="questions")

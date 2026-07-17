@@ -1,10 +1,10 @@
 import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../api/auth'
+import { adminLogin } from '../api/auth'
 import { setToken } from '../api/client'
 import { ApiError } from '../api/client'
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -16,11 +16,14 @@ export default function LoginPage() {
     setError(null)
     setLoading(true)
     try {
-      const result = await login(email, password)
+      const result = await adminLogin(email, password)
+      // The backend endpoint only returns success for ADMIN users (403 otherwise),
+      // so if we get here the role is guaranteed ADMIN.
       setToken(result.access_token)
-      // Candidate login accepts any valid credentials and always goes to the portal.
-      navigate('/portal')
+      navigate('/forms')
     } catch (err) {
+      // 401 = wrong credentials; 403 = valid creds but not an admin.
+      // Both surface cleanly as ApiError.message.
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
@@ -33,7 +36,7 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-4"
       >
-        <h1 className="text-xl font-semibold text-gray-800">BRET Candidate Login</h1>
+        <h1 className="text-xl font-semibold text-gray-800">BRET Admin Login</h1>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -68,9 +71,8 @@ export default function LoginPage() {
         </button>
 
         <p className="text-center text-xs text-gray-500 pt-2">
-          Administrator?{' '}
-          <Link to="/admin/login" className="text-blue-600 hover:underline">
-            Log in here
+          <Link to="/login" className="text-blue-600 hover:underline">
+            ← Back to candidate login
           </Link>
         </p>
       </form>

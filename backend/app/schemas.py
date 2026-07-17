@@ -154,16 +154,16 @@ class QuestionCreate(BaseModel):
     number: int
     option_a_text: str
     option_b_text: str
-    option_a_factor_id: Optional[int] = None
-    option_b_factor_id: Optional[int] = None
+    option_a_factor_id: int
+    option_b_factor_id: int
 
 
 class QuestionUpdate(BaseModel):
     number: Optional[int] = None
     option_a_text: Optional[str] = None
     option_b_text: Optional[str] = None
-    option_a_factor_id: Optional[int] = None
-    option_b_factor_id: Optional[int] = None
+    option_a_factor_id: int
+    option_b_factor_id: int
 
 
 class QuestionOut(BaseModel):
@@ -182,7 +182,14 @@ class QuestionOut(BaseModel):
 class FactorResultOut(BaseModel):
     """Aggregated result for one factor across all sections of a session."""
     factor_id: int
-    factor_name: str
-    section_breakdown: list[dict]  # [{"section_id": int, "section_name": str, "score": int}]
-    total_score: int
+    factor_name: str  # [{"section_id": int, "section_name": str, "score": int}]
+    score: int
     percentage: float
+
+class SectionResultOut(BaseModel):
+    """All factor resuts for one section, sorted by score descending. 
+    Factors are scoped to a section, so results are grouped by section."""
+    section_id: int
+    section_code: str
+    section_name: str
+    factors: list[FactorResultOut]

@@ -1,180 +1,212 @@
+// import { useEffect, useState } from 'react'
+// import { Link, useParams } from 'react-router-dom'
+// import { getSessionResults, SectionResult } from '../api/sessions'
+// import { ApiError } from '../api/client'
+// import AdminLayout from '../components/AdminLayout'
+
+// const PALETTE = [
+//   { bar: 'bg-blue-500', badge: 'bg-blue-100 text-blue-800' },
+//   { bar: 'bg-violet-500', badge: 'bg-violet-100 text-violet-800' },
+//   { bar: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-800' },
+//   { bar: 'bg-amber-500', badge: 'bg-amber-100 text-amber-800' },
+//   { bar: 'bg-rose-500', badge: 'bg-rose-100 text-rose-800' },
+//   { bar: 'bg-cyan-500', badge: 'bg-cyan-100 text-cyan-800' },
+//   { bar: 'bg-fuchsia-500', badge: 'bg-fuchsia-100 text-fuchsia-800' },
+//   { bar: 'bg-lime-500', badge: 'bg-lime-100 text-lime-800' },
+// ]
+
+// function colour(index: number) {
+//   return PALETTE[index % PALETTE.length]
+// }
+
+// export default function SessionResultsPage() {
+//   const { id } = useParams()
+//   const sessionId = id ? parseInt(id, 10) : 0
+
+//   const [sections, setSections] = useState<SectionResult[]>([])
+//   const [loading, setLoading] = useState(true)
+//   const [error, setError] = useState<string | null>(null)
+
+//   useEffect(() => {
+//     if (!sessionId) return
+//     setLoading(true)
+//     setError(null)
+//     getSessionResults(sessionId)
+//       .then(setSections)
+//       .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to load results.'))
+//       .finally(() => setLoading(false))
+//   }, [sessionId])
+
+//   if (loading) {
+//     return (
+//       <AdminLayout title="Session Results">
+//         <p className="text-sm text-gray-500">Loading results...</p>
+//       </AdminLayout>
+//     )
+//   }
+
+//   if (error) {
+//     return (
+//       <AdminLayout title="Session Results">
+//         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm mb-4">{error}</div>
+//         <Link to="/sessions" className="text-blue-600 hover:underline text-sm">← Back to Sessions</Link>
+//       </AdminLayout>
+//     )
+//   }
+
+//   if (sections.length === 0) {
+//     return (
+//       <AdminLayout title="Session Results">
+//         <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
+//           No results available for this session yet. The session may not be submitted, or no questions had factor mappings.
+//         </div>
+//         <Link to="/sessions" className="text-blue-600 hover:underline text-sm mt-4 inline-block">← Back to Sessions</Link>
+//       </AdminLayout>
+//     )
+//   }
+
+//   return (
+//     <AdminLayout title="Session Results">
+//       <div className="max-w-4xl space-y-8">
+//         <Link to="/sessions" className="text-blue-600 hover:underline text-sm inline-block">← Back to Sessions</Link>
+
+//         <div className="bg-white rounded-xl shadow border border-gray-100 p-6">
+//           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Session #{sessionId}</p>
+//           <h1 className="text-2xl font-bold text-gray-900">Behavioural Profile</h1>
+//           <p className="text-sm text-gray-500 mt-1">
+//             Results are grouped by section. Each section has its own set of behavioural factors; the dominant factor in each section is highlighted.
+//           </p>
+//         </div>
+
+//         {sections.map((section) => {
+//           const top = section.factors[0]
+//           return (
+//             <div key={section.section_id} className="bg-white rounded-xl shadow border border-gray-100 p-6 space-y-5">
+//               <div className="flex items-center justify-between gap-4 flex-wrap">
+//                 <h2 className="text-lg font-semibold text-gray-800">
+//                   {section.section_code} - {section.section_name}
+//                 </h2>
+//                 {top && (
+//                   <div className="text-right">
+//                     <p className="text-xs text-gray-400 uppercase tracking-wide">Dominant Factor</p>
+//                     <p className="text-base font-bold text-slate-800">{top.factor_name}</p>
+//                     <p className="text-sm font-extrabold text-blue-600">{top.percentage}%</p>
+//                   </div>
+//                 )}
+//               </div>
+
+//               {section.factors.map((factor, i) => {
+//                 const col = colour(i)
+//                 return (
+//                   <div key={factor.factor_id} className="space-y-1.5">
+//                     <div className="flex items-center justify-between gap-4">
+//                       <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${col.badge}`}>
+//                         {factor.factor_name}
+//                       </span>
+//                       <div className="flex items-center gap-3 shrink-0 text-right">
+//                         <span className="text-xs text-gray-500">{factor.score} pts</span>
+//                         <span className="text-sm font-bold text-gray-800 w-12 text-right">{factor.percentage}%</span>
+//                       </div>
+//                     </div>
+//                     <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+//                       <div
+//                         className={`h-full rounded-full transition-all duration-700 ${col.bar}`}
+//                         style={{ width: `${factor.percentage}%` }}
+//                       />
+//                     </div>
+//                   </div>
+//                 )
+//               })}
+//             </div>
+//           )
+//         })}
+//       </div>
+//     </AdminLayout>
+//   )
+// }
+
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listSessions, deleteSession, Session } from '../api/sessions'
-import { ApiError } from '../api/client'
+import { listSessions, Session } from '../api/sessions'
 import AdminLayout from '../components/AdminLayout'
-
-const STATUS_LABELS: Record<Session['status'], string> = {
-  in_progress: 'In Progress',
-  submitted: 'Submitted',
-}
-
-const STATUS_STYLES: Record<Session['status'], string> = {
-  in_progress: 'bg-yellow-100 text-yellow-700',
-  submitted: 'bg-green-100 text-green-700',
-}
+import { ApiError } from '../api/client'
 
 export default function SessionsPage() {
-  // ── List state ──────────────────────────────────────────────────────────
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // ── Filters ───────────────────────────────────────────────────────────
-  const [statusFilter, setStatusFilter] = useState<'' | 'in_progress' | 'submitted'>('')
-
-  // ── Delete state ──────────────────────────────────────────────────────
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
-  const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState<{ id: number; message: string } | null>(null)
-
-  // ── Load ──────────────────────────────────────────────────────────────
-  async function loadSessions() {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await listSessions(statusFilter ? { status_filter: statusFilter } : undefined)
-      setSessions(data)
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load sessions.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    loadSessions()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter])
-
-  // ── Delete ────────────────────────────────────────────────────────────
-  function requestDelete(id: number) {
-    setConfirmDeleteId(id)
-    setDeleteError(null)
-  }
-
-  function cancelDelete() {
-    setConfirmDeleteId(null)
-    setDeleteError(null)
-  }
-
-  async function confirmDelete(id: number) {
-    setDeleting(true)
-    setDeleteError(null)
-    try {
-      await deleteSession(id)
-      setConfirmDeleteId(null)
-      await loadSessions()
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Failed to delete session.'
-      setDeleteError({ id, message })
-    } finally {
-      setDeleting(false)
+    async function load() {
+      setLoading(true)
+      setError(null)
+      try {
+        const data = await listSessions()
+        setSessions(data)
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Failed to load sessions.')
+      } finally {
+        setLoading(false)
+      }
     }
+    load()
+  }, [])
+
+  if (loading) {
+    return (
+      <AdminLayout title="Sessions">
+        <p className="text-sm text-gray-500">Loading sessions...</p>
+      </AdminLayout>
+    )
   }
 
-  // ── Render ────────────────────────────────────────────────────────────
+  if (error) {
+    return (
+      <AdminLayout title="Sessions">
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4">
+          {error}
+        </div>
+      </AdminLayout>
+    )
+  }
+
   return (
     <AdminLayout title="Sessions">
-      <div className="max-w-4xl space-y-6">
-
-        {/* ── Filter bar ───────────────────────────────────────────── */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600">Filter by status:</span>
-          {(['', 'in_progress', 'submitted'] as const).map((value) => (
-            <button
-              key={value}
-              onClick={() => setStatusFilter(value)}
-              className={`rounded-full px-3 py-1 text-xs font-medium border transition ${
-                statusFilter === value
-                  ? 'bg-slate-800 text-white border-slate-800'
-                  : 'border-gray-300 text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              {value === '' ? 'All' : STATUS_LABELS[value]}
-            </button>
-          ))}
-
-          <button
-            onClick={loadSessions}
-            className="ml-auto text-xs border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
-          >
-            Refresh
-          </button>
-        </div>
-
-        {/* ── Session list ─────────────────────────────────────────── */}
-        <div className="bg-white shadow rounded-lg divide-y">
-          {loading && <p className="p-6 text-sm text-gray-500">Loading sessions...</p>}
-          {error && <p className="p-6 text-sm text-red-600">{error}</p>}
-          {!loading && !error && sessions.length === 0 && (
-            <p className="p-6 text-sm text-gray-500">No sessions found.</p>
-          )}
-
-          {!loading && !error && sessions.map((session) => (
-            <div key={session.id} className="p-4 flex items-center justify-between gap-4">
-
-              {/* Session info */}
-              <div className="flex-1 min-w-0 space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-800">Session #{session.id}</span>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_STYLES[session.status]}`}>
-                    {STATUS_LABELS[session.status]}
-                  </span>
-                  <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-                    {session.product_type}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500">
-                  User ID: {session.user_id} &nbsp;·&nbsp; Form ID: {session.form_id}
-                </p>
-                {deleteError?.id === session.id && (
-                  <p className="text-xs text-red-600">{deleteError.message}</p>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="shrink-0 flex items-center gap-2">
-                {session.status === 'submitted' && (
-                  <Link
-                    to={`/sessions/${session.id}/results`}
-                    className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50"
-                  >
-                    View Results
-                  </Link>
-                )}
-                {confirmDeleteId === session.id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-600">Delete this session?</span>
-                    <button
-                      onClick={() => confirmDelete(session.id)}
-                      disabled={deleting}
-                      className="text-xs bg-red-600 text-white rounded px-2 py-1 hover:bg-red-700 disabled:opacity-50"
-                    >
-                      {deleting ? 'Deleting...' : 'Confirm'}
-                    </button>
-                    <button
-                      onClick={cancelDelete}
-                      disabled={deleting}
-                      className="text-xs border border-gray-300 rounded px-2 py-1 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => requestDelete(session.id)}
-                    className="text-xs border border-red-300 text-red-600 rounded px-3 py-1 hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-
-            </div>
-          ))}
-        </div>
-
+      <div className="space-y-4">
+        {sessions.length === 0 ? (
+          <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
+            No sessions found.
+          </div>
+        ) : (
+          <div className="bg-white shadow rounded-lg overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">User</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Form</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {sessions.map((session) => (
+                  <tr key={session.id}>
+                    <td className="px-6 py-4 text-sm text-gray-700">{session.id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{session.user_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{session.form_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{session.status}</td>
+                    <td className="px-6 py-4 text-sm text-blue-600">
+                      <Link to={`/sessions/${session.id}/results`} className="hover:underline">
+                        View Results
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </AdminLayout>
   )

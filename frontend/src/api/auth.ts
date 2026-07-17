@@ -14,6 +14,13 @@ export async function login(email: string, password: string): Promise<LoginRespo
   })
 }
 
+export async function adminLogin(email: string, password: string): Promise<LoginResponse>{
+  return apiRequest<LoginResponse>('/auth/admin/login',{
+    method: 'POST',
+    body: { email, password },
+  })
+}
+
 /**
  * Fetch the currently logged-in user's profile (id, name, email, role).
  */

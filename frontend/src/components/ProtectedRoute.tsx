@@ -16,18 +16,15 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-/**
- * Gate for the candidate (USER) portal. Redirects to /login if not
- * authenticated, and to /forms (admin) if the user is an admin.
- */
+
 export function UserRoute({ children }: { children: React.ReactNode }) {
   const token = getToken()
   if (!token) {
     return <Navigate to="/login" replace />
   }
-  if (getRoleFromToken() === 'ADMIN') {
-    return <Navigate to="/forms" replace />
-  }
+  // if (getRoleFromToken() === 'ADMIN') {
+  //   return <Navigate to="/forms" replace />
+  // }
   return <>{children}</>
 }
 

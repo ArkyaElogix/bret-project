@@ -7,18 +7,25 @@ import {
   BehaviouralFactor,
 } from '../api/behavioralFactors'
 import { listBehaviouralTypes, BehaviouralType } from '../api/behavioralTypes'
+import { listForms, Form } from '../api/forms'
 import { ApiError } from '../api/client'
 import AdminLayout from '../components/AdminLayout'
+
+type ExtendedBehaviouralType = BehaviouralType & { form_id?: number }
 
 export default function BehaviouralFactorsPage() {
   // ── Data State ───────────────────────────────────────────────────────────
   const [factors, setFactors] = useState<BehaviouralFactor[]>([])
-  const [sections, setSections] = useState<BehaviouralType[]>([])
+  const [sections, setSections] = useState<ExtendedBehaviouralType[]>([])
+  const [forms, setForms] = useState<Form[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   // ── Filter State ─────────────────────────────────────────────────────────
   const [filterSectionId, setFilterSectionId] = useState<number | 'ALL'>('ALL')
+
+  // Form selector that filters available subsections in the "Add" form.
+  const [formFilterId, setFormFilterId] = useState<number | 'ALL'>('ALL')
 
   // ── Create State ─────────────────────────────────────────────────────────
   const [newSectionId, setNewSectionId] = useState<number | ''>('')
@@ -40,18 +47,23 @@ export default function BehaviouralFactorsPage() {
   const [deleteError, setDeleteError] = useState<{ id: number; message: string } | null>(null)
 
   // ── Load Data ────────────────────────────────────────────────────────────
-  async function loadData() {
+  async function loadData(formId?: number | 'ALL') {
     setLoading(true)
     setError(null)
     try {
-      const [factorsData, sectionsData] = await Promise.all([
-        listBehaviouralFactors(),
-        listBehaviouralTypes(),
-      ])
+      // Fetch factors (all) and forms; fetch sections optionally filtered by form
+      const [factorsData, formsData] = await Promise.all([listBehaviouralFactors(), listForms()])
       setFactors(factorsData)
-      setSections(sectionsData)
-      if (sectionsData.length > 0 && newSectionId === '') {
-        setNewSectionId(sectionsData[0].id)
+      setForms(formsData)
+
+      const effectiveFormId = formId === 'ALL' || formId == null ? undefined : Number(formId)
+      const sectionsDataRaw = await listBehaviouralTypes(effectiveFormId)
+      // cast to extended type to surface form_id if present
+      setSections(sectionsDataRaw as ExtendedBehaviouralType[])
+
+      // set default newSectionId if unset
+      if (sectionsDataRaw.length > 0 && newSectionId === '') {
+        setNewSectionId(sectionsDataRaw[0].id)
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load data.')
@@ -63,6 +75,25 @@ export default function BehaviouralFactorsPage() {
   useEffect(() => {
     loadData()
   }, [])
+
+  // reload sections when form filter changes (keeps rest of data as-is)
+  useEffect(() => {
+    // only reload types (subsections) to reflect chosen form
+    async function reloadSections() {
+      setLoading(true)
+      try {
+        const effectiveFormId = formFilterId === 'ALL' ? undefined : Number(formFilterId)
+        const sectionsData = await listBehaviouralTypes(effectiveFormId)
+        setSections(sectionsData as ExtendedBehaviouralType[])
+        if (sectionsData.length > 0 && newSectionId === '') setNewSectionId(sectionsData[0].id)
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Failed to load subsections.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    reloadSections()
+  }, [formFilterId])
 
   // ── Actions ──────────────────────────────────────────────────────────────
   async function handleCreate(e: FormEvent) {
@@ -77,7 +108,7 @@ export default function BehaviouralFactorsPage() {
       await createBehaviouralFactor(Number(newSectionId), newName.trim(), newOrderIndex)
       setNewName('')
       setNewOrderIndex(0)
-      // reload
+      // reload factors only
       const factorsData = await listBehaviouralFactors()
       setFactors(factorsData)
     } catch (err) {
@@ -143,19 +174,27 @@ export default function BehaviouralFactorsPage() {
   })
 
   // Group factors by section for display
-  const groupedSections = sections.map((sec) => {
-    const secFactors = filteredFactors.filter((f) => f.behavioural_type_id === sec.id)
-    return {
-      ...sec,
-      factors: secFactors,
-    }
-  }).filter((sec) => {
-    // If filtering by specific section, only show that section
-    if (filterSectionId !== 'ALL' && sec.id !== Number(filterSectionId)) {
-      return false
-    }
-    return true
-  })
+  const groupedSections = sections
+    .map((sec) => {
+      const secFactors = filteredFactors.filter((f) => f.behavioural_type_id === sec.id)
+      return {
+        ...sec,
+        factors: secFactors,
+      }
+    })
+    .filter((sec) => {
+      // If filtering by specific section, only show that section
+      if (filterSectionId !== 'ALL' && sec.id !== Number(filterSectionId)) {
+        return false
+      }
+      return true
+    })
+
+  function findFormNameForSection(sec: ExtendedBehaviouralType) {
+    const fid = sec.form_id
+    if (fid == null) return undefined
+    return forms.find((f) => f.id === fid)?.name
+  }
 
   return (
     <AdminLayout title="Behavioural Factors">
@@ -194,6 +233,25 @@ export default function BehaviouralFactorsPage() {
           <div className="bg-white shadow rounded-lg p-6 space-y-4 md:col-span-1">
             <h2 className="text-base font-semibold text-gray-800">Add Behavioural Factor</h2>
             <form onSubmit={handleCreate} className="space-y-4">
+              {/* NEW: Form selector to filter subsections */}
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Form (filter subsections)</label>
+                <select
+                  value={formFilterId}
+                  onChange={(e) =>
+                    setFormFilterId(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value))
+                  }
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="ALL">Show all subsections</option>
+                  {forms.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-sm text-gray-600 mb-1">Section / Subsection</label>
                 <select
@@ -208,6 +266,10 @@ export default function BehaviouralFactorsPage() {
                     </option>
                   ))}
                 </select>
+                {/* small annotation showing which form this subsection belongs to (if available) */}
+                <p className="text-xs text-gray-500 mt-1">
+                  Showing subsections{formFilterId === 'ALL' ? '' : ` for form: ${forms.find(f => f.id === Number(formFilterId))?.name ?? formFilterId}`}
+                </p>
               </div>
 
               <div>
@@ -262,9 +324,14 @@ export default function BehaviouralFactorsPage() {
                   sec.factors.length > 0 && (
                     <div key={sec.id} className="bg-white shadow rounded-lg overflow-hidden border border-gray-100">
                       <div className="bg-slate-50 border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-                        <h3 className="font-semibold text-sm text-slate-800">
-                          {sec.code} - {sec.name}
-                        </h3>
+                        <div>
+                          <h3 className="font-semibold text-sm text-slate-800">
+                            {sec.code} - {sec.name}
+                          </h3>
+                          {findFormNameForSection(sec) && (
+                            <div className="text-xs text-gray-500">Form: {findFormNameForSection(sec)}</div>
+                          )}
+                        </div>
                         <span className="text-xs text-gray-500 uppercase tracking-wide">
                           {sec.factors.length} factors
                         </span>
@@ -321,6 +388,11 @@ export default function BehaviouralFactorsPage() {
                                 <div>
                                   <p className="text-sm font-medium text-gray-800">{factor.name}</p>
                                   <p className="text-xs text-gray-500">Order Index: {factor.order_index}</p>
+                                  {/* small inline form mention to clarify parent form */}
+                                  {/*
+                                    We only show this when we can resolve the section's form.
+                                    The section object is available via sections state if needed.
+                                  */}
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <button

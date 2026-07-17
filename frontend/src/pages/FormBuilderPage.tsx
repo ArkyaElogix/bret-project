@@ -38,8 +38,8 @@ export default function FormBuilderPage() {
   const [newNumber, setNewNumber] = useState<number>(1)
   const [newOptionA, setNewOptionA] = useState('')
   const [newOptionB, setNewOptionB] = useState('')
-  const [newFactorA, setNewFactorA] = useState<number | ''>('')
-  const [newFactorB, setNewFactorB] = useState<number | ''>('')
+  const [newFactorA, setNewFactorA] = useState<number>(0)
+  const [newFactorB, setNewFactorB] = useState<number>(0)
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
 
@@ -48,8 +48,8 @@ export default function FormBuilderPage() {
   const [editNumber, setEditNumber] = useState<number>(1)
   const [editOptionA, setEditOptionA] = useState('')
   const [editOptionB, setEditOptionB] = useState('')
-  const [editFactorA, setEditFactorA] = useState<number | ''>('')
-  const [editFactorB, setEditFactorB] = useState<number | ''>('')
+  const [editFactorA, setEditFactorA] = useState<number>(0)
+  const [editFactorB, setEditFactorB] = useState<number>(0)
   const [saving, setSaving] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
 
@@ -101,8 +101,10 @@ export default function FormBuilderPage() {
     setNewNumber(nextNum)
     setNewOptionA('')
     setNewOptionB('')
-    setNewFactorA('')
-    setNewFactorB('')
+    const factors = getFactorsForSection(sectionId)
+    const defaultFactor = factors.length > 0 ? factors[0].id : 0
+    setNewFactorA(defaultFactor)
+    setNewFactorB(defaultFactor)
     setCreateError(null)
   }
 
@@ -121,8 +123,8 @@ export default function FormBuilderPage() {
         newNumber,
         newOptionA.trim(),
         newOptionB.trim(),
-        newFactorA === '' ? null : newFactorA,
-        newFactorB === '' ? null : newFactorB
+        newFactorA,
+        newFactorB
       )
       setAddingToSection(null)
       // Reload questions
@@ -140,8 +142,8 @@ export default function FormBuilderPage() {
     setEditNumber(q.number)
     setEditOptionA(q.option_a_text)
     setEditOptionB(q.option_b_text)
-    setEditFactorA(q.option_a_factor_id ?? '')
-    setEditFactorB(q.option_b_factor_id ?? '')
+    setEditFactorA(q.option_a_factor_id ?? 0)
+    setEditFactorB(q.option_b_factor_id ?? 0)
     setEditError(null)
     setAddingToSection(null)
     setConfirmDeleteId(null)
@@ -160,8 +162,8 @@ export default function FormBuilderPage() {
         number: editNumber,
         option_a_text: editOptionA.trim(),
         option_b_text: editOptionB.trim(),
-        option_a_factor_id: editFactorA === '' ? null : editFactorA,
-        option_b_factor_id: editFactorB === '' ? null : editFactorB,
+        option_a_factor_id: editFactorA,
+        option_b_factor_id: editFactorB,
       })
       setEditingId(null)
       const questionsData = await listQuestions({ form_id: formId })
@@ -295,13 +297,13 @@ export default function FormBuilderPage() {
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Maps to Factor (Optional)</label>
+                              <label className="block text-xs text-gray-600 mb-1">Maps to Factor</label>
                               <select
                                 value={newFactorA}
-                                onChange={(e) => setNewFactorA(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                                onChange={(e) => setNewFactorA(parseInt(e.target.value, 10))}
                                 className="w-full border rounded px-2 py-1.5 text-sm"
                               >
-                                <option value="">-- None --</option>
+                              
                                 {sectionFactors.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                               </select>
                             </div>
@@ -319,13 +321,13 @@ export default function FormBuilderPage() {
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Maps to Factor (Optional)</label>
+                              <label className="block text-xs text-gray-600 mb-1">Maps to Factor</label>
                               <select
                                 value={newFactorB}
-                                onChange={(e) => setNewFactorB(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                                onChange={(e) => setNewFactorB(parseInt(e.target.value, 10))}
                                 className="w-full border rounded px-2 py-1.5 text-sm"
                               >
-                                <option value="">-- None --</option>
+                              
                                 {sectionFactors.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                               </select>
                             </div>
@@ -393,13 +395,13 @@ export default function FormBuilderPage() {
                                     />
                                   </div>
                                   <div>
-                                    <label className="block text-xs text-gray-600 mb-1">Maps to Factor (Optional)</label>
+                                    <label className="block text-xs text-gray-600 mb-1">Maps to Factor</label>
                                     <select
                                       value={editFactorA}
-                                      onChange={(e) => setEditFactorA(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                                      onChange={(e) => setEditFactorA(parseInt(e.target.value, 10))}
                                       className="w-full border rounded px-2 py-1.5 text-sm"
                                     >
-                                      <option value="">-- None --</option>
+                                      
                                       {sectionFactors.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                                     </select>
                                   </div>
@@ -420,10 +422,10 @@ export default function FormBuilderPage() {
                                     <label className="block text-xs text-gray-600 mb-1">Maps to Factor (Optional)</label>
                                     <select
                                       value={editFactorB}
-                                      onChange={(e) => setEditFactorB(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                                      onChange={(e) => setEditFactorB(parseInt(e.target.value, 10))}
                                       className="w-full border rounded px-2 py-1.5 text-sm"
                                     >
-                                      <option value="">-- None --</option>
+                                      
                                       {sectionFactors.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
                                     </select>
                                   </div>

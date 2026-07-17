@@ -38,6 +38,7 @@ from app.schemas import (
     SectionScoreOut,
     SessionFullOut,
     FactorResultOut,
+    SectionResultOut,
 )
 from app.scoring import calculate_and_store_scores
 from app.auth import get_current_user, require_admin
@@ -55,7 +56,7 @@ def _get_owned_session(session_id: int, db: Session, current_user: User) -> Asse
     return session
 
 
-@router.post("/start", response_model=SessionOut, status_code=201)
+@router.post("/start", response_model=SessionOut)
 def start_or_resume_session(
     payload: SessionStartRequest,
     db: Session = Depends(get_db),
@@ -66,9 +67,10 @@ def start_or_resume_session(
     if payload.product_type not in (ProductType.BASIC.value, ProductType.EXECUTIVE.value):
         raise HTTPException(status_code=400, detail="product_type must be BASIC or EXECUTIVE")
 
-    # reuse an existing in-progress session for this user+form, rather
-    # than creating a duplicate every time they come back
-    existing = (
+    # If the user already has an in-progress session for THIS form, return it
+    # (resume). We do NOT auto-resume across different forms — that's a hard
+    # rule below to force users to finish what they started.
+    existing_for_form = (
         db.query(AssessmentSession)
         .filter(
             AssessmentSession.user_id == current_user.id,
@@ -77,8 +79,29 @@ def start_or_resume_session(
         )
         .first()
     )
-    if existing:
-        return existing
+    if existing_for_form:
+        return existing_for_form
+
+    # Hard gate: block starting a new session if the user has any other
+    # in-progress session elsewhere. Users must finish (submit) the current
+    # one before they can begin a new form.
+    blocking = (
+        db.query(AssessmentSession)
+        .filter(
+            AssessmentSession.user_id == current_user.id,
+            AssessmentSession.status == SessionStatus.in_progress,
+        )
+        .first()
+    )
+    if blocking:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "message": "You must finish your in-progress assessment before starting a new one.",
+                "existing_session_id": blocking.id,
+                "existing_form_id": blocking.form_id,
+            },
+        )
 
     session = AssessmentSession(
         user_id=current_user.id,
@@ -90,6 +113,21 @@ def start_or_resume_session(
     db.commit()
     db.refresh(session)
     return session
+
+
+@router.get("/me", response_model=list[SessionOut])
+def list_my_sessions(
+    status_filter: str | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Return the current user's own sessions, newest first. Optional status
+    filter. Used by the candidate portal to show resume/start/completed state
+    per form."""
+    query = db.query(AssessmentSession).filter(AssessmentSession.user_id == current_user.id)
+    if status_filter is not None:
+        query = query.filter(AssessmentSession.status == status_filter)
+    return query.order_by(AssessmentSession.created_at.desc()).all()
 
 
 @router.post("/{session_id}/answers", response_model=ResponseOut)
@@ -203,7 +241,7 @@ def get_session_scores(
     return scores
 
 
-@router.get("/{session_id}/results", response_model=list[FactorResultOut])
+@router.get("/{session_id}/results", response_model=list[SectionResultOut])
 def get_session_results(
     session_id: int,
     db: Session = Depends(get_db),
@@ -224,40 +262,70 @@ def get_session_results(
     section_ids = {s.section_id for s in scores}
 
     factors = {f.id: f for f in db.query(BehaviouralFactor).filter(BehaviouralFactor.id.in_(factor_ids)).all()}
-    sections = {s.id: s for s in db.query(BehaviouralType).filter(BehaviouralType.id.in_(section_ids)).all()}
+    sections = db.query(BehaviouralType).filter(BehaviouralType.id.in_(section_ids)).order_by(BehaviouralType.order_index).all()
 
     # Aggregate: factor_id -> {total, breakdown: [{section_id, section_name, score}]}
-    aggregated: dict[int, dict] = {}
-    for score_row in scores:
-        fid = score_row.factor_id
-        if fid not in aggregated:
-            aggregated[fid] = {"total": 0, "breakdown": []}
-        aggregated[fid]["total"] += score_row.score
-        sec = sections.get(score_row.section_id)
-        aggregated[fid]["breakdown"].append({
-            "section_id": score_row.section_id,
-            "section_name": f"{sec.code} - {sec.name}" if sec else f"Section {score_row.section_id}",
-            "score": score_row.score,
-        })
+    # aggregated: dict[int, dict] = {}
+    # for score_row in scores:
+    #     fid = score_row.factor_id
+    #     if fid not in aggregated:
+    #         aggregated[fid] = {"total": 0, "breakdown": []}
+    #     aggregated[fid]["total"] += score_row.score
+    #     sec = sections.get(score_row.section_id)
+    #     aggregated[fid]["breakdown"].append({
+    #         "section_id": score_row.section_id,
+    #         "section_name": f"{sec.code} - {sec.name}" if sec else f"Section {score_row.section_id}",
+    #         "score": score_row.score,
+    #     })
 
-    grand_total = sum(v["total"] for v in aggregated.values())
+    # grand_total = sum(v["total"] for v in aggregated.values())
 
-    results = []
-    for fid, data in aggregated.items():
-        factor = factors.get(fid)
-        pct = round(data["total"] / grand_total * 100, 1) if grand_total > 0 else 0.0
-        results.append(FactorResultOut(
-            factor_id=fid,
-            factor_name=factor.name if factor else f"Factor {fid}",
-            section_breakdown=data["breakdown"],
-            total_score=data["total"],
-            percentage=pct,
+    # results = []
+    # for fid, data in aggregated.items():
+    #     factor = factors.get(fid)
+    #     pct = round(data["total"] / grand_total * 100, 1) if grand_total > 0 else 0.0
+    #     results.append(FactorResultOut(
+    #         factor_id=fid,
+    #         factor_name=factor.name if factor else f"Factor {fid}",
+    #         section_breakdown=data["breakdown"],
+    #         total_score=data["total"],
+    #         percentage=pct,
+    #     ))
+
+    # # Sort highest percentage first
+    # results.sort(key=lambda r: r.percentage, reverse=True)
+    # return results
+    by_section: dict[int, dict[int, int]] = {}
+    for row in scores:
+        by_section.setdefault(row.section_id, {})[row.factor_id] = row.score
+
+    results: list[SectionResultOut] = []
+    for section in sections:
+        factor_scores = by_section.get(section.id)
+        if not factor_scores:
+            continue
+
+        section_total = sum(factor_scores.values())
+        factor_results = []
+        for fid, score in factor_scores.items():
+            factor = factors.get(fid)
+            pct = round(score / section_total * 100, 1) if section_total > 0 else 0.0
+            factor_results.append(FactorResultOut(
+                factor_id=fid,
+                factor_name=factor.name if factor else f"Factor {fid}",
+                score=score,
+                percentage=pct,
+            ))
+        factor_results.sort(key=lambda r: r.score, reverse=True)
+
+        results.append(SectionResultOut(
+            section_id=section.id,
+            section_code=section.code,
+            section_name=section.name,
+            factors=factor_results,
         ))
 
-    # Sort highest percentage first
-    results.sort(key=lambda r: r.percentage, reverse=True)
     return results
-
 
 @router.get("/", response_model=list[SessionOut])
 def list_all_sessions(
@@ -310,4 +378,4 @@ def delete_session(
         raise HTTPException(status_code=404, detail="Session not found")
 
     db.delete(session)
-    db.commit()
+    db.commit()

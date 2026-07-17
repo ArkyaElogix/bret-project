@@ -23,6 +23,58 @@ export async function startSession(
 }
 
 /**
+ * List the current user's own sessions, newest first. Optional status filter.
+ */
+export async function listMySessions(statusFilter?: string): Promise<Session[]> {
+  const query = statusFilter ? `?status_filter=${encodeURIComponent(statusFilter)}` : ''
+  return apiRequest<Session[]>(`/sessions/me${query}`)
+}
+
+export interface ResponseData {
+  id: number
+  session_id: number
+  question_id: number
+  chosen_option: 'A' | 'B'
+}
+
+export interface SessionProgress {
+  session: Session
+  answered_question_ids: number[]
+  responses: ResponseData[]
+}
+
+/**
+ * Get a session's current answers (for resume / progress display).
+ * Accessible by the session's owner or an admin.
+ */
+export async function getSessionProgress(sessionId: number): Promise<SessionProgress> {
+  return apiRequest<SessionProgress>(`/sessions/${sessionId}/progress`)
+}
+
+/**
+ * Submit (upsert) one answer. Safe to call repeatedly — overwrites the prior
+ * choice for the same question. Owner or admin only.
+ */
+export async function submitAnswer(
+  sessionId: number,
+  questionId: number,
+  chosenOption: 'A' | 'B'
+): Promise<ResponseData> {
+  return apiRequest<ResponseData>(`/sessions/${sessionId}/answers`, {
+    method: 'POST',
+    body: { question_id: questionId, chosen_option: chosenOption },
+  })
+}
+
+/**
+ * Finalize a session. Requires all questions answered; triggers server-side
+ * scoring. Returns the updated session (status = submitted).
+ */
+export async function submitSession(sessionId: number): Promise<Session> {
+  return apiRequest<Session>(`/sessions/${sessionId}/submit`, { method: 'POST' })
+}
+
+/**
  * Admin-only: list all sessions, with optional filters.
  */
 export async function listSessions(filters?: {
@@ -46,24 +98,30 @@ export async function deleteSession(id: number): Promise<void> {
   await apiRequest<void>(`/sessions/${id}`, { method: 'DELETE' })
 }
 
-export interface SectionBreakdown {
-  section_id: number
-  section_name: string
-  score: number
-}
+// export interface SectionBreakdown {
+//   section_id: number
+//   section_name: string
+//   score: number
+// }
 
 export interface FactorResult {
   factor_id: number
   factor_name: string
-  section_breakdown: SectionBreakdown[]
-  total_score: number
+  score: number
   percentage: number
+}
+
+export interface SectionResult {
+  section_id: number
+  section_code: string
+  section_name: string
+  factors: FactorResult[]
 }
 
 /**
  * Get aggregated factor results (totals + percentages) for a submitted session.
  * Accessible by the session's owner or an admin.
  */
-export async function getSessionResults(sessionId: number): Promise<FactorResult[]> {
-  return apiRequest<FactorResult[]>(`/sessions/${sessionId}/results`)
+export async function getSessionResults(sessionId: number): Promise<SectionResult[]> {
+  return apiRequest<SectionResult[]>(`/sessions/${sessionId}/results`)
 }
