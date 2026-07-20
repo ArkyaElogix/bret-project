@@ -34,11 +34,16 @@ export default function PortalProfilePage() {
             </p>
             <div className="space-y-3">
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-400">Email (your username)</p>
+                <p className="text-xs uppercase tracking-wide text-red-600">Email (your username)</p>
                 <p className="text-sm font-medium text-gray-800 break-all">{user.email}</p>
               </div>
+              
               <div>
-                <p className="text-xs uppercase tracking-wide text-gray-400">Account type</p>
+                <p className="text-xs uppercase tracking-wide text-red-600">Account Name</p>
+                <p className="text-sm font-medium text-gray-800">{user.name}</p>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-red-950">Account type</p>
                 <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
                   {user.role === 'ADMIN' ? 'Admin' : 'Candidate'}
                 </span>

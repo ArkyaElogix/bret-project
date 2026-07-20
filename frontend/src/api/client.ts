@@ -1,7 +1,7 @@
 // Central place for talking to the FastAPI backend.
 // Handles the base URL, JSON headers, and attaching the JWT automatically.
 
-const API_BASE_URL = 'http://localhost:8000'
+const API_BASE_URL = 'http://192.168.1.103:8000'
 
 const TOKEN_KEY = 'bret_token'
 

@@ -47,6 +47,9 @@ export default function PortalFormsPage() {
     // mySessions is newest-first; find the most recent session for this form
     return mySessions.find((s) => s.form_id === formId)
   }
+  function sessionAgainForForm(formId: number): Session[] {
+    return mySessions.filter((s) => s.form_id === formId)
+  }
 
   function openStartForm(form: Form) {
     setStartFormId(form.id)
@@ -74,6 +77,22 @@ export default function PortalFormsPage() {
       setStartError({
         id: form.id,
         message: err instanceof ApiError ? err.message : 'Failed to start assessment.',
+      })
+    } finally {
+      setStarting(false)
+    }
+  }
+
+  async function handleStartAgain(form: Form, previousSession: Session){
+    setStarting(true)
+    setStartError(null)
+
+    try{
+      const session = await startSession(form.id, previousSession.product_type)
+    } catch (err) {
+      setStartError({
+        id: form.id,
+        message: err instanceof ApiError ? err.message : 'Failed to start assessment again.',
       })
     } finally {
       setStarting(false)
@@ -110,6 +129,7 @@ export default function PortalFormsPage() {
           <div className="bg-white shadow rounded-lg divide-y">
             {forms.map((form) => {
               const session = sessionForForm(form.id)
+              const attempts = sessionAgainForForm(form.id)
               const isInProgress = session?.status === 'in_progress'
               const isSubmitted = session?.status === 'submitted'
 
@@ -146,21 +166,21 @@ export default function PortalFormsPage() {
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                           Completed
                         </span>
-                        <button
+                        {/* <button
                           onClick={() => navigate(`/portal/sessions/${session.id}/results`)}
                           className="border border-gray-300 rounded px-4 py-1.5 text-sm hover:bg-gray-50"
                         >
                           View Results
-                        </button>
+                        </button> */}
                         {/* Note: starting again after submitting is allowed by the
                             backend (old session is no longer in_progress). */}
                         <button
-                          onClick={() => openStartForm(form)}
-                          disabled={anyInProgress}
+                          onClick={() => handleStartAgain(form, session)}
+                          disabled={anyInProgress || starting}
                           className="border border-blue-300 text-blue-600 rounded px-4 py-1.5 text-sm hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                           title={anyInProgress ? 'Finish your in-progress assessment first' : 'Start again'}
                         >
-                          Start Again
+                          {starting ? 'Starting...' : 'Start Again'}
                         </button>
                       </>
                     )}
@@ -210,6 +230,50 @@ export default function PortalFormsPage() {
                       </>
                     )}
                   </div>
+                  
+                  {attempts.length > 0 && (
+                    <div className="mt-4 border-t border-gray-100 pt-3">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                        Previous Attempts
+                      </p>
+
+                      <div className="space-y-2">
+                        {attempts.map((attempt, index) => (
+                          <div
+                            key={attempt.id}
+                            className="flex items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 px-3 py-2"
+                          >
+                            <div>
+                              <p className="text-sm font-medium text-gray-700">
+                                Attempt {attempts.length - index}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Session #{attempt.id} · {attempt.product_type} ·{' '}
+                                {attempt.status === 'submitted' ? 'Completed' : 'In progress'}
+                              </p>
+                            </div>
+
+                            {attempt.status === 'submitted' ? (
+                              <button
+                                onClick={() => navigate(`/portal/sessions/${attempt.id}/results`)}
+                                className="border border-gray-300 rounded px-3 py-1.5 text-xs hover:bg-white"
+                              >
+                                View Result
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => navigate(`/portal/sessions/${attempt.id}`)}
+                                className="bg-blue-600 text-white rounded px-3 py-1.5 text-xs font-medium hover:bg-blue-700"
+                              >
+                                Resume
+                              </button>
+                            )}
+          
+                          </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                   {startError?.id === form.id && (
                     <p className="text-xs text-red-600">{startError.message}</p>

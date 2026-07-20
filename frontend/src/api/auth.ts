@@ -27,3 +27,14 @@ export async function adminLogin(email: string, password: string): Promise<Login
 export async function getMe(): Promise<User> {
   return apiRequest<User>('/auth/me')
 }
+
+export async function registerCandidate(
+  name: string,
+  email: string,
+  password: string
+): Promise<LoginResponse> {
+  return apiRequest<LoginResponse>('/auth/register', {
+    method: 'POST',
+    body: { name, email, password },
+  })
+}

@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import User, UserRole
-from app.schemas import LoginRequest, TokenResponse, UserOut
-from app.security import verify_password
+from app.schemas import LoginRequest, TokenResponse, UserOut, CandidateRegisterRequest
+from app.security import verify_password, hash_password
 from app.auth import create_access_token, get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -42,6 +42,26 @@ def admin_login(payload: LoginRequest, db: Session = Depends(get_db)):
     token = create_access_token(user)
     return TokenResponse(access_token=token, role=user.role.value)
 
+
+@router.post("/register", response_model=TokenResponse, status_code=201)
+def register_candidate(payload: CandidateRegisterRequest, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == payload.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    user = User(
+        name=payload.name,
+        email=payload.email,
+        password_hash=hash_password(payload.password),
+        role=UserRole.USER,
+    )
+
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    token = create_access_token(user)
+    return TokenResponse(access_token=token, role=user.role.value)
 
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):

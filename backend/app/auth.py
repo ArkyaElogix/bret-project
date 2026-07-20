@@ -11,7 +11,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-
+from app.schemas import LoginRequest, TokenResponse, CandidateRegisterRequest, UserOut
+from app.security import verify_password, hash_password
 from app.database import get_db
 from app.models.models import User, UserRole
 
