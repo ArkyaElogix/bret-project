@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { clearToken } from '../api/client'
+import { logout } from '../api/client'
 
 export default function Sidebar() {
   const navigate = useNavigate()
@@ -9,12 +9,11 @@ export default function Sidebar() {
   const links = [
     { to: '/users', label: 'Users', icon: '👥' },
     { to: '/forms', label: 'Forms', icon: '📋' },
-    { to: '/behavioural-factors', label: 'Behavioural Factors', icon: '🧠' },
     { to: '/sessions', label: 'Sessions', icon: '📊' },
   ]
 
   function handleLogout() {
-    clearToken()
+    logout()
     navigate('/login')
   }
 

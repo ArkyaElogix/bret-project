@@ -67,3 +67,11 @@ def register_candidate(payload: CandidateRegisterRequest, db: Session = Depends(
 def get_me(current_user: User = Depends(get_current_user)):
     """Return the currently logged-in user's profile (id, name, email, role)."""
     return current_user
+
+@router.post("/logout", status_code=204)
+def logout(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.token_version += 1
+    db.commit()

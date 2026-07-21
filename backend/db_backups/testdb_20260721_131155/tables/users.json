@@ -1,0 +1,29 @@
+[
+  {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@test.com",
+    "password_hash": "$2b$12$tpmGObZic06gWfNfYHTqCO3SuJr2ZL.h1VdKRLOYbydy25MiV0hKG",
+    "role": "ADMIN",
+    "created_at": "2026-07-10T16:25:58",
+    "updated_at": "2026-07-10T16:26:01"
+  },
+  {
+    "id": 2,
+    "name": "Test Candidate",
+    "email": "candidate@test.com",
+    "password_hash": "$2b$12$O4K7nHTAXmNBdC.VWQh.5uyZkFvW5ywGPvdfaefr2LmL5iCARynRi",
+    "role": "USER",
+    "created_at": "2026-07-10T16:27:13",
+    "updated_at": "2026-07-10T16:27:14"
+  },
+  {
+    "id": 4,
+    "name": "Arkya",
+    "email": "arkya@test.com",
+    "password_hash": "$2b$12$mhsDZg1qFOrW.eldjFCLvuo9hp0RUlE/Z86G4j8P2RRcR2b10Hojy",
+    "role": "USER",
+    "created_at": "2026-07-20T07:01:17",
+    "updated_at": "2026-07-20T07:01:17"
+  }
+]

@@ -34,6 +34,7 @@ def create_access_token(user: User) -> str:
     payload = {
         "sub": str(user.id),
         "role": user.role.value,
+        "token_version": user.token_version,
         "exp": expire,
     }
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
@@ -52,6 +53,7 @@ def get_current_user(
     try:
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
         user_id = payload.get("sub")
+        token_version = payload.get("token_version")
         if user_id is None:
             raise credentials_error
     except JWTError:
@@ -59,6 +61,8 @@ def get_current_user(
 
     user = db.get(User, int(user_id))
     if user is None:
+        raise credentials_error
+    if user.token_version != token_version:
         raise credentials_error
     return user
 

@@ -1,0 +1,104 @@
+[
+  {
+    "id": 1,
+    "behavioural_type_id": 1,
+    "name": "Altruistic",
+    "order_index": 1
+  },
+  {
+    "id": 2,
+    "behavioural_type_id": 1,
+    "name": "Emotional",
+    "order_index": 2
+  },
+  {
+    "id": 3,
+    "behavioural_type_id": 1,
+    "name": "Power",
+    "order_index": 3
+  },
+  {
+    "id": 4,
+    "behavioural_type_id": 1,
+    "name": "Existential",
+    "order_index": 4
+  },
+  {
+    "id": 5,
+    "behavioural_type_id": 14,
+    "name": "Altruistic",
+    "order_index": 1
+  },
+  {
+    "id": 6,
+    "behavioural_type_id": 14,
+    "name": "Emotional",
+    "order_index": 2
+  },
+  {
+    "id": 7,
+    "behavioural_type_id": 14,
+    "name": "Power",
+    "order_index": 3
+  },
+  {
+    "id": 8,
+    "behavioural_type_id": 14,
+    "name": "Existential",
+    "order_index": 4
+  },
+  {
+    "id": 9,
+    "behavioural_type_id": 15,
+    "name": "Type I",
+    "order_index": 1
+  },
+  {
+    "id": 10,
+    "behavioural_type_id": 15,
+    "name": "Type II",
+    "order_index": 2
+  },
+  {
+    "id": 11,
+    "behavioural_type_id": 15,
+    "name": "Type III",
+    "order_index": 3
+  },
+  {
+    "id": 12,
+    "behavioural_type_id": 15,
+    "name": "Type IV",
+    "order_index": 4
+  },
+  {
+    "id": 13,
+    "behavioural_type_id": 16,
+    "name": "Type I",
+    "order_index": 1
+  },
+  {
+    "id": 14,
+    "behavioural_type_id": 16,
+    "name": "Type II",
+    "order_index": 2
+  },
+  {
+    "id": 15,
+    "behavioural_type_id": 16,
+    "name": "Type III",
+    "order_index": 3
+  },
+  {
+    "id": 16,
+    "behavioural_type_id": 16,
+    "name": "Type IV",
+    "order_index": 4
+  },
+  {
+    "id": 21,
+    "behavioural_type_id": 36,
+    "name": "ggggg",
+    "order_index": 1
+  }
+]

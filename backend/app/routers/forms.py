@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.models import Form, BehaviouralType, AssessmentSession, User
+from app.models.models import Form, AssessmentSession, User
 from app.schemas import FormCreate, FormUpdate, FormOut
 from app.auth import require_admin, get_current_user
 
@@ -22,15 +22,6 @@ def create_form(
 ):
     form = Form(**payload.model_dump())
     db.add(form)
-    db.flush()  # To get the form ID without committing
-
-    # Pre-populate 3 subsections
-    subsections = [
-        BehaviouralType(form_id=form.id, code="A", name="Subsection A", order_index=0),
-        BehaviouralType(form_id=form.id, code="B", name="Subsection B", order_index=1),
-        BehaviouralType(form_id=form.id, code="C", name="Subsection C", order_index=2),
-    ]
-    db.add_all(subsections)
 
     db.commit()
     db.refresh(form)

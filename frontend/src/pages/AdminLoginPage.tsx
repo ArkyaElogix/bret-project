@@ -1,7 +1,7 @@
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { adminLogin } from '../api/auth'
-import { setToken } from '../api/client'
+import { setToken, clearToken } from '../api/client'
 import { ApiError } from '../api/client'
 
 export default function AdminLoginPage() {
@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
       // The backend endpoint only returns success for ADMIN users (403 otherwise),
       // so if we get here the role is guaranteed ADMIN.
       setToken(result.access_token)
-      navigate('/forms')
+      navigate('/forms', { replace: true })
     } catch (err) {
       // 401 = wrong credentials; 403 = valid creds but not an admin.
       // Both surface cleanly as ApiError.message.

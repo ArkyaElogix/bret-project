@@ -2,13 +2,27 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
+# class BehaviouralTypeCreate(BaseModel):
+#     form_id: int
+#     code: str
+#     name: str
+#     instructions: Optional[str] = None
+#     order_index: int = 0
 class BehaviouralTypeCreate(BaseModel):
-    form_id: int
     code: str
     name: str
     instructions: Optional[str] = None
     order_index: int = 0
 
+
+class BehaviouralTypeOut(BaseModel):
+    id: int
+    code: str
+    name: str
+    instructions: Optional[str] = None
+    order_index: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 class BehaviouralTypeUpdate(BaseModel):
     code: Optional[str] = None
@@ -17,15 +31,15 @@ class BehaviouralTypeUpdate(BaseModel):
     order_index: Optional[int] = None
 
 
-class BehaviouralTypeOut(BaseModel):
-    id: int
-    form_id: int
-    code: str
-    name: str
-    instructions: Optional[str] = None
-    order_index: int
+# class BehaviouralTypeOut(BaseModel):
+#     id: int
+#     form_id: int
+#     code: str
+#     name: str
+#     instructions: Optional[str] = None
+#     order_index: int
 
-    model_config = ConfigDict(from_attributes=True)
+#     model_config = ConfigDict(from_attributes=True)
 
 
 class BehaviouralFactorCreate(BaseModel):

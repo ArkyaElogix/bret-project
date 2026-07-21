@@ -50,46 +50,77 @@ class UserRole(str, enum.Enum):
     USER = "USER"
 
 
+# class Form(Base):
+#     """A specific version/set of questions, e.g. 'BRET v1', 'BRET Executive 2027'.
+#     Sections (behavioural_types) and factors are shared across all forms —
+#     only the actual questions differ between forms."""
+#     __tablename__ = "forms"
+
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     name = Column(String(255), nullable=False)
+#     is_active = Column(Boolean, nullable=False, default=False)  # only one should be True at a time
+#     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+#     questions = relationship("Question", back_populates="form", cascade="all, delete-orphan")
+#     sessions = relationship("AssessmentSession", back_populates="form")
+#     behavioural_types = relationship("BehaviouralType", back_populates="form", cascade="all, delete-orphan")
+
+
+# class BehaviouralType(Base):
+#     """Formerly 'sections' — A, B, C."""
+#     __tablename__ = "behavioural_types"
+
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     form_id = Column(Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False)
+#     code = Column(String(1), nullable=False)  # 'A', 'B', 'C'
+#     name = Column(String(100), nullable=False)
+#     instructions = Column(Text, nullable=True)
+#     order_index = Column(Integer, nullable=False, default=0)
+
+#     questions = relationship(
+#         "Question", back_populates="behavioural_type", order_by="Question.number"
+#     )
+#     behavioural_factors = relationship(
+#         "BehaviouralFactor", back_populates="behavioural_type",
+#         order_by="BehaviouralFactor.order_index"
+#     )
+#     form = relationship("Form", back_populates="behavioural_types")
+
+#     __table_args__ = (
+#         UniqueConstraint("form_id", "code", name="uq_form_type_code"),
+#     )
+
 class Form(Base):
-    """A specific version/set of questions, e.g. 'BRET v1', 'BRET Executive 2027'.
-    Sections (behavioural_types) and factors are shared across all forms —
-    only the actual questions differ between forms."""
     __tablename__ = "forms"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    is_active = Column(Boolean, nullable=False, default=False)  # only one should be True at a time
+    is_active = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     questions = relationship("Question", back_populates="form", cascade="all, delete-orphan")
     sessions = relationship("AssessmentSession", back_populates="form")
-    behavioural_types = relationship("BehaviouralType", back_populates="form", cascade="all, delete-orphan")
 
 
 class BehaviouralType(Base):
-    """Formerly 'sections' — A, B, C."""
     __tablename__ = "behavioural_types"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    form_id = Column(Integer, ForeignKey("forms.id", ondelete="CASCADE"), nullable=False)
-    code = Column(String(1), nullable=False)  # 'A', 'B', 'C'
+    code = Column(String(1), nullable=False)
     name = Column(String(100), nullable=False)
     instructions = Column(Text, nullable=True)
     order_index = Column(Integer, nullable=False, default=0)
 
-    questions = relationship(
-        "Question", back_populates="behavioural_type", order_by="Question.number"
-    )
+    questions = relationship("Question", back_populates="behavioural_type", order_by="Question.number")
     behavioural_factors = relationship(
-        "BehaviouralFactor", back_populates="behavioural_type",
-        order_by="BehaviouralFactor.order_index"
+        "BehaviouralFactor",
+        back_populates="behavioural_type",
+        order_by="BehaviouralFactor.order_index",
     )
-    form = relationship("Form", back_populates="behavioural_types")
 
     __table_args__ = (
-        UniqueConstraint("form_id", "code", name="uq_form_type_code"),
+        UniqueConstraint("code", name="uq_behavioural_type_code"),
     )
-
 
 class BehaviouralFactor(Base):
     """e.g. Altruistic, Emotional, Power, Existential — scoped to a behavioural_type."""
@@ -149,6 +180,7 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
+    token_version = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False

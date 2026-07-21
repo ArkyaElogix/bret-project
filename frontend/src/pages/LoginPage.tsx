@@ -1,7 +1,7 @@
-import { useState, FormEvent } from 'react'
+import { useEffect,useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { login, registerCandidate } from '../api/auth'
-import { setToken } from '../api/client'
+import { setToken, clearToken } from '../api/client'
 import { ApiError } from '../api/client'
 
 export default function LoginPage() {
@@ -46,7 +46,7 @@ export default function LoginPage() {
           : await login(email, password)
 
       setToken(result.access_token)
-      navigate('/portal')
+      navigate('/portal', { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
     } finally {

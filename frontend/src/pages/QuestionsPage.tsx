@@ -4,9 +4,6 @@ import { ApiError } from '../api/client'
 import { getForm, Form } from '../api/forms'
 import {
   listBehaviouralTypes,
-  createBehaviouralType,
-  updateBehaviouralType,
-  deleteBehaviouralType,
   BehaviouralType,
 } from '../api/behavioralTypes'
 import {
@@ -60,19 +57,6 @@ export default function QuestionsPage() {
   const [newSectionName, setNewSectionName] = useState('')
   const [newSectionInstructions, setNewSectionInstructions] = useState('')
   const [newSectionOrder, setNewSectionOrder] = useState(0)
-  const [creatingSection, setCreatingSection] = useState(false)
-  const [createSectionError, setCreateSectionError] = useState<string | null>(null)
-
-  const [editingSectionId, setEditingSectionId] = useState<number | null>(null)
-  const [editSectionCode, setEditSectionCode] = useState('')
-  const [editSectionName, setEditSectionName] = useState('')
-  const [editSectionInstructions, setEditSectionInstructions] = useState('')
-  const [editSectionOrder, setEditSectionOrder] = useState(0)
-  const [savingSection, setSavingSection] = useState(false)
-  const [editSectionError, setEditSectionError] = useState<string | null>(null)
-  const [confirmDeleteSectionId, setConfirmDeleteSectionId] = useState<number | null>(null)
-  const [deletingSection, setDeletingSection] = useState(false)
-  const [deleteSectionError, setDeleteSectionError] = useState<{ id: number; message: string } | null>(null)
 
   async function loadData() {
     setLoading(true)
@@ -80,7 +64,7 @@ export default function QuestionsPage() {
     try {
       const [formData, sectionsData, factorsData, questionsData] = await Promise.all([
         getForm(formId),
-        listBehaviouralTypes(formId),
+        listBehaviouralTypes(),
         listBehaviouralFactors(),
         listQuestions({ form_id: formId }),
       ])
@@ -108,7 +92,21 @@ export default function QuestionsPage() {
   function getQuestionsForSection(sectionId: number) {
     return questions.filter((question) => question.behavioural_type_id === sectionId)
   }
-
+  function getFactorUsageCount(
+    sectionId: number,
+    factorId: number,
+    excludeQuestionId?: number
+  ): number {
+    const qs = getQuestionsForSection(sectionId).filter(
+      (q) => q.id !== excludeQuestionId
+    )
+    let count = 0
+    for (const q of qs) {
+      if (q.option_a_factor_id === factorId) count++
+      if (q.option_b_factor_id === factorId) count++
+    }
+    return count
+  }
   function handleStartAdding(sectionId: number) {
     setAddingToSection(sectionId)
     const existing = getQuestionsForSection(sectionId)
@@ -116,7 +114,7 @@ export default function QuestionsPage() {
     setNewNumber(nextNumber)
     setNewOptionA('')
     setNewOptionB('')
-    const factors= getFactorsForSection(sectionId)
+    const factors = getFactorsForSection(sectionId)
     const defaultFactor = factors.length > 0 ? factors[0].id : 0
     setNewFactorA(defaultFactor)
     setNewFactorB(defaultFactor)
@@ -210,89 +208,6 @@ export default function QuestionsPage() {
     }
   }
 
-  async function handleCreateSection(e: FormEvent) {
-    e.preventDefault()
-    setCreateSectionError(null)
-    setCreatingSection(true)
-    try {
-      await createBehaviouralType(
-        newSectionCode.trim(),
-        newSectionName.trim(),
-        newSectionInstructions.trim(),
-        newSectionOrder
-      )
-      setNewSectionCode('')
-      setNewSectionName('')
-      setNewSectionInstructions('')
-      setNewSectionOrder(0)
-      await loadData()
-    } catch (err) {
-      setCreateSectionError(err instanceof ApiError ? err.message : 'Failed to create section.')
-    } finally {
-      setCreatingSection(false)
-    }
-  }
-
-  function handleStartEditingSection(section: BehaviouralType) {
-    setEditingSectionId(section.id)
-    setEditSectionCode(section.code)
-    setEditSectionName(section.name)
-    setEditSectionInstructions(section.instructions ?? '')
-    setEditSectionOrder(section.order_index)
-    setEditSectionError(null)
-    setConfirmDeleteSectionId(null)
-    setDeleteSectionError(null)
-  }
-
-  function handleCancelEditingSection() {
-    setEditingSectionId(null)
-    setEditSectionError(null)
-  }
-
-  async function handleSaveSection(id: number) {
-    setSavingSection(true)
-    setEditSectionError(null)
-    try {
-      await updateBehaviouralType(
-        id,
-        editSectionCode.trim(),
-        editSectionName.trim(),
-        editSectionInstructions.trim(),
-        editSectionOrder
-      )
-      setEditingSectionId(null)
-      await loadData()
-    } catch (err) {
-      setEditSectionError(err instanceof ApiError ? err.message : 'Failed to update section.')
-    } finally {
-      setSavingSection(false)
-    }
-  }
-
-  function handleRequestDeleteSection(id: number) {
-    setConfirmDeleteSectionId(id)
-    setDeleteSectionError(null)
-    setEditingSectionId(null)
-  }
-
-  function handleCancelDeleteSection() {
-    setConfirmDeleteSectionId(null)
-    setDeleteSectionError(null)
-  }
-
-  async function handleConfirmDeleteSection(id: number) {
-    setDeletingSection(true)
-    setDeleteSectionError(null)
-    try {
-      await deleteBehaviouralType(id)
-      setConfirmDeleteSectionId(null)
-      await loadData()
-    } catch (err) {
-      setDeleteSectionError({ id, message: err instanceof ApiError ? err.message : 'Failed to delete section.' })
-    } finally {
-      setDeletingSection(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -313,9 +228,50 @@ export default function QuestionsPage() {
     )
   }
 
+  function FactorReference() {
+    return (
+      <aside className="self-start rounded-lg border border-gray-200 bg-white shadow-sm lg:sticky lg:top-6">
+        <details open>
+          <summary className="cursor-pointer list-none border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800">
+            Available Factors
+          </summary>
+
+          <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
+            {sections.map((section) => {
+              const sectionFactors = getFactorsForSection(section.id)
+
+              return (
+                <div key={section.id} className="space-y-2">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    {section.code} - {section.name}
+                  </h3>
+
+                  {sectionFactors.length === 0 ? (
+                    <p className="text-xs text-gray-400">No factors configured.</p>
+                  ) : (
+                    <ul className="space-y-1">
+                      {sectionFactors.map((factor) => (
+                        <li
+                          key={factor.id}
+                          className="rounded border border-gray-100 bg-gray-50 px-2 py-1 text-xs text-gray-700"
+                        >
+                          {factor.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </details>
+      </aside>
+    )
+  }
+
   return (
     <AdminLayout title="Manage Form">
-      <div className="max-w-6xl space-y-8">
+      <div className="max-w-7xl space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <Link to="/forms" className="text-blue-600 hover:underline text-sm inline-block mb-3">
@@ -328,68 +284,14 @@ export default function QuestionsPage() {
           </div>
           <Link to={`/forms/${form.id}`} className="rounded bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
             View Details
+
           </Link>
         </div>
+      </div>
+      <div className="mt-8 flex flex-col gap-6 rg:flex-row">
 
-        <form onSubmit={handleCreateSection} className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">Add a new section</h2>
-            <span className="text-xs uppercase tracking-wide text-gray-400">Section / subsection</span>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm text-gray-600">Code</label>
-              <input
-                type="text"
-                required
-                value={newSectionCode}
-                onChange={(e) => setNewSectionCode(e.target.value)}
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                placeholder="e.g. A"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm text-gray-600">Name</label>
-              <input
-                type="text"
-                required
-                value={newSectionName}
-                onChange={(e) => setNewSectionName(e.target.value)}
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                placeholder="e.g. Section A"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="mb-1 block text-sm text-gray-600">Description / instructions</label>
-            <textarea
-              value={newSectionInstructions}
-              onChange={(e) => setNewSectionInstructions(e.target.value)}
-              rows={3}
-              className="w-full resize-y rounded border border-gray-300 px-3 py-2 text-sm"
-              placeholder="Add guidance shown for this subsection"
-            />
-          </div>
-          <div className="w-32">
-            <label className="mb-1 block text-sm text-gray-600">Order</label>
-            <input
-              type="number"
-              min={0}
-              value={newSectionOrder}
-              onChange={(e) => setNewSectionOrder(Number(e.target.value))}
-              className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-          {createSectionError && <p className="text-sm text-red-600">{createSectionError}</p>}
-          <button
-            type="submit"
-            disabled={creatingSection}
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {creatingSection ? 'Creating...' : 'Create section'}
-          </button>
-        </form>
-
+      </div>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="space-y-6">
           {sections.map((section) => {
             const sectionQuestions = getQuestionsForSection(section.id)
@@ -400,108 +302,27 @@ export default function QuestionsPage() {
                   <div>
                     <h2 className="text-lg font-semibold text-gray-800">
                       {section.code} - {section.name}
+                      {(() => {
+                        const fullFactors = getFactorsForSection(section.id).filter(
+                          (f) => getFactorUsageCount(section.id, f.id) >= 5
+                        )
+                        return fullFactors.length > 0 ? (
+                          <p className="mt-1 text-xs text-amber-600 font-medium">
+                            {fullFactors.length} factor{fullFactors.length > 1 ? 's' : ''} at capacity (used 5/5 times):{' '}
+                            {fullFactors.map((f) => f.name).join(', ')}
+                          </p>
+                        ) : null
+                      })()}
+
                     </h2>
                     {section.instructions && (
                       <p className="mt-1 text-sm text-gray-500">{section.instructions}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleStartEditingSection(section)}
-                      className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-white"
-                    >
-                      Edit Section
-                    </button>
-                    {confirmDeleteSectionId === section.id ? (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-600">Delete?</span>
-                        <button
-                          onClick={() => handleConfirmDeleteSection(section.id)}
-                          disabled={deletingSection}
-                          className="rounded bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
-                        >
-                          {deletingSection ? 'Deleting...' : 'Confirm'}
-                        </button>
-                        <button
-                          onClick={handleCancelDeleteSection}
-                          disabled={deletingSection}
-                          className="rounded border border-gray-300 px-2.5 py-1 text-xs hover:bg-white disabled:opacity-50"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => handleRequestDeleteSection(section.id)}
-                        className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
-                      >
-                        Delete Section
-                      </button>
-                    )}
-                  </div>
+
                 </div>
 
-                {editingSectionId === section.id && (
-                  <div className="border-b border-gray-200 bg-gray-50 p-6 space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div>
-                        <label className="mb-1 block text-xs text-gray-600">Code</label>
-                        <input
-                          type="text"
-                          value={editSectionCode}
-                          onChange={(e) => setEditSectionCode(e.target.value)}
-                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1 block text-xs text-gray-600">Name</label>
-                        <input
-                          type="text"
-                          value={editSectionName}
-                          onChange={(e) => setEditSectionName(e.target.value)}
-                          className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-xs text-gray-600">Description / instructions</label>
-                      <textarea
-                        value={editSectionInstructions}
-                        onChange={(e) => setEditSectionInstructions(e.target.value)}
-                        rows={3}
-                        className="w-full resize-y rounded border border-gray-300 px-3 py-2 text-sm"
-                      />
-                    </div>
-                    <div className="w-32">
-                      <label className="mb-1 block text-xs text-gray-600">Order</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={editSectionOrder}
-                        onChange={(e) => setEditSectionOrder(Number(e.target.value))}
-                        className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
-                      />
-                    </div>
-                    {editSectionError && <p className="text-sm text-red-600">{editSectionError}</p>}
-                    {deleteSectionError?.id === section.id && <p className="text-sm text-red-600">{deleteSectionError.message}</p>}
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleSaveSection(section.id)}
-                        disabled={savingSection}
-                        className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                      >
-                        {savingSection ? 'Saving...' : 'Save Section'}
-                      </button>
-                      <button
-                        onClick={handleCancelEditingSection}
-                        disabled={savingSection}
-                        className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-white disabled:opacity-50"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
+
 
                 <div className="p-6">
                   <div className="mb-4 flex items-center justify-between">
@@ -548,12 +369,17 @@ export default function QuestionsPage() {
                                 onChange={(e) => setNewFactorA(parseInt(e.target.value, 10))}
                                 className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
                               >
-                                
-                                {sectionFactors.map((factor) => (
-                                  <option key={factor.id} value={factor.id}>
-                                    {factor.name}
-                                  </option>
-                                ))}
+
+                                {sectionFactors.map((factor) => {
+                                  const used = getFactorUsageCount(section.id, factor.id)
+                                  const full = used >= 5
+                                  return (
+                                    <option key={factor.id} value={factor.id} disabled={full}>
+                                      {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                    </option>
+                                  )
+                                })}
+
                               </select>
                             </div>
                           </div>
@@ -575,12 +401,17 @@ export default function QuestionsPage() {
                                 onChange={(e) => setNewFactorB(parseInt(e.target.value, 10))}
                                 className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
                               >
-                              
-                                {sectionFactors.map((factor) => (
-                                  <option key={factor.id} value={factor.id}>
-                                    {factor.name}
-                                  </option>
-                                ))}
+
+                                {sectionFactors.map((factor) => {
+                                  const used = getFactorUsageCount(section.id, factor.id)
+                                  const full = used >= 5
+                                  return (
+                                    <option key={factor.id} value={factor.id} disabled={full}>
+                                      {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                    </option>
+                                  )
+                                })}
+
                               </select>
                             </div>
                           </div>
@@ -647,12 +478,17 @@ export default function QuestionsPage() {
                                       onChange={(e) => setEditFactorA(parseInt(e.target.value, 10))}
                                       className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
                                     >
-                                      
-                                      {sectionFactors.map((factor) => (
-                                        <option key={factor.id} value={factor.id}>
-                                          {factor.name}
-                                        </option>
-                                      ))}
+
+                                      {sectionFactors.map((factor) => {
+                                        const used = getFactorUsageCount(section.id, factor.id)
+                                        const full = used >= 5
+                                        return (
+                                          <option key={factor.id} value={factor.id} disabled={full}>
+                                            {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                          </option>
+                                        )
+                                      })}
+
                                     </select>
                                   </div>
                                 </div>
@@ -674,12 +510,17 @@ export default function QuestionsPage() {
                                       onChange={(e) => setEditFactorB(parseInt(e.target.value, 10))}
                                       className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
                                     >
-                                      
-                                      {sectionFactors.map((factor) => (
-                                        <option key={factor.id} value={factor.id}>
-                                          {factor.name}
-                                        </option>
-                                      ))}
+
+                                      {sectionFactors.map((factor) => {
+                                        const used = getFactorUsageCount(section.id, factor.id, question.id)
+                                        const full = used >= 5
+                                        return (
+                                          <option key={factor.id} value={factor.id} disabled={full}>
+                                            {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                          </option>
+                                        )
+                                      })}
+
                                     </select>
                                   </div>
                                 </div>
@@ -771,9 +612,11 @@ export default function QuestionsPage() {
                   </div>
                 </div>
               </div>
+
             )
           })}
         </div>
+        <FactorReference />
       </div>
     </AdminLayout>
   )

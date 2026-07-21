@@ -20,10 +20,10 @@ export default function FormsPage() {
   const [deleteError, setDeleteError] = useState<{ id: number; message: string } | null>(null)
   const [togglingId, setTogglingId] = useState<number | null>(null)
 
-  async function handleToggleActive(form:Form){
+  async function handleToggleActive(form: Form) {
     setTogglingId(form.id)
     try {
-      await updateForm(form.id, form.name,!form.is_active )
+      await updateForm(form.id, form.name, !form.is_active)
       await loadForms()
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to toggle active status.')
@@ -133,7 +133,6 @@ export default function FormsPage() {
               <div key={form.id} className="p-4 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-800">{form.name}</p>
-                  <p className="text-xs text-gray-500">ID: {form.id}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {/*form.is_active && (

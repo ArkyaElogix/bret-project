@@ -13,6 +13,78 @@ from app.auth import require_admin, get_current_user
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
+def count_factor_usage(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    factor_id: int,
+    exclude_question_id: int | None = None,
+) -> int:
+    query = db.query(Question).filter(
+        Question.form_id == form_id,
+        Question.behavioural_type_id == behavioural_type_id,
+        (
+            (Question.option_a_factor_id == factor_id)
+            | (Question.option_b_factor_id == factor_id)
+        ),
+    )
+
+    if exclude_question_id is not None:
+        query = query.filter(Question.id != exclude_question_id)
+
+    total = 0
+    for question in query.all():
+        if question.option_a_factor_id == factor_id:
+            total += 1
+        if question.option_b_factor_id == factor_id:
+            total += 1
+
+    return total
+
+
+def validate_factor_usage_limit(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    option_a_factor_id: int,
+    option_b_factor_id: int,
+    exclude_question_id: int | None = None,
+):
+    new_counts: dict[int, int] = {}
+
+    for factor_id in (option_a_factor_id, option_b_factor_id):
+        new_counts[factor_id] = new_counts.get(factor_id, 0) + 1
+
+    for factor_id, added_count in new_counts.items():
+        existing_count = count_factor_usage(
+            db,
+            form_id=form_id,
+            behavioural_type_id=behavioural_type_id,
+            factor_id=factor_id,
+            exclude_question_id=exclude_question_id,
+        )
+
+        if existing_count + added_count > 5:
+            raise HTTPException(
+                status_code=400,
+                detail="Each behavioural factor can only be applied 5 times per section.",
+            )
+
+def validate_factor_for_section(
+    db: Session,
+    factor_id: int,
+    behavioural_type_id: int,
+):
+    factor = db.get(BehaviouralFactor, factor_id)
+    if not factor:
+        raise HTTPException(status_code=404, detail=f"Behavioural factor {factor_id} not found")
+
+    if factor.behavioural_type_id != behavioural_type_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Selected factor does not belong to this section",
+        )
+
 
 @router.post("/", response_model=QuestionOut, status_code=201)
 def create_question(
@@ -27,12 +99,9 @@ def create_question(
     if not behavioural_type:
         raise HTTPException(status_code=404, detail="Behavioural type not found")
 
-    for factor_id in (payload.option_a_factor_id, payload.option_b_factor_id):
-        if not db.get(BehaviouralFactor, factor_id):
-            raise HTTPException(
-                status_code=404, detail=f"Behavioural factor {factor_id} not found"
-            )
-
+    validate_factor_for_section(db, payload.option_a_factor_id, payload.behavioural_type_id)
+    validate_factor_for_section(db, payload.option_b_factor_id, payload.behavioural_type_id)
+    validate_factor_usage_limit(db, form_id=payload.form_id, behavioural_type_id=payload.behavioural_type_id, option_a_factor_id=payload.option_a_factor_id, option_b_factor_id=payload.option_b_factor_id)
     question = Question(**payload.model_dump())
     db.add(question)
     db.commit()
@@ -87,6 +156,18 @@ def update_question(
             )
 
     updates = payload.model_dump(exclude_unset=True)
+    target_section_id = updates.get("behavioural_type_id", question.behavioural_type_id)
+
+    validate_factor_for_section(db, payload.option_a_factor_id, target_section_id)
+    validate_factor_for_section(db, payload.option_b_factor_id, target_section_id)
+    validate_factor_usage_limit(
+        db,
+        form_id=question.form_id,
+        behavioural_type_id=target_section_id,
+        option_a_factor_id=payload.option_a_factor_id,
+        option_b_factor_id=payload.option_b_factor_id,
+        exclude_question_id=question.id,
+    )
     for field, value in updates.items():
         setattr(question, field, value)
 

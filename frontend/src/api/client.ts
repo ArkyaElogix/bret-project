@@ -1,9 +1,53 @@
 // Central place for talking to the FastAPI backend.
 // Handles the base URL, JSON headers, and attaching the JWT automatically.
 
-const API_BASE_URL = 'http://192.168.1.103:8000'
+const API_BASE_URL = 'http://localhost:8000'
 
 const TOKEN_KEY = 'bret_token'
+
+const AUTH_CHANGE_EVENT = 'bret-auth-change'
+
+export function notifyAuthChange() {
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT))
+}
+
+export function getAuthChangeEventName() {
+  return AUTH_CHANGE_EVENT
+}
+
+export function isTokenValid(): boolean {
+  const token = getToken()
+  if (!token) return false
+
+  const parts = token.split('.')
+  if (parts.length !== 3) return false
+
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const payload = JSON.parse(atob(base64))
+    const exp = payload?.exp
+
+    if (typeof exp !== 'number') return false
+
+    return exp * 1000 > Date.now()
+  } catch {
+    return false
+  }
+}
+
+export async function logout() {
+  try {
+    if (getToken()) {
+      await apiRequest<void>('/auth/logout', { method: 'POST' })
+    }
+  } catch {
+    // Still clear local auth even if backend logout fails.
+  } finally {
+    clearToken()
+    notifyAuthChange()
+    window.location.replace('/login')
+  }
+}
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)
@@ -11,10 +55,12 @@ export function getToken(): string | null {
 
 export function setToken(token: string) {
   localStorage.setItem(TOKEN_KEY, token)
+  notifyAuthChange()
 }
 
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY)
+  notifyAuthChange()
 }
 
 export type Role = 'ADMIN' | 'USER'

@@ -5,7 +5,6 @@ import FormsPage from './pages/FormsPage'
 import { AdminRoute, UserRoute } from './components/ProtectedRoute'
 import FormDetailsPage from './pages/FormDetailsPage'
 import QuestionsPage from './pages/QuestionsPage'
-import BehaviouralFactorsPage from './pages/BehavioralFactorsPage'
 import UsersPage from './pages/UsersPage'
 import SessionsPage from './pages/SessionsPage'
 import SessionResultsPage from './pages/SessionResultsPage'
@@ -18,14 +17,7 @@ export default function App() {
   return (
     <Routes>
       {/* Admin portal */}
-      <Route
-        path="/behavioural-factors"
-        element={
-          <AdminRoute>
-            <BehaviouralFactorsPage />
-          </AdminRoute>
-        }
-      />
+      
       <Route
         path="/users"
         element={
