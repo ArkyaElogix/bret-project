@@ -8,7 +8,8 @@ export interface BehaviouralType {
   order_index: number
 }
 
-export async function listBehaviouralTypes(): Promise<BehaviouralType[]> {
-  return apiRequest<BehaviouralType[]>('/behavioural-types/')
+export async function listBehaviouralTypes(form_id?: number): Promise<BehaviouralType[]> {
+  const query = form_id != null ? `?form_id=${form_id}` : ''
+  return apiRequest<BehaviouralType[]>(`/behavioural-types/${query}`)
 }
 
