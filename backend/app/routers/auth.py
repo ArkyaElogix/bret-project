@@ -49,10 +49,14 @@ def register_candidate(payload: CandidateRegisterRequest, db: Session = Depends(
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    if payload.product_type not in (ProductType.BASIC.value, ProductType.EXECUTIVE.value):
+        raise HTTPException(status_code=400, detail="product_type must be BASIC or EXECUTIVE")
+
     user = User(
         name=payload.name,
         email=payload.email,
         password_hash=hash_password(payload.password),
+        product_type=payload.product_type,
         role=UserRole.USER,
     )
 

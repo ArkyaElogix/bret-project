@@ -74,14 +74,14 @@ class SectionScoreOut(BaseModel):
 
 class SessionStartRequest(BaseModel):
     form_id: int
-    product_type: str  # "BASIC" or "EXECUTIVE"
 
 
 class SessionOut(BaseModel):
     id: int
     user_id: int
+    user_name: str
     form_id: int
-    product_type: str
+
     status: str
 
     model_config = ConfigDict(from_attributes=True)
@@ -90,6 +90,9 @@ class SessionOut(BaseModel):
 class AnswerSubmit(BaseModel):
     question_id: int
     chosen_option: str  # "A" or "B"
+
+class UserTypeUpdate(BaseModel):
+    product_type: str  # "BASIC" or "EXECUTIVE"
 
 
 class ResponseOut(BaseModel):
@@ -121,6 +124,7 @@ class CandidateRegisterRequest(BaseModel):
     name: str
     email: str
     password: str
+    product_type: str
 
 
 class TokenResponse(BaseModel):
@@ -141,6 +145,7 @@ class UserOut(BaseModel):
     name: str
     email: str
     role: str
+    product_type: str
 
     model_config = ConfigDict(from_attributes=True)
 

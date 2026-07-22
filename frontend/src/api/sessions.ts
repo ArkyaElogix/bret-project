@@ -3,8 +3,8 @@ import { apiRequest } from './client'
 export interface Session {
   id: number
   user_id: number
+  user_name: string
   form_id: number
-  product_type: 'BASIC' | 'EXECUTIVE'
   status: 'in_progress' | 'submitted'
 }
 
@@ -14,11 +14,10 @@ export interface Session {
  */
 export async function startSession(
   formId: number,
-  productType: 'BASIC' | 'EXECUTIVE'
 ): Promise<Session> {
   return apiRequest<Session>('/sessions/start', {
     method: 'POST',
-    body: { form_id: formId, product_type: productType },
+    body: { form_id: formId },
   })
 }
 

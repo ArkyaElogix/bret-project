@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.models import User, UserRole
-from app.schemas import UserCreate, UserOut, PasswordChange
+from app.models.models import User, UserRole, ProductType
+from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate
 from app.security import hash_password
 from app.auth import require_admin
 
@@ -88,6 +88,26 @@ def change_user_password(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.password_hash = hash_password(payload.new_password)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@router.patch("/{user_id}/type", response_model=UserOut)
+def change_user_type(
+    user_id: int,
+    payload: UserTypeUpdate,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Admin-only: change a user's account type (BASIC/EXECUTIVE)."""
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if payload.product_type not in (ProductType.BASIC.value, ProductType.EXECUTIVE.value):
+        raise HTTPException(status_code=400, detail="product_type must be BASIC or EXECUTIVE")
+        
+    user.product_type = payload.product_type
     db.commit()
     db.refresh(user)
     return user

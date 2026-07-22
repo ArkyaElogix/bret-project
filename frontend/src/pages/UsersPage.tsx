@@ -389,7 +389,7 @@ export default function UsersPage() {
                           </p>
                           <p className="text-xs text-gray-500">
                             {user ? user.email : '—'} · Form {session.form_id} ·{' '}
-                            {session.product_type}
+                            
                           </p>
                         </div>
                         <div className="flex items-center gap-2">

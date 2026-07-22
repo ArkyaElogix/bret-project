@@ -124,10 +124,11 @@
 //     </AdminLayout>
 //   )
 // }
+import { listSessions, deleteSession, Session } from '../api/sessions'
 
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listSessions, Session } from '../api/sessions'
+
 import AdminLayout from '../components/AdminLayout'
 import { ApiError } from '../api/client'
 
@@ -135,6 +136,19 @@ export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  async function handleDelete(id: number) {
+    if (!window.confirm('Are you sure you want to completely delete this session? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      await deleteSession(id)
+      // Remove the deleted session from the local state to update the UI immediately
+      setSessions(sessions.filter((s) => s.id !== id))
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to delete session.')
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -193,13 +207,16 @@ export default function SessionsPage() {
                 {sessions.map((session) => (
                   <tr key={session.id}>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{session.user_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{session.user_name}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.form_id}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.status}</td>
                     <td className="px-6 py-4 text-sm text-blue-600">
-                      <Link to={`/sessions/${session.id}/results`} className="hover:underline">
+                      <Link to={`/sessions/${session.id}/results`} className={"hover:underline text-xs px-3 py-1 rounded bg-blue-100 text-blue-800 disabled:opacity-50"}>
                         View Results
                       </Link>
+                      <button onClick={() => handleDelete(session.id)} className=' hover:underline text-xs px-3 py-1 rounded bg-red-100 text-red-800 disabled:opacity-50'>
+                        Delete
+                      </button>
                     </td>
                   </tr>
                 ))}

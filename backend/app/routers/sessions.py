@@ -64,8 +64,6 @@ def start_or_resume_session(
 ):
     if not db.get(Form, payload.form_id):
         raise HTTPException(status_code=404, detail="Form not found")
-    if payload.product_type not in (ProductType.BASIC.value, ProductType.EXECUTIVE.value):
-        raise HTTPException(status_code=400, detail="product_type must be BASIC or EXECUTIVE")
 
     # If the user already has an in-progress session for THIS form, return it
     # (resume). We do NOT auto-resume across different forms — that's a hard
@@ -106,7 +104,6 @@ def start_or_resume_session(
     session = AssessmentSession(
         user_id=current_user.id,
         form_id=payload.form_id,
-        product_type=payload.product_type,
         status=SessionStatus.in_progress,
     )
     db.add(session)
@@ -264,37 +261,7 @@ def get_session_results(
     factors = {f.id: f for f in db.query(BehaviouralFactor).filter(BehaviouralFactor.id.in_(factor_ids)).all()}
     sections = db.query(BehaviouralType).filter(BehaviouralType.id.in_(section_ids)).order_by(BehaviouralType.order_index).all()
 
-    # Aggregate: factor_id -> {total, breakdown: [{section_id, section_name, score}]}
-    # aggregated: dict[int, dict] = {}
-    # for score_row in scores:
-    #     fid = score_row.factor_id
-    #     if fid not in aggregated:
-    #         aggregated[fid] = {"total": 0, "breakdown": []}
-    #     aggregated[fid]["total"] += score_row.score
-    #     sec = sections.get(score_row.section_id)
-    #     aggregated[fid]["breakdown"].append({
-    #         "section_id": score_row.section_id,
-    #         "section_name": f"{sec.code} - {sec.name}" if sec else f"Section {score_row.section_id}",
-    #         "score": score_row.score,
-    #     })
 
-    # grand_total = sum(v["total"] for v in aggregated.values())
-
-    # results = []
-    # for fid, data in aggregated.items():
-    #     factor = factors.get(fid)
-    #     pct = round(data["total"] / grand_total * 100, 1) if grand_total > 0 else 0.0
-    #     results.append(FactorResultOut(
-    #         factor_id=fid,
-    #         factor_name=factor.name if factor else f"Factor {fid}",
-    #         section_breakdown=data["breakdown"],
-    #         total_score=data["total"],
-    #         percentage=pct,
-    #     ))
-
-    # # Sort highest percentage first
-    # results.sort(key=lambda r: r.percentage, reverse=True)
-    # return results
     by_section: dict[int, dict[int, int]] = {}
     for row in scores:
         by_section.setdefault(row.section_id, {})[row.factor_id] = row.score

@@ -255,6 +255,13 @@ export default function PortalAssessmentPage() {
             </div>
           )
         })}
+        <button
+              onClick={handleSubmit}
+              disabled={!allAnswered || submitting}
+              className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+            >
+              {submitting ? 'Submitting...' : 'Submit Assessment'}
+        </button>
       </div>
     </PortalLayout>
   )

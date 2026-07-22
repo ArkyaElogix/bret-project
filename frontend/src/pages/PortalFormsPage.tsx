@@ -5,7 +5,7 @@ import { listMySessions, startSession, Session } from '../api/sessions'
 import { ApiError } from '../api/client'
 import PortalLayout from '../components/PortalLayout'
 
-type ProductType = 'BASIC' | 'EXECUTIVE'
+
 
 export default function PortalFormsPage() {
   const navigate = useNavigate()
@@ -14,8 +14,7 @@ export default function PortalFormsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [startFormId, setStartFormId] = useState<number | null>(null)
-  const [productType, setProductType] = useState<ProductType>('BASIC')
+
   const [starting, setStarting] = useState(false)
   const [startError, setStartError] = useState<{ id: number; message: string } | null>(null)
 
@@ -24,7 +23,7 @@ export default function PortalFormsPage() {
     setError(null)
     try {
       const [formsData, sessionsData] = await Promise.all([
-        listForms(true), // active forms only
+        listForms(), // active forms only
         listMySessions(), // all my sessions, newest first
       ])
       setForms(formsData)
@@ -51,23 +50,12 @@ export default function PortalFormsPage() {
     return mySessions.filter((s) => s.form_id === formId)
   }
 
-  function openStartForm(form: Form) {
-    setStartFormId(form.id)
-    setProductType('BASIC')
-    setStartError(null)
-  }
 
-  function cancelStart() {
-    setStartFormId(null)
-    setStartError(null)
-  }
-
-  async function handleStart(e: FormEvent, form: Form) {
-    e.preventDefault()
+  async function handleStart(form: Form) {
     setStarting(true)
     setStartError(null)
     try {
-      const session = await startSession(form.id, productType)
+      const session = await startSession(form.id)
       await loadData() // refresh so the new in-progress state shows
       navigate(`/portal/sessions/${session.id}`)
     } catch (err) {
@@ -83,12 +71,14 @@ export default function PortalFormsPage() {
     }
   }
 
-  async function handleStartAgain(form: Form, previousSession: Session){
+  async function handleStartAgain(form: Form, previousSession: Session) {
     setStarting(true)
     setStartError(null)
 
-    try{
-      const session = await startSession(form.id, previousSession.product_type)
+    try {
+      const session = await startSession(form.id)
+      await loadData()
+      navigate(`/portal/sessions/${session.id}`)
     } catch (err) {
       setStartError({
         id: form.id,
@@ -138,7 +128,6 @@ export default function PortalFormsPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h2 className="text-base font-semibold text-gray-800">{form.name}</h2>
-                      <p className="mt-1 text-xs text-gray-500">Form ID: {form.id}</p>
                     </div>
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
                       Active
@@ -186,51 +175,17 @@ export default function PortalFormsPage() {
                     )}
 
                     {!session && (
-                      <>
-                        {startFormId === form.id ? (
-                          <form
-                            onSubmit={(e) => handleStart(e, form)}
-                            className="flex items-center gap-3 flex-wrap"
-                          >
-                            <label className="text-sm text-gray-600">Product type:</label>
-                            <select
-                              value={productType}
-                              onChange={(e) => setProductType(e.target.value as ProductType)}
-                              className="border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                              <option value="BASIC">BASIC</option>
-                              <option value="EXECUTIVE">EXECUTIVE</option>
-                            </select>
-                            <button
-                              type="submit"
-                              disabled={starting}
-                              className="bg-blue-600 text-white rounded px-4 py-1.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-                            >
-                              {starting ? 'Starting...' : 'Confirm Start'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={cancelStart}
-                              disabled={starting}
-                              className="border border-gray-300 rounded px-4 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50"
-                            >
-                              Cancel
-                            </button>
-                          </form>
-                        ) : (
-                          <button
-                            onClick={() => openStartForm(form)}
-                            disabled={anyInProgress}
-                            className="bg-blue-600 text-white rounded px-4 py-1.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={anyInProgress ? 'Finish your in-progress assessment first' : 'Start assessment'}
-                          >
-                            Start Assessment
-                          </button>
-                        )}
-                      </>
+                      <button
+                        onClick={() => handleStart(form)}
+                        disabled={anyInProgress || starting}
+                        className="bg-blue-600 text-white rounded px-4 py-1.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={anyInProgress ? 'Finish your in-progress assessment first' : 'Start assessment'}
+                      >
+                        {starting ? 'Starting...' : 'Start Assessment'}
+                      </button>
                     )}
                   </div>
-                  
+
                   {attempts.length > 0 && (
                     <div className="mt-4 border-t border-gray-100 pt-3">
                       <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
@@ -248,7 +203,6 @@ export default function PortalFormsPage() {
                                 Attempt {attempts.length - index}
                               </p>
                               <p className="text-xs text-gray-500">
-                                Session #{attempt.id} · {attempt.product_type} ·{' '}
                                 {attempt.status === 'submitted' ? 'Completed' : 'In progress'}
                               </p>
                             </div>
@@ -268,12 +222,12 @@ export default function PortalFormsPage() {
                                 Resume
                               </button>
                             )}
-          
+
                           </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                   {startError?.id === form.id && (
                     <p className="text-xs text-red-600">{startError.message}</p>

@@ -180,6 +180,7 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
+    product_type = Column(Enum(ProductType), nullable=False, default=ProductType.BASIC)
     token_version = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
@@ -195,7 +196,6 @@ class AssessmentSession(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     form_id = Column(Integer, ForeignKey("forms.id"), nullable=False)
-    product_type = Column(Enum(ProductType), nullable=False)
     status = Column(
         Enum(SessionStatus), nullable=False, default=SessionStatus.in_progress
     )
@@ -213,7 +213,9 @@ class AssessmentSession(Base):
     section_scores = relationship(
         "SectionScore", back_populates="session", cascade="all, delete-orphan"
     )
-
+    @property
+    def user_name(self) -> str:
+        return self.user.name if self.user else "Unknown User"
 
 class Response(Base):
     __tablename__ = "responses"

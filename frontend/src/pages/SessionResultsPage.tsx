@@ -71,7 +71,7 @@ export default function SessionResultsPage() {
         <Link to="/sessions" className="text-blue-600 hover:underline text-sm inline-block">← Back to Sessions</Link>
 
         <div className="bg-white rounded-xl shadow border border-gray-100 p-6">
-          <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Session #{sessionId}</p>
+          
           <h1 className="text-2xl font-bold text-gray-900">Behavioural Profile</h1>
           <p className="text-sm text-gray-500 mt-1">
             Results are grouped by section. Each section has its own set of behavioural factors; the dominant factor in each section is highlighted.
