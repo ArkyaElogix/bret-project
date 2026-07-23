@@ -177,7 +177,7 @@ export default function UsersPage() {
                 <span className="text-xs text-red-600 font-medium">Delete?</span>
                 <button
                   onClick={() => handleDelete(user.id)}
-                  disabled={deleting}
+                  disabled={deleting || user.role==='ADMIN'}
                   className="text-xs bg-red-600 text-white rounded px-2.5 py-1 hover:bg-red-700 disabled:opacity-50"
                 >
                   {deleting ? '...' : 'Confirm'}
@@ -200,7 +200,7 @@ export default function UsersPage() {
                   setDeleteError(null)
                   closePasswordForm()
                 }}
-                disabled={isChangingPassword}
+                disabled={isChangingPassword || user.role === 'ADMIN'}
                 className="text-xs border border-red-300 text-red-600 rounded px-3 py-1 hover:bg-red-50 disabled:opacity-50"
               >
                 Delete
@@ -256,7 +256,6 @@ export default function UsersPage() {
   return (
     <AdminLayout title="Users">
       <div className="max-w-4xl space-y-8">
-        <h1 className="text-xl font-semibold text-gray-800">Users</h1>
 
         {/* Create-user form */}
         <form

@@ -4,6 +4,7 @@ export interface Form {
   id: number
   name: string
   is_active: boolean
+  is_complete?: boolean
 }
 
 /**

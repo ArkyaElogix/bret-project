@@ -10,6 +10,7 @@ from app.database import get_db
 from app.models.models import Form, AssessmentSession, User
 from app.schemas import FormCreate, FormUpdate, FormOut
 from app.auth import require_admin, get_current_user
+from app.services.form_completion import is_form_complete
 
 router = APIRouter(prefix="/forms", tags=["Forms"])
 
@@ -66,6 +67,12 @@ def update_form(
         raise HTTPException(status_code=404, detail="Form not found")
 
     updates = payload.model_dump(exclude_unset=True)
+    if updates.get("is_active") is True:
+        if not is_form_complete(db, form.id):
+            raise HTTPException(
+                status_code=400,
+                detail="Cannot activate form: each section must contain exactly 10 questions.",
+            )
     for field, value in updates.items():
         setattr(form, field, value)
 

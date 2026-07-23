@@ -1,7 +1,14 @@
 // Central place for talking to the FastAPI backend.
 // Handles the base URL, JSON headers, and attaching the JWT automatically.
 
-const API_BASE_URL = 'http://192.168.1.103:8000'
+const LOCAL_API_BASE_URL = 'http://localhost:8000'
+const NETWORK_API_BASE_URL = 'http://192.168.1.103:8000'
+
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  (['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)
+    ? LOCAL_API_BASE_URL
+    : NETWORK_API_BASE_URL)
 
 const TOKEN_KEY = 'bret_token'
 

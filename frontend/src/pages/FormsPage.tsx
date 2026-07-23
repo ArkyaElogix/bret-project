@@ -1,6 +1,8 @@
 import { useEffect, useState, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { listForms, createForm, deleteForm, updateForm, Form } from '../api/forms'
+import { listBehaviouralTypes, BehaviouralType } from '../api/behavioralTypes'
+import { listQuestions, Question } from '../api/questions'
 import { ApiError } from '../api/client'
 
 import AdminLayout from '../components/AdminLayout'
@@ -19,8 +21,43 @@ export default function FormsPage() {
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<{ id: number; message: string } | null>(null)
   const [togglingId, setTogglingId] = useState<number | null>(null)
+  const [completionState, setCompletionState] = useState<Record<number, { isComplete: boolean; message: string }>>({})
+  const [popupError, setPopupError] = useState<string | null>(null)
+
+  function getCompletionState(sections: BehaviouralType[], questions: Question[]) {
+    if (sections.length !== 3) {
+      return {
+        isComplete: false,
+        message: `This Questionnaire needs 3 sections before it can be activated.`,
+      }
+    }
+
+    const sectionStatus = sections.map((section) => ({
+      section,
+      count: questions.filter((question) => question.behavioural_type_id === section.id).length,
+    }))
+
+    const incompleteSection = sectionStatus.find((item) => item.count !== 10)
+    if (incompleteSection) {
+      return {
+        isComplete: false,
+        message: `${incompleteSection.section.code} needs ${incompleteSection.count}/10 questions before activation.`,
+      }
+    }
+
+    return {
+      isComplete: true,
+      message: 'Complete and ready to activate.',
+    }
+  }
 
   async function handleToggleActive(form: Form) {
+    if (!form.is_active && !form.is_complete) {
+      setPopupError(`Cannot activate "${form.name}" until it is complete.`)
+      return
+    }
+
+    setPopupError(null)
     setTogglingId(form.id)
     try {
       await updateForm(form.id, form.name, !form.is_active)
@@ -35,9 +72,29 @@ export default function FormsPage() {
   async function loadForms() {
     setLoading(true)
     setError(null)
+    setPopupError(null)
     try {
-      const data = await listForms()
-      setForms(data)
+      const [formsData, sectionsData] = await Promise.all([
+        listForms(),
+        listBehaviouralTypes(),
+      ])
+
+      const questionResults = await Promise.all(
+        formsData.map((form) => listQuestions({ form_id: form.id }))
+      )
+
+      const nextCompletionState: Record<number, { isComplete: boolean; message: string }> = {}
+      const nextForms = formsData.map((form, index) => {
+        const state = getCompletionState(sectionsData, questionResults[index])
+        nextCompletionState[form.id] = state
+        return {
+          ...form,
+          is_complete: state.isComplete,
+        }
+      })
+
+      setForms(nextForms)
+      setCompletionState(nextCompletionState)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to load forms.')
     } finally {
@@ -80,13 +137,11 @@ export default function FormsPage() {
   }
 
   return (
-    <AdminLayout title="Forms">
+    <AdminLayout title="Questionnaires">
       <div className="max-w-4xl space-y-8">
-        <h1 className="text-xl font-semibold text-gray-800">Forms</h1>
-
         {/* Create form */}
         <form onSubmit={handleCreate} className="bg-white shadow rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-medium text-gray-700">Create a new form</h2>
+          <h2 className="text-sm font-medium text-gray-700">Create a new questionnaire</h2>
 
           <div>
             <label className="block text-sm text-gray-600 mb-1">Name</label>
@@ -106,7 +161,7 @@ export default function FormsPage() {
               checked={newIsActive}
               onChange={(e) => setNewIsActive(e.target.checked)}
             />
-            Set as active form
+            Set as active
           </label>
 
           {createError && <p className="text-sm text-red-600">{createError}</p>}
@@ -116,17 +171,22 @@ export default function FormsPage() {
             disabled={creating}
             className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
           >
-            {creating ? 'Creating...' : 'Create form'}
+            {creating ? 'Creating...' : 'Create new Questionnaire'}
           </button>
         </form>
 
         {/* List */}
         <div className="bg-white shadow rounded-lg divide-y">
-          {loading && <p className="p-6 text-sm text-gray-500">Loading forms...</p>}
+          {loading && <p className="p-6 text-sm text-gray-500">Loading Questionnaires...</p>}
           {error && <p className="p-6 text-sm text-red-600">{error}</p>}
           {!loading && !error && forms.length === 0 && (
-            <p className="p-6 text-sm text-gray-500">No forms yet. Create one above.</p>
+            <p className="p-6 text-sm text-gray-500">No Questionnaires yet. Create one above.</p>
           )}
+          {popupError && (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">
+            {popupError}
+          </div>
+        )}
           {!loading &&
             !error &&
             forms.map((form) => (
@@ -156,7 +216,7 @@ export default function FormsPage() {
                     to={`/forms/${form.id}/edit`}
                     className="text-xs border border-slate-300 text-slate-700 rounded px-3 py-1 hover:bg-slate-50"
                   >
-                    Manage Form
+                    Manage Questionnaire
                   </Link>
                   {confirmDeleteId === form.id ? (
                     <div className="flex items-center gap-2">

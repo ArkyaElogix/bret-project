@@ -270,12 +270,12 @@ export default function QuestionsPage() {
   }
 
   return (
-    <AdminLayout title="Manage Form">
+    <AdminLayout title="Manage Questionnaire">
       <div className="max-w-7xl space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <Link to="/forms" className="text-blue-600 hover:underline text-sm inline-block mb-3">
-              &larr; Back to Forms
+              &larr; Back to Questionnaire's page
             </Link>
             <h1 className="text-2xl font-bold text-gray-800">{form.name}</h1>
             <p className="mt-2 text-sm text-gray-500">
@@ -300,7 +300,7 @@ export default function QuestionsPage() {
               <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div className="flex items-start justify-between gap-4 border-b border-gray-200 bg-slate-50 px-6 py-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-800">
+                    <h2 className="text-lg font-bold text-gray-800">
                       {section.code} - {section.name}
                       {(() => {
                         const fullFactors = getFactorsForSection(section.id).filter(
@@ -315,8 +315,9 @@ export default function QuestionsPage() {
                       })()}
 
                     </h2>
+                    <h2 className="mt-1 text-sm font-bold text-red-800">Instruction displayed to candidates who are answering: </h2>
                     {section.instructions && (
-                      <p className="mt-1 text-sm text-gray-500">{section.instructions}</p>
+                      <p className="mt-1 text-sm font-bold text-black">{section.instructions}</p>
                     )}
                   </div>
 

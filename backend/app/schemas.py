@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-
+from datetime import datetime
 
 # class BehaviouralTypeCreate(BaseModel):
 #     form_id: int
@@ -81,9 +81,9 @@ class SessionOut(BaseModel):
     user_id: int
     user_name: str
     form_id: int
-
+    form_name: str
     status: str
-
+    submitted_at: datetime | None = None
     model_config = ConfigDict(from_attributes=True)
 
 

@@ -5,7 +5,9 @@ export interface Session {
   user_id: number
   user_name: string
   form_id: number
+  form_name: string
   status: 'in_progress' | 'submitted'
+  submitted_at: string | null
 }
 
 /**

@@ -216,6 +216,9 @@ class AssessmentSession(Base):
     @property
     def user_name(self) -> str:
         return self.user.name if self.user else "Unknown User"
+    @property
+    def form_name(self) -> str:
+        return self.form.name if self.form else "Unknown Assessment"
 
 class Response(Base):
     __tablename__ = "responses"

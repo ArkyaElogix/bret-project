@@ -45,6 +45,12 @@ from app.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
+def _ensure_form_available_for_new_session(form: Form) -> None:
+    if not form.is_active:
+        raise HTTPException(
+            status_code=403,
+            detail="This assessment is no longer available.",
+        )
 
 def _get_owned_session(session_id: int, db: Session, current_user: User) -> AssessmentSession:
     """Fetch a session and enforce that only its owner or an admin can access it."""
@@ -62,12 +68,12 @@ def start_or_resume_session(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if not db.get(Form, payload.form_id):
+    form = db.get(Form, payload.form_id)
+    if not form:
         raise HTTPException(status_code=404, detail="Form not found")
 
-    # If the user already has an in-progress session for THIS form, return it
-    # (resume). We do NOT auto-resume across different forms — that's a hard
-    # rule below to force users to finish what they started.
+    _ensure_form_available_for_new_session(form)
+
     existing_for_form = (
         db.query(AssessmentSession)
         .filter(
@@ -80,9 +86,6 @@ def start_or_resume_session(
     if existing_for_form:
         return existing_for_form
 
-    # Hard gate: block starting a new session if the user has any other
-    # in-progress session elsewhere. Users must finish (submit) the current
-    # one before they can begin a new form.
     blocking = (
         db.query(AssessmentSession)
         .filter(
@@ -110,7 +113,6 @@ def start_or_resume_session(
     db.commit()
     db.refresh(session)
     return session
-
 
 @router.get("/me", response_model=list[SessionOut])
 def list_my_sessions(

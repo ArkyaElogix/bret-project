@@ -93,6 +93,33 @@ export default function FormBuilderPage() {
     return questions.filter((q) => q.behavioural_type_id === sectionId)
   }
 
+  function getCompletionStatus() {
+    if (sections.length !== 3) {
+      return {
+        isComplete: false,
+        message: `This form needs 3 sections before it can be activated.`,
+      }
+    }
+
+    const sectionStatus = sections.map((section) => ({
+      section,
+      count: getQuestionsForSection(section.id).length,
+    }))
+
+    const incompleteSection = sectionStatus.find((item) => item.count !== 10)
+    if (incompleteSection) {
+      return {
+        isComplete: false,
+        message: `${incompleteSection.section.code} needs ${incompleteSection.count}/10 questions before activation.`,
+      }
+    }
+
+    return {
+      isComplete: true,
+      message: 'Complete and ready to activate.',
+    }
+  }
+
   function handleStartAdding(sectionId: number) {
     setAddingToSection(sectionId)
     // Suggest the next number
@@ -127,9 +154,7 @@ export default function FormBuilderPage() {
         newFactorB
       )
       setAddingToSection(null)
-      // Reload questions
-      const questionsData = await listQuestions({ form_id: formId })
-      setQuestions(questionsData)
+      await loadData()
     } catch (err) {
       setCreateError(err instanceof ApiError ? err.message : 'Failed to create question.')
     } finally {
@@ -166,8 +191,7 @@ export default function FormBuilderPage() {
         option_b_factor_id: editFactorB,
       })
       setEditingId(null)
-      const questionsData = await listQuestions({ form_id: formId })
-      setQuestions(questionsData)
+      await loadData()
     } catch (err) {
       setEditError(err instanceof ApiError ? err.message : 'Failed to update question.')
     } finally {
@@ -187,8 +211,7 @@ export default function FormBuilderPage() {
     try {
       await deleteQuestion(id)
       setConfirmDeleteId(null)
-      const questionsData = await listQuestions({ form_id: formId })
-      setQuestions(questionsData)
+      await loadData()
     } catch (err) {
       setDeleteError({
         id,
@@ -218,6 +241,8 @@ export default function FormBuilderPage() {
     )
   }
 
+  const completionStatus = getCompletionStatus()
+
   return (
     <AdminLayout title="Form Builder">
       <div className="max-w-5xl space-y-8">
@@ -228,10 +253,18 @@ export default function FormBuilderPage() {
           <h1 className="text-2xl font-bold text-gray-800">
             {form.name} <span className="text-gray-400 font-normal text-lg ml-2">ID: {form.id}</span>
           </h1>
-          {form.is_active && (
-            <span className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-              Active Form
+          <div className="flex items-center gap-2 flex-wrap mt-2">
+            <span className={`inline-block text-xs px-2 py-1 rounded-full ${form.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+              {form.is_active ? 'Active Form' : 'Inactive Form'}
             </span>
+            <span className={`inline-block text-xs px-2 py-1 rounded-full ${completionStatus.isComplete ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+              {completionStatus.isComplete ? 'Complete' : 'Incomplete'}
+            </span>
+          </div>
+          {!completionStatus.isComplete && (
+            <p className="text-sm text-amber-700 mt-2">
+              {completionStatus.message}
+            </p>
           )}
         </div>
 
@@ -254,8 +287,9 @@ export default function FormBuilderPage() {
                       <h2 className="text-lg font-semibold text-gray-800">
                         {section.code} - {section.name}
                       </h2>
+                      <h2 className="mt-1 text-sm text-red-800">Instruction displayed to candidates: </h2>
                       {section.instructions && (
-                        <p className="text-sm text-gray-500 mt-1">{section.instructions}</p>
+                        <p className="text-sm text-black mt-1">{section.instructions}</p>
                       )}
                     </div>
                     <button

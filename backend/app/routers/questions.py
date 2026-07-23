@@ -10,6 +10,7 @@ from app.database import get_db
 from app.models.models import Question, BehaviouralType, BehaviouralFactor, Form, User
 from app.schemas import QuestionCreate, QuestionOut, QuestionUpdate
 from app.auth import require_admin, get_current_user
+from app.services.form_completion import is_form_complete
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
@@ -41,6 +42,10 @@ def count_factor_usage(
 
     return total
 
+def deactivate_form_for_edit(db: Session, form) -> None:
+    if form.is_active:
+        form.is_active = False
+        db.add(form)
 
 def validate_factor_usage_limit(
     db: Session,
@@ -92,12 +97,21 @@ def create_question(
     db: Session = Depends(get_db),
     _admin: User = Depends(require_admin),
 ):
-    if not db.get(Form, payload.form_id):
+    form = db.get(Form, payload.form_id)
+    if not form:
         raise HTTPException(status_code=404, detail="Form not found")
+    
+    deactivate_form_for_edit(db, form)
 
     behavioural_type = db.get(BehaviouralType, payload.behavioural_type_id)
     if not behavioural_type:
         raise HTTPException(status_code=404, detail="Behavioural type not found")
+
+    if payload.option_a_factor_id == payload.option_b_factor_id:
+        raise HTTPException(
+            status_code=400,
+            detail="The two selected factors must be different.",
+        )
 
     validate_factor_for_section(db, payload.option_a_factor_id, payload.behavioural_type_id)
     validate_factor_for_section(db, payload.option_b_factor_id, payload.behavioural_type_id)
@@ -149,11 +163,22 @@ def update_question(
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
 
+    form = db.get(Form, question.form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    deactivate_form_for_edit(db, form)
+
     for factor_id in (payload.option_a_factor_id, payload.option_b_factor_id):
         if not db.get(BehaviouralFactor, factor_id):
             raise HTTPException(
                 status_code=404, detail=f"Behavioural factor {factor_id} not found"
             )
+    if payload.option_a_factor_id == payload.option_b_factor_id:
+        raise HTTPException(
+            status_code=400,
+            detail="The two selected factors must be different.",
+    )
 
     updates = payload.model_dump(exclude_unset=True)
     target_section_id = updates.get("behavioural_type_id", question.behavioural_type_id)
@@ -185,6 +210,12 @@ def delete_question(
     question = db.get(Question, question_id)
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
+
+    form = db.get(Form, question.form_id)
+    if not form:
+        raise HTTPException(status_code=404, detail="Form not found")
+
+    deactivate_form_for_edit(db, form)
 
     db.delete(question)
     db.commit()

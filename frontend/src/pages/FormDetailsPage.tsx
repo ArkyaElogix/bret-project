@@ -33,7 +33,7 @@ export default function FormDetailsPage() {
       setFactors(factorsData)
       setQuestions(questionsData)
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load form details.')
+      setError(err instanceof ApiError ? err.message : 'Failed to load Questionnaire details.')
     } finally {
       setLoading(false)
     }
@@ -51,8 +51,8 @@ export default function FormDetailsPage() {
 
   if (loading) {
     return (
-      <AdminLayout title="Form Details">
-        <p className="text-gray-500">Loading form details...</p>
+      <AdminLayout title="Questionnaires Details">
+        <p className="text-gray-500">Loading Questionnaire details...</p>
       </AdminLayout>
     )
   }
@@ -62,23 +62,23 @@ export default function FormDetailsPage() {
       <AdminLayout title="Form Details">
         <p className="text-red-600">{error || 'Form not found.'}</p>
         <Link to="/forms" className="text-blue-600 hover:underline mt-4 inline-block">
-          &larr; Back to Forms
+          &larr; Back to Questionnaires page
         </Link>
       </AdminLayout>
     )
   }
 
   return (
-    <AdminLayout title="Form Details">
+    <AdminLayout title="Questionnaire Details || View only">
       <div className="max-w-5xl space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <Link to="/forms" className="text-blue-600 hover:underline text-sm inline-block mb-3">
-              &larr; Back to Forms
+              &larr; Back to Questionnaires page
             </Link>
             <h1 className="text-2xl font-bold text-gray-800">{form.name}</h1>
             <p className="text-sm text-gray-500 mt-2">
-              View-only overview of the sections, questions, and mapping factors for this form.
+              View-only overview of the sections, questions, and mapping factors for this Questionnaire.
             </p>
           </div>
           <Link
@@ -105,8 +105,9 @@ export default function FormDetailsPage() {
                         <h2 className="text-lg font-semibold text-gray-800">
                           {section.code} - {section.name}
                         </h2>
+                        <h2 className="mt-1 text-sm font-bold text-red-800">Instruction displayed to candidates: </h2>
                         {section.instructions && (
-                          <p className="mt-1 text-sm text-gray-500">{section.instructions}</p>
+                          <p className="mt-1 text-sm font-bold text-black">{section.instructions}</p>
                         )}
                       </div>
                       <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700">

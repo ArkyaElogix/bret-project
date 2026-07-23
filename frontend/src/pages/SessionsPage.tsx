@@ -208,7 +208,7 @@ export default function SessionsPage() {
                   <tr key={session.id}>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.id}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.user_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{session.form_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{session.form_name}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.status}</td>
                     <td className="px-6 py-4 text-sm text-blue-600">
                       <Link to={`/sessions/${session.id}/results`} className={"hover:underline text-xs px-3 py-1 rounded bg-blue-100 text-blue-800 disabled:opacity-50"}>

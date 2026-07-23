@@ -67,6 +67,7 @@ export default function PortalAssessmentPage() {
 
   async function handleSelect(questionId: number, option: Option) {
     if (session?.status === 'submitted') return
+    if (form && !form.is_active) return
     if (answers[questionId] === option) return // no change
 
     // Optimistic update
@@ -95,6 +96,10 @@ export default function PortalAssessmentPage() {
   }
 
   async function handleSubmit() {
+    if (form && !form.is_active) {
+    setSubmitError('This assessment is no longer available.')
+    return
+  }
     setSubmitting(true)
     setSubmitError(null)
     try {
@@ -142,6 +147,24 @@ export default function PortalAssessmentPage() {
       </PortalLayout>
     )
   }
+
+  if (form && !form.is_active) {
+  return (
+    <PortalLayout title="Assessment Unavailable">
+      <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
+        <p className="text-sm text-gray-700">
+          This assessment is no longer available.
+        </p>
+        <Link
+          to="/portal"
+          className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
+        >
+          Back to Forms
+        </Link>
+      </div>
+    </PortalLayout>
+  )
+}
 
   const totalQuestions = questions.length
   const answeredCount = questions.filter((q) => answers[q.id]).length
@@ -204,7 +227,7 @@ export default function PortalAssessmentPage() {
                   {section.code} - {section.name}
                 </h2>
                 {section.instructions && (
-                  <p className="mt-1 text-sm text-gray-500">{section.instructions}</p>
+                  <p className="mt-1 text-sm font-bold text-red-500">{section.instructions}</p>
                 )}
               </div>
 
