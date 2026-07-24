@@ -12,12 +12,13 @@ import PortalFormsPage from './pages/PortalFormsPage'
 import PortalProfilePage from './pages/PortalProfilePage'
 import PortalAssessmentPage from './pages/PortalAssessmentPage'
 import PortalResultsPage from './pages/PortalResultsPage'
+import { SessionReportPage } from './pages/SessionReportPage'
 
 export default function App() {
   return (
     <Routes>
       {/* Admin portal */}
-      
+
       <Route
         path="/users"
         element={
@@ -84,6 +85,7 @@ export default function App() {
           </UserRoute>
         }
       />
+      <Route path="/sessions/:id/report" element={<SessionReportPage />} />
       <Route
         path="/portal/sessions/:id"
         element={
@@ -103,7 +105,7 @@ export default function App() {
 
       {/* Public */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path ="/admin/login" element={<AdminLoginPage />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/" element={<Navigate to="/forms" replace />} />
     </Routes>
   )

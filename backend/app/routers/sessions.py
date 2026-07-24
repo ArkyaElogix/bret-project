@@ -27,6 +27,7 @@ from app.models.models import (
     BehaviouralType,
     SessionStatus,
     ProductType,
+    ReportStatement,
     OptionLetter,
 )
 from app.schemas import (
@@ -39,6 +40,7 @@ from app.schemas import (
     SessionFullOut,
     FactorResultOut,
     SectionResultOut,
+    SessionReportOut,
 )
 from app.scoring import calculate_and_store_scores
 from app.auth import get_current_user, require_admin
@@ -295,6 +297,70 @@ def get_session_results(
         ))
 
     return results
+
+@router.get("/{session_id}/report", response_model=SessionReportOut)
+def get_session_report(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    session = _get_owned_session(session_id, db, current_user)
+    if session.status != SessionStatus.submitted:
+        raise HTTPException(status_code=400, detail="Session is not submitted yet")
+    scores = db.query(SectionScore).filter(SectionScore.session_id == session_id).all()
+    if not scores:
+        return SessionReportOut(
+            session=session, 
+            user={"name": session.user_name, "product_type": session.user.product_type.value}, 
+            form={"id": session.form_id, "name": session.form_name}, 
+            sections=[]
+        )
+    factor_ids = {s.factor_id for s in scores}
+    section_ids = {s.section_id for s in scores}
+    factors = {f.id: f for f in db.query(BehaviouralFactor).filter(BehaviouralFactor.id.in_(factor_ids)).all()}
+    sections = db.query(BehaviouralType).filter(BehaviouralType.id.in_(section_ids)).order_by(BehaviouralType.order_index).all()
+    # Pre-fetch statements for this product type and these factors
+    statements = db.query(ReportStatement).filter(
+        ReportStatement.product_type == session.user.product_type,
+        ReportStatement.factor_id.in_(factor_ids)
+    ).all()
+    
+    # Create a lookup dict: (factor_id, score) -> statement
+    stmt_lookup = {(s.factor_id, s.score): s for s in statements}
+    by_section: dict[int, list[dict]] = {}
+    for row in scores:
+        factor = factors.get(row.factor_id)
+        
+        # NOTE: Using raw count as the score directly.
+        final_score = row.score 
+        stmt = stmt_lookup.get((row.factor_id, final_score))
+        
+        factor_out = {
+            "factor_id": row.factor_id,
+            "factor_name": factor.name if factor else f"Factor {row.factor_id}",
+            "raw_score": row.score,
+            "score": final_score,
+            "score_label": stmt.score_label if stmt else None,
+            "statement_title": stmt.title if stmt else None,
+            "statement": stmt.statement_text if stmt else None,
+        }
+        by_section.setdefault(row.section_id, []).append(factor_out)
+    report_sections = []
+    for sec in sections:
+        sec_factors = by_section.get(sec.id, [])
+        sec_factors.sort(key=lambda x: x["score"], reverse=True)
+        report_sections.append({
+            "section_id": sec.id,
+            "section_code": sec.code,
+            "section_name": sec.name,
+            "factors": sec_factors
+        })
+    return {
+        "session": session,
+        "user": {"name": session.user_name, "product_type": session.user.product_type.value},
+        "form": {"id": session.form.id if session.form else session.form_id, "name": session.form_name},
+        "sections": report_sections
+    }
 
 @router.get("/", response_model=list[SessionOut])
 def list_all_sessions(

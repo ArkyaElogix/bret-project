@@ -268,3 +268,25 @@ class SectionScore(Base):
             "session_id", "section_id", "factor_id", name="uq_session_section_factor"
         ),
     )
+
+class ReportStatement(Base):
+    __tablename__ = "report_statements"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    product_type = Column(Enum(ProductType), nullable=False)
+    behavioural_type_id = Column(Integer, ForeignKey("behavioural_types.id"), nullable=False)
+    factor_id = Column(Integer, ForeignKey("behavioural_factors.id"), nullable=False)
+    score = Column(Integer, nullable=False)  # 0-5
+    score_label = Column(String(50), nullable=False) # e.g. "Very Strong", "Absence"
+    title = Column(String(255), nullable=False)
+    statement_text = Column(Text, nullable=False)
+
+    behavioural_type = relationship("BehaviouralType")
+    factor = relationship("BehaviouralFactor")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "product_type", "behavioural_type_id", "factor_id", "score",
+            name="uq_report_statement_lookup"
+        ),
+    )

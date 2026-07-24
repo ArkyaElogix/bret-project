@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
@@ -217,3 +217,22 @@ class SectionResultOut(BaseModel):
     section_code: str
     section_name: str
     factors: list[FactorResultOut]
+
+class ReportFactorOut(BaseModel):
+    factor_id: int
+    factor_name: str
+    raw_score: int
+    score: int
+    score_label: str | None = None
+    statement_title: str | None = None
+    statement: str | None = None
+class ReportSectionOut(BaseModel):
+    section_id: int
+    section_code: str
+    section_name: str
+    factors: list[ReportFactorOut]
+class SessionReportOut(BaseModel):
+    session: SessionOut
+    user: dict[str, Any]
+    form: dict[str, Any]
+    sections: list[ReportSectionOut]

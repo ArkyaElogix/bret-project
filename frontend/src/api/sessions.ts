@@ -126,3 +126,32 @@ export interface SectionResult {
 export async function getSessionResults(sessionId: number): Promise<SectionResult[]> {
   return apiRequest<SectionResult[]>(`/sessions/${sessionId}/results`)
 }
+
+
+export interface ReportFactor {
+  factor_id: number;
+  factor_name: string;
+  raw_score: number;
+  score: number;
+  score_label: string | null;
+  statement_title: string | null;
+  statement: string | null;
+}
+
+export interface ReportSection {
+  section_id: number;
+  section_code: string;
+  section_name: string;
+  factors: ReportFactor[];
+}
+
+export interface SessionReport {
+  session: Session;
+  user: { name: string; product_type: string };
+  form: { id: number; name: string };
+  sections: ReportSection[];
+}
+
+export async function getSessionReport(sessionId: number): Promise<SessionReport> {
+  return apiRequest<SessionReport>(`/sessions/${sessionId}/report`);
+}

@@ -12,12 +12,26 @@ with the team before treating these numbers as final.
 
 from sqlalchemy.orm import Session
 
-from app.models.models import Response as ResponseModel, Question, SectionScore
+from app.models.models import Response as ResponseModel, Question, SectionScore, AssessmentSession
 
 
 def calculate_and_store_scores(session_id: int, db: Session) -> list[SectionScore]:
-    # pull every answered response for this session, joined to its question
-    # (need the question to know which factor each chosen option maps to)
+    session = db.get(AssessmentSession, session_id)
+    if not session:
+        return []
+
+    # 1. Find all distinct sections and factors linked to this form's questions
+    questions = db.query(Question).filter(Question.form_id == session.form_id).all()
+    
+    # Initialize tallies to 0 for all possible factors in this form
+    tallies: dict[tuple[int, int], int] = {}
+    for q in questions:
+        if q.option_a_factor_id:
+            tallies[(q.behavioural_type_id, q.option_a_factor_id)] = 0
+        if q.option_b_factor_id:
+            tallies[(q.behavioural_type_id, q.option_b_factor_id)] = 0
+
+    # 2. Pull responses
     responses = (
         db.query(ResponseModel)
         .join(Question, ResponseModel.question_id == Question.id)
@@ -25,8 +39,7 @@ def calculate_and_store_scores(session_id: int, db: Session) -> list[SectionScor
         .all()
     )
 
-    # tally: {(section_id, factor_id): count}
-    tallies: dict[tuple[int, int], int] = {}
+    # 3. Add to tallies
     for response in responses:
         question = response.question
         factor_id = (
@@ -35,12 +48,15 @@ def calculate_and_store_scores(session_id: int, db: Session) -> list[SectionScor
             else question.option_b_factor_id
         )
         if factor_id is None:
-            continue  # this option scores nothing, skip
+            continue
+        
         key = (question.behavioural_type_id, factor_id)
-        tallies[key] = tallies.get(key, 0) + 1
+        if key in tallies:
+            tallies[key] += 1
+        else:
+            tallies[key] = 1 # Fallback safeguard
 
-    # clear any previous scores for this session, then write fresh ones
-    # (simplest way to handle re-scoring without diffing old vs new)
+    # 4. Clear any previous scores for this session, then write fresh ones
     db.query(SectionScore).filter(SectionScore.session_id == session_id).delete()
 
     results = []
@@ -58,3 +74,4 @@ def calculate_and_store_scores(session_id: int, db: Session) -> list[SectionScor
     for r in results:
         db.refresh(r)
     return results
+
