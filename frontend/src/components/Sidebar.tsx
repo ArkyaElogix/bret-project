@@ -8,7 +8,7 @@ export default function Sidebar() {
 
   const links = [
     { to: '/users', label: 'Users', icon: '👥' },
-    { to: '/forms', label: 'Forms', icon: '📋' },
+    { to: '/forms', label: 'Questionnaires', icon: '📋' },
     { to: '/sessions', label: 'Sessions', icon: '📊' },
   ]
 

@@ -8,12 +8,12 @@ logged-in token, not a client-supplied value. Regular users can only
 access their own sessions; admins can access any session (needed for
 reviewing responses later).
 """
-
+import os
+from typing import Any, Dict, List
 from datetime import datetime
-
+from app.services.ai_report_service import AIReportService
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
 from app.database import get_db
 from app.models.models import (
     AssessmentSession,
@@ -46,6 +46,343 @@ from app.scoring import calculate_and_store_scores
 from app.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
+
+def _build_basic_report_factor(
+    factor_id: int,
+    factor_name: str,
+    score: int = 0,
+    statement: str = "",
+    title: str | None = None,
+) -> dict[str, Any]:
+    return {
+        "factor_id": factor_id,
+        "factor_name": factor_name,
+        "raw_score": score,
+        "score": score,
+        "score_label": None,
+        "statement_title": title,
+        "statement": statement,
+    }
+
+
+def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict[str, Any]:
+    user_name = session.user_name or (session.user.name if session.user else "Participant")
+    product_type = (
+        session.user.product_type.value
+        if session.user and session.user.product_type
+        else "BASIC"
+    )
+    form_name = session.form_name or (session.form.name if session.form else "Assessment")
+
+    # --- ADD THIS TO FETCH REAL SCORES ---
+    from app.models.models import SectionScore
+    real_scores = db.query(SectionScore).filter(SectionScore.session_id == session.id).all()
+    score_map = {s.factor_id: s.score for s in real_scores}
+    # -------------------------------------
+
+    sections = [
+        {
+            "section_id": 1001,
+            "section_code": "LETTER",
+            "section_name": "Discovery Letter",
+            "factors": [
+                _build_basic_report_factor(
+                    0,
+                    "Welcome",
+                    0,
+                    (
+                        f"Dear {user_name}, this report offers a reflective view of your intrinsic drives, "
+                        f"conditioned impulses, and acquired communication patterns. "
+                        f"It is designed to help you understand your behavioral blueprint with clarity, "
+                        f"purpose, and intentional self-awareness."
+                    ),
+                    "Discovery Letter",
+                )
+            ],
+        },
+        {
+            "section_id": 1002,
+            "section_code": "DEF",
+            "section_name": "Definitions: Drives",
+            "factors": [
+                _build_basic_report_factor(
+                    1,
+                    "Altruistic Drive",
+                    0,
+                    "A drive rooted in service, empathy, and the welfare of others. It reflects concern for the collective and a desire to contribute beyond personal benefit.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    2,
+                    "Emotional Drive",
+                    0,
+                    "A drive guided by the heart and the human element. It reflects warmth, connection, and sensitivity to the emotional reality around you.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    3,
+                    "Power Drive",
+                    0,
+                    "A drive toward influence, impact, and responsibility. It reflects your desire to shape outcomes and lead with purpose.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    4,
+                    "Existential Drive",
+                    0,
+                    "A grounding force centered on stability, comfort, and self-preservation. It reflects the need to protect personal well-being while pursuing meaningful goals.",
+                    "Definition",
+                ),
+            ],
+        },
+        {
+            "section_id": 1003,
+            "section_code": "DEF",
+            "section_name": "Definitions: Conditioning Factors",
+            "factors": [
+                _build_basic_report_factor(
+                    5,
+                    "Innovator",
+                    0,
+                    "A mindset inclined toward possibility, exploration, and new ideas. It reflects curiosity and the urge to rethink what already exists.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    6,
+                    "Adopter",
+                    0,
+                    "A mindset that values social acceptance and practical adaptation. It reflects your ability to work with new ideas once their value is clear.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    7,
+                    "Evaluator",
+                    0,
+                    "A mindset rooted in analysis, discipline, and careful judgment. It reflects a preference for evidence before action.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    8,
+                    "Preserver",
+                    0,
+                    "A mindset that values order, continuity, and stability. It reflects a preference to protect what works and maintain consistency.",
+                    "Definition",
+                ),
+            ],
+        },
+        {
+            "section_id": 1004,
+            "section_code": "DEF",
+            "section_name": "Definitions: Acquired Factors",
+            "factors": [
+                _build_basic_report_factor(
+                    9,
+                    "Authoritative",
+                    0,
+                    "A style of taking charge and creating direction. It reflects decisiveness and confidence in leading people or situations.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    10,
+                    "Directive",
+                    0,
+                    "A style grounded in structure, standards, and clear guidance. It reflects a preference for rules and defined expectations.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    11,
+                    "Emotive",
+                    0,
+                    "A style that communicates with warmth and feeling. It reflects the ability to connect through expression and human engagement.",
+                    "Definition",
+                ),
+                _build_basic_report_factor(
+                    12,
+                    "Placative",
+                    0,
+                    "A style centered on harmony, calm, and accommodation. It reflects a desire to reduce friction and create smooth interpersonal movement.",
+                    "Definition",
+                ),
+            ],
+        },
+        {
+            "section_id": 1005,
+            "section_code": "A",
+            "section_name": "Drives Profile",
+            "factors": [
+                _build_basic_report_factor(
+                    1,
+                    "Altruistic",
+                    score_map.get(1,0),
+                    f"{user_name} shows a balanced concern for others and for meaningful contribution. You are likely to support causes that benefit the wider collective, while also protecting your own boundaries.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    2,
+                    "Emotional",
+                    score_map.get(2,0),
+                    f"{user_name} is likely to make decisions with a strong awareness of human impact and interpersonal connection. Emotion plays an important role in how you relate to others and judge situations.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    3,
+                    "Power",
+                    score_map.get(3,0),
+                    f"{user_name} appears to value influence and meaningful responsibility. You tend to take seriously the need to shape outcomes and contribute in a visible, accountable way.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    4,
+                    "Existential",
+                    score_map.get(4,0),
+                    f"{user_name} appears grounded in stability and self-preservation. You tend to protect your own comfort and security while remaining aware of broader responsibilities.",
+                    "Profile Insight",
+                ),
+            ],
+        },
+        {
+            "section_id": 1006,
+            "section_code": "B",
+            "section_name": "Conditioning: Change Orientation",
+            "factors": [
+                _build_basic_report_factor(
+                    5,
+                    "Innovator",
+                    0,
+                    f"{user_name} is likely to respond to change with thoughtful curiosity rather than immediate rejection. You are open to new possibilities, especially when they offer growth and meaningful improvement.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    6,
+                    "Adopter",
+                    score_map.get(6,0),
+                    f"{user_name} tends to adapt to change once the value of a new approach is clear. You often prefer confirmation and practical reassurance before fully embracing a shift.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    7,
+                    "Evaluator",
+                    score_map.get(7,0),
+                    f"{user_name} is likely to assess change through evidence and sound judgment. You want clarity, structure, and reason before moving forward.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    8,
+                    "Preserver",
+                    score_map.get(8,0),
+                    f"{user_name} values continuity and stability in changing environments. You tend to protect what is working while remaining mindful of practical adaptation.",
+                    "Profile Insight",
+                ),
+            ],
+        },
+        {
+            "section_id": 1007,
+            "section_code": "C",
+            "section_name": "Acquired Communication Style",
+            "factors": [
+                _build_basic_report_factor(
+                    9,
+                    "Authoritative",
+                    score_map.get(9,0),
+                    f"{user_name} likely communicates with clarity and intent when leadership is needed. You are able to take charge when the situation demands direction and accountability.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    10,
+                    "Directive",
+                    score_map.get(10,0),
+                    f"{user_name} likely values structure and clear expectations in communication. You tend to prefer guidance that brings predictability and order to interaction.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    11,
+                    "Emotive",
+                    score_map.get(11,0),
+                    f"{user_name} is likely to connect well with others through expression and emotional awareness. Your communication can feel human, warm, and engaging when the context allows it.",
+                    "Profile Insight",
+                ),
+                _build_basic_report_factor(
+                    12,
+                    "Placative",
+                    score_map.get(12,0),
+                    f"{user_name} tends to communicate in ways that preserve harmony and reduce tension. You are likely to value rapport, calmness, and mutually respectful interaction.",
+                    "Profile Insight",
+                ),
+            ],
+        },
+        {
+            "section_id": 1008,
+            "section_code": "OBS",
+            "section_name": "Overall Observations",
+            "factors": [
+                _build_basic_report_factor(
+                    0,
+                    "Integrated Behavioral Pattern",
+                    0,
+                    (
+                        f"{user_name}'s profile suggests a balanced and reflective style of functioning. "
+                        f"You appear capable of combining empathy, structure, and self-awareness in a way that supports meaningful growth and effective interaction."
+                    ),
+                    "Overall Observations",
+                )
+            ],
+        },
+    ]
+
+    return {
+        "session": session,
+        "user": {
+            "name": user_name,
+            "product_type": product_type,
+        },
+        "form": {
+            "id": session.form.id if session.form else session.form_id,
+            "name": form_name,
+        },
+        "sections": sections,
+    }
+
+
+@router.get("/{session_id}/report", response_model=SessionReportOut)
+def get_session_report(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    session = _get_owned_session(session_id, db, current_user)
+
+    if session.status != SessionStatus.submitted:
+        raise HTTPException(status_code=400, detail="Session is not submitted yet")
+
+    use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
+
+    if use_ai:
+        try:
+            ai_service = AIReportService()
+            ai_report = ai_service.generate_report(session_id, db)
+            ai_sections = _format_ai_report_for_response(ai_report, db)
+            
+            # Get the full basic payload to extract static definition sections
+            basic_payload = _build_basic_report_payload(session, db)
+            
+            # Definitions and discovery letter come from the static payload
+            static_sections = [
+                s for s in basic_payload["sections"]
+                if s["section_code"] in ("LETTER", "DEF")
+            ]
+            
+            # Prepend static definitions, then append AI-generated profile sections
+            return {
+                "session": session,
+                "user": basic_payload["user"],
+                "form": basic_payload["form"],
+                "sections": static_sections + ai_sections,
+            }
+        except Exception as e:
+            print(f"AI report generation failed: {e}")
+    
+    return _build_basic_report_payload(session, db)
+
 
 def _ensure_form_available_for_new_session(form: Form) -> None:
     if not form.is_active:
@@ -298,69 +635,6 @@ def get_session_results(
 
     return results
 
-@router.get("/{session_id}/report", response_model=SessionReportOut)
-def get_session_report(
-    session_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    session = _get_owned_session(session_id, db, current_user)
-    if session.status != SessionStatus.submitted:
-        raise HTTPException(status_code=400, detail="Session is not submitted yet")
-    scores = db.query(SectionScore).filter(SectionScore.session_id == session_id).all()
-    if not scores:
-        return SessionReportOut(
-            session=session, 
-            user={"name": session.user_name, "product_type": session.user.product_type.value}, 
-            form={"id": session.form_id, "name": session.form_name}, 
-            sections=[]
-        )
-    factor_ids = {s.factor_id for s in scores}
-    section_ids = {s.section_id for s in scores}
-    factors = {f.id: f for f in db.query(BehaviouralFactor).filter(BehaviouralFactor.id.in_(factor_ids)).all()}
-    sections = db.query(BehaviouralType).filter(BehaviouralType.id.in_(section_ids)).order_by(BehaviouralType.order_index).all()
-    # Pre-fetch statements for this product type and these factors
-    statements = db.query(ReportStatement).filter(
-        ReportStatement.product_type == session.user.product_type,
-        ReportStatement.factor_id.in_(factor_ids)
-    ).all()
-    
-    # Create a lookup dict: (factor_id, score) -> statement
-    stmt_lookup = {(s.factor_id, s.score): s for s in statements}
-    by_section: dict[int, list[dict]] = {}
-    for row in scores:
-        factor = factors.get(row.factor_id)
-        
-        # NOTE: Using raw count as the score directly.
-        final_score = row.score 
-        stmt = stmt_lookup.get((row.factor_id, final_score))
-        
-        factor_out = {
-            "factor_id": row.factor_id,
-            "factor_name": factor.name if factor else f"Factor {row.factor_id}",
-            "raw_score": row.score,
-            "score": final_score,
-            "score_label": stmt.score_label if stmt else None,
-            "statement_title": stmt.title if stmt else None,
-            "statement": stmt.statement_text if stmt else None,
-        }
-        by_section.setdefault(row.section_id, []).append(factor_out)
-    report_sections = []
-    for sec in sections:
-        sec_factors = by_section.get(sec.id, [])
-        sec_factors.sort(key=lambda x: x["score"], reverse=True)
-        report_sections.append({
-            "section_id": sec.id,
-            "section_code": sec.code,
-            "section_name": sec.name,
-            "factors": sec_factors
-        })
-    return {
-        "session": session,
-        "user": {"name": session.user_name, "product_type": session.user.product_type.value},
-        "form": {"id": session.form.id if session.form else session.form_id, "name": session.form_name},
-        "sections": report_sections
-    }
 
 @router.get("/", response_model=list[SessionOut])
 def list_all_sessions(
@@ -414,3 +688,131 @@ def delete_session(
 
     db.delete(session)
     db.commit()
+
+# app/routers/sessions.py (updated get_session_report)
+
+
+
+# @router.get("/{session_id}/report", response_model=SessionReportOut)
+# def get_session_report(
+#     session_id: int,
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     session = _get_owned_session(session_id, db, current_user)
+#     if session.status != SessionStatus.submitted:
+#         raise HTTPException(status_code=400, detail="Session is not submitted yet")
+    
+#     # Use AI report generation
+#     ai_service = AIReportService()
+#     try:
+#         ai_report = ai_service.generate_report(session_id, db)
+#     except Exception as e:
+#         # Fallback to static report if AI fails
+#         return _generate_static_report(session_id, db)
+    
+#     # Transform AI report to match existing schema
+#     return {
+#         "session": session,
+#         "user": {"name": session.user.name, "product_type": session.user.product_type.value},
+#         "form": {"id": session.form.id, "name": session.form.name},
+#         "sections": _format_ai_report_for_response(ai_report, db)
+#     }
+
+def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
+    """Format AI report to match SessionReportOut schema."""
+    sections = []
+    
+    # Convert each AI-generated profile to the expected format
+    for profile_type in ["drives_profile", "conditioning_profile", "communication_profile"]:
+        profile = ai_report.get(profile_type, {})
+        if not profile:
+            continue
+        
+        # Get or create section data
+        section = {
+            "section_id": 0,  # Placeholder
+            "section_code": profile.get("section_code", ""),
+            "section_name": profile.get("section_name", ""),
+            "factors": []
+        }
+        
+        # Add composite insight as the first factor
+        if profile.get("composite_insight"):
+            section["factors"].append({
+                "factor_id": 0,
+                "factor_name": "COMPOSITE INSIGHT",
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": None,
+                "statement": profile["composite_insight"]
+            })
+        
+        # Add individual factors
+        for factor in profile.get("factors", []):
+            section["factors"].append({
+                "factor_id": 0,
+                "factor_name": factor["factor_name"],
+                "raw_score": int(factor.get("score",0)),
+                "score": factor.get("score",0),
+                "score_label": factor.get("score_label",""),
+                "statement_title": f"{factor['factor_name']} ({factor['score_label']})",
+                "statement": factor["description"]
+            })
+        
+        sections.append(section)
+    
+    # Add orientation insights
+    orientation = ai_report.get("orientation_insights", {})
+    if orientation:
+        orientations_section = {
+            "section_id": 0,
+            "section_code": "O",
+            "section_name": "Orientation Insights",
+            "factors": []
+        }
+        for key, value in orientation.items():
+            orientations_section["factors"].append({
+                "factor_id": 0,
+                "factor_name": key.replace("_", " ").title(),
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": f"{key.replace('_', ' ').title()} Orientation",
+                "statement": value
+            })
+        sections.append(orientations_section)
+    
+    # Add overall observations
+    observations = ai_report.get("overall_observations", {})
+    if observations:
+        observations_section = {
+            "section_id": 0,
+            "section_code": "O",
+            "section_name": "Overall Observations",
+            "factors": []
+        }
+        if observations.get("integrated_pattern"):
+            observations_section["factors"].append({
+                "factor_id": 0,
+                "factor_name": "INTEGRATED BEHAVIORAL PATTERN",
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": "Integrated Behavioral Pattern",
+                "statement": observations["integrated_pattern"]
+            })
+        if observations.get("key_takeaways"):
+            observations_section["factors"].append({
+                "factor_id": 0,
+                "factor_name": "Key Takeaways",
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": "Key Takeaways",
+                "statement": "\n".join(f"• {item}" for item in observations["key_takeaways"])
+            })
+        sections.append(observations_section)
+    
+    return sections

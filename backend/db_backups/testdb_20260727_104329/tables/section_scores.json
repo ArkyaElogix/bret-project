@@ -1,0 +1,464 @@
+[
+  {
+    "id": 1,
+    "session_id": 1,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 1
+  },
+  {
+    "id": 2,
+    "session_id": 1,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 1
+  },
+  {
+    "id": 5,
+    "session_id": 3,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 4
+  },
+  {
+    "id": 6,
+    "session_id": 3,
+    "section_id": 1,
+    "factor_id": 3,
+    "score": 5
+  },
+  {
+    "id": 7,
+    "session_id": 3,
+    "section_id": 1,
+    "factor_id": 4,
+    "score": 1
+  },
+  {
+    "id": 8,
+    "session_id": 3,
+    "section_id": 2,
+    "factor_id": 5,
+    "score": 4
+  },
+  {
+    "id": 9,
+    "session_id": 3,
+    "section_id": 2,
+    "factor_id": 8,
+    "score": 2
+  },
+  {
+    "id": 10,
+    "session_id": 3,
+    "section_id": 2,
+    "factor_id": 6,
+    "score": 4
+  },
+  {
+    "id": 11,
+    "session_id": 3,
+    "section_id": 3,
+    "factor_id": 10,
+    "score": 1
+  },
+  {
+    "id": 12,
+    "session_id": 3,
+    "section_id": 3,
+    "factor_id": 9,
+    "score": 4
+  },
+  {
+    "id": 13,
+    "session_id": 3,
+    "section_id": 3,
+    "factor_id": 12,
+    "score": 4
+  },
+  {
+    "id": 14,
+    "session_id": 3,
+    "section_id": 3,
+    "factor_id": 11,
+    "score": 1
+  },
+  {
+    "id": 15,
+    "session_id": 4,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 4
+  },
+  {
+    "id": 16,
+    "session_id": 4,
+    "section_id": 1,
+    "factor_id": 4,
+    "score": 2
+  },
+  {
+    "id": 17,
+    "session_id": 4,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 2
+  },
+  {
+    "id": 18,
+    "session_id": 4,
+    "section_id": 1,
+    "factor_id": 3,
+    "score": 2
+  },
+  {
+    "id": 19,
+    "session_id": 4,
+    "section_id": 2,
+    "factor_id": 5,
+    "score": 3
+  },
+  {
+    "id": 20,
+    "session_id": 4,
+    "section_id": 2,
+    "factor_id": 8,
+    "score": 2
+  },
+  {
+    "id": 21,
+    "session_id": 4,
+    "section_id": 2,
+    "factor_id": 7,
+    "score": 3
+  },
+  {
+    "id": 22,
+    "session_id": 4,
+    "section_id": 2,
+    "factor_id": 6,
+    "score": 2
+  },
+  {
+    "id": 23,
+    "session_id": 4,
+    "section_id": 3,
+    "factor_id": 10,
+    "score": 3
+  },
+  {
+    "id": 24,
+    "session_id": 4,
+    "section_id": 3,
+    "factor_id": 12,
+    "score": 3
+  },
+  {
+    "id": 25,
+    "session_id": 4,
+    "section_id": 3,
+    "factor_id": 11,
+    "score": 3
+  },
+  {
+    "id": 26,
+    "session_id": 4,
+    "section_id": 3,
+    "factor_id": 9,
+    "score": 1
+  },
+  {
+    "id": 27,
+    "session_id": 5,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 1
+  },
+  {
+    "id": 28,
+    "session_id": 6,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 2
+  },
+  {
+    "id": 29,
+    "session_id": 6,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 1
+  },
+  {
+    "id": 30,
+    "session_id": 7,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 2
+  },
+  {
+    "id": 31,
+    "session_id": 7,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 1
+  },
+  {
+    "id": 32,
+    "session_id": 8,
+    "section_id": 1,
+    "factor_id": 3,
+    "score": 1
+  },
+  {
+    "id": 33,
+    "session_id": 8,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 1
+  },
+  {
+    "id": 34,
+    "session_id": 9,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 5
+  },
+  {
+    "id": 35,
+    "session_id": 9,
+    "section_id": 1,
+    "factor_id": 3,
+    "score": 4
+  },
+  {
+    "id": 36,
+    "session_id": 9,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 1
+  },
+  {
+    "id": 37,
+    "session_id": 9,
+    "section_id": 2,
+    "factor_id": 5,
+    "score": 3
+  },
+  {
+    "id": 38,
+    "session_id": 9,
+    "section_id": 2,
+    "factor_id": 8,
+    "score": 2
+  },
+  {
+    "id": 39,
+    "session_id": 9,
+    "section_id": 2,
+    "factor_id": 7,
+    "score": 3
+  },
+  {
+    "id": 40,
+    "session_id": 9,
+    "section_id": 2,
+    "factor_id": 6,
+    "score": 2
+  },
+  {
+    "id": 41,
+    "session_id": 9,
+    "section_id": 3,
+    "factor_id": 10,
+    "score": 4
+  },
+  {
+    "id": 42,
+    "session_id": 9,
+    "section_id": 3,
+    "factor_id": 12,
+    "score": 2
+  },
+  {
+    "id": 43,
+    "session_id": 9,
+    "section_id": 3,
+    "factor_id": 11,
+    "score": 2
+  },
+  {
+    "id": 44,
+    "session_id": 9,
+    "section_id": 3,
+    "factor_id": 9,
+    "score": 2
+  },
+  {
+    "id": 45,
+    "session_id": 10,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 3
+  },
+  {
+    "id": 46,
+    "session_id": 10,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 3
+  },
+  {
+    "id": 47,
+    "session_id": 10,
+    "section_id": 1,
+    "factor_id": 3,
+    "score": 1
+  },
+  {
+    "id": 48,
+    "session_id": 10,
+    "section_id": 1,
+    "factor_id": 4,
+    "score": 3
+  },
+  {
+    "id": 49,
+    "session_id": 10,
+    "section_id": 2,
+    "factor_id": 5,
+    "score": 3
+  },
+  {
+    "id": 50,
+    "session_id": 10,
+    "section_id": 2,
+    "factor_id": 8,
+    "score": 2
+  },
+  {
+    "id": 51,
+    "session_id": 10,
+    "section_id": 2,
+    "factor_id": 7,
+    "score": 2
+  },
+  {
+    "id": 52,
+    "session_id": 10,
+    "section_id": 2,
+    "factor_id": 6,
+    "score": 3
+  },
+  {
+    "id": 53,
+    "session_id": 10,
+    "section_id": 3,
+    "factor_id": 10,
+    "score": 3
+  },
+  {
+    "id": 54,
+    "session_id": 10,
+    "section_id": 3,
+    "factor_id": 11,
+    "score": 3
+  },
+  {
+    "id": 55,
+    "session_id": 10,
+    "section_id": 3,
+    "factor_id": 9,
+    "score": 1
+  },
+  {
+    "id": 56,
+    "session_id": 10,
+    "section_id": 3,
+    "factor_id": 12,
+    "score": 3
+  },
+  {
+    "id": 57,
+    "session_id": 11,
+    "section_id": 1,
+    "factor_id": 2,
+    "score": 2
+  },
+  {
+    "id": 58,
+    "session_id": 11,
+    "section_id": 1,
+    "factor_id": 1,
+    "score": 2
+  },
+  {
+    "id": 59,
+    "session_id": 11,
+    "section_id": 1,
+    "factor_id": 3,
+    "score": 4
+  },
+  {
+    "id": 60,
+    "session_id": 11,
+    "section_id": 1,
+    "factor_id": 4,
+    "score": 2
+  },
+  {
+    "id": 61,
+    "session_id": 11,
+    "section_id": 2,
+    "factor_id": 5,
+    "score": 3
+  },
+  {
+    "id": 62,
+    "session_id": 11,
+    "section_id": 2,
+    "factor_id": 8,
+    "score": 2
+  },
+  {
+    "id": 63,
+    "session_id": 11,
+    "section_id": 2,
+    "factor_id": 7,
+    "score": 3
+  },
+  {
+    "id": 64,
+    "session_id": 11,
+    "section_id": 2,
+    "factor_id": 6,
+    "score": 2
+  },
+  {
+    "id": 65,
+    "session_id": 11,
+    "section_id": 3,
+    "factor_id": 10,
+    "score": 1
+  },
+  {
+    "id": 66,
+    "session_id": 11,
+    "section_id": 3,
+    "factor_id": 11,
+    "score": 3
+  },
+  {
+    "id": 67,
+    "session_id": 11,
+    "section_id": 3,
+    "factor_id": 9,
+    "score": 3
+  },
+  {
+    "id": 68,
+    "session_id": 11,
+    "section_id": 3,
+    "factor_id": 12,
+    "score": 3
+  }
+]

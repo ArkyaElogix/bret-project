@@ -1,0 +1,404 @@
+.bret-page-shell {
+  min-height: 100vh;
+  background: #f8faff;
+  padding: 24px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+.bret-report-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.bret-topbar {
+  background: #1e293b;
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bret-topbar-links {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bret-topbar-button,
+.bret-topbar-primary {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.bret-topbar-button {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.bret-topbar-primary {
+  background: #1b4fd8;
+  color: #fff;
+}
+
+.bret-report-body {
+  padding: 32px 36px 40px;
+}
+
+.bret-cover {
+  background: linear-gradient(135deg, #f8faff 0%, #eef2ff 100%);
+  border-radius: 16px;
+  padding: 40px 42px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.bret-cover h1 {
+  font-size: 34px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.bret-cover-subtitle {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #64748b;
+  margin: 0;
+  max-width: 760px;
+  font-style: italic;
+}
+
+.bret-cover-card {
+  background: #e8eeff;
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bret-cover-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.bret-cover-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.bret-cover-meta {
+  font-size: 14px;
+  color: #334155;
+}
+
+.bret-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
+  background: #fff;
+}
+
+.bret-section-header {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 14px;
+}
+
+.bret-summary-card {
+  background: #f8faff;
+  border-left: 4px solid #1b4fd8;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.bret-summary-card h3 {
+  color: #1b4fd8;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px;
+}
+
+.bret-score-panel h3,
+.bret-takeaway-card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.bret-summary-card p {
+  font-style: italic;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.bret-takeaway-card p,
+.bret-takeaway-card li,
+.bret-factor-description,
+.bret-definition-card p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #475569;
+}
+
+.bret-definitions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bret-definition-card {
+  border-left: 3px solid #1b4fd8;
+  padding-left: 14px;
+}
+
+.bret-definition-card h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.bret-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(0, 1.5fr);
+  gap: 32px;
+}
+
+.bret-profile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bret-factor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bret-factor-item {
+  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bret-factor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bret-factor-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.bret-factor-score {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.bret-score-panel-vertical {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.bret-chart-wrapper {
+  display: flex;
+  height: 240px;
+  gap: 12px;
+}
+
+.bret-chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-size: 10px;
+  color: #94a3b8;
+  padding-bottom: 30px;
+}
+
+.bret-chart-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  flex: 1;
+  border-bottom: 1px solid #e2e8f0;
+  border-left: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.bret-vertical-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  justify-content: flex-end;
+  z-index: 1;
+}
+
+.bret-vertical-bar-track {
+  width: 48px;
+  height: calc(100% - 30px);
+  background: transparent;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bret-vertical-bar-fill {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s ease;
+}
+
+.bret-vertical-bar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  text-align: center;
+  width: 60px;
+  height: 18px;
+}
+
+.bret-chart-legend {
+  font-size: 11px;
+  color: #94a3b8;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.bret-takeaways-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.bret-takeaways-secondary {
+  margin-top: 12px;
+}
+
+.bret-takeaway-card {
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.bret-takeaway-highlight {
+  background: #eef2ff;
+}
+
+.bret-takeaway-card ul {
+  padding-left: 16px;
+  margin: 0;
+}
+
+.bret-takeaway-card li {
+  margin-bottom: 6px;
+}
+
+.bret-page-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bret-loading-card,
+.bret-error-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  max-width: 560px;
+  text-align: center;
+}
+
+.bret-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid #eef2ff;
+  border-top: 3px solid #1b4fd8;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  animation: spin 1s linear infinite;
+}
+
+.bret-error-card a {
+  color: #1b4fd8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+
+  .bret-profile-layout,
+  .bret-takeaways-grid,
+  .bret-definitions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .bret-page-shell {
+    padding: 0;
+    background: #fff;
+  }
+
+  .bret-report-shell {
+    box-shadow: none;
+    max-width: none;
+    border-radius: 0;
+  }
+
+  .bret-report-body {
+    padding: 20px;
+  }
+}

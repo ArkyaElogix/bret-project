@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "behavioural_type_id": 1,
+    "name": "I-Altruistic",
+    "order_index": 1
+  },
+  {
+    "id": 2,
+    "behavioural_type_id": 1,
+    "name": "II-Emotional",
+    "order_index": 2
+  },
+  {
+    "id": 3,
+    "behavioural_type_id": 1,
+    "name": "III-Power",
+    "order_index": 3
+  },
+  {
+    "id": 4,
+    "behavioural_type_id": 1,
+    "name": "IV-Existential",
+    "order_index": 4
+  },
+  {
+    "id": 5,
+    "behavioural_type_id": 2,
+    "name": "I-Innovator",
+    "order_index": 1
+  },
+  {
+    "id": 6,
+    "behavioural_type_id": 2,
+    "name": "II-Adopter",
+    "order_index": 2
+  },
+  {
+    "id": 7,
+    "behavioural_type_id": 2,
+    "name": "III-Evaluator",
+    "order_index": 3
+  },
+  {
+    "id": 8,
+    "behavioural_type_id": 2,
+    "name": "IV-Preserver",
+    "order_index": 4
+  },
+  {
+    "id": 9,
+    "behavioural_type_id": 3,
+    "name": "I-Authorative",
+    "order_index": 1
+  },
+  {
+    "id": 10,
+    "behavioural_type_id": 3,
+    "name": "II-Directive",
+    "order_index": 2
+  },
+  {
+    "id": 11,
+    "behavioural_type_id": 3,
+    "name": "III-Emotive",
+    "order_index": 3
+  },
+  {
+    "id": 12,
+    "behavioural_type_id": 3,
+    "name": "IV-Placative",
+    "order_index": 4
+  }
+]

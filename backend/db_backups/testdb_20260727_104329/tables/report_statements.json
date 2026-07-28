@@ -1,0 +1,1442 @@
+[
+  {
+    "id": 1,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Altruistic Drive",
+    "statement_text": "Odd Man Out. You ensure that all your activities are focused on larger good, even if they are at the cost of personal benefit and comfort. You align your activities with or seek goals that have a larger implication. Lack of such goals and objectives may have a negative impact on your morale and energy levels. As a leader you seek to ensure that all your team members adhere to the highest standards of social and moral standards. You may engage in activities that will help your team members, and the larger society, develop themselves to the higher levels of “human potential”. Your decisions and choices may have a moralistic or ethical aspect rather than business or personal interest. "
+  },
+  {
+    "id": 2,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Altruistic Drive",
+    "statement_text": "You are ever willing to make sacrifices for larger good. Your decisions and choices are governed by your perceptions of their larger implications for the people and society. You are likely to have the big picture in mind and may not care much about personal gains and benefits. You are gifted with the ability to empathize and understand others’ problems easily. This helps you connect with people rather easily and you may find yourself often surrounded by individuals who may need help. Usually a good listener, you may struggle to express yourself adequately particularly on issues that are of personal interest to you. You can be very stubborn and fight relentlessly for causes that may impact larger society. In the professional environment you seek to understand the implications of your business as well as your own role for the larger society. "
+  },
+  {
+    "id": 3,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Altruistic Drive ",
+    "statement_text": "You are reflective in your approach. You have a desire to help and doing good for others but you also have clearly defined boundaries. Therefore, you may stop short of going beyond certain limits. Values and old-world approach to life sits well with you though you are not rigid about it. You avoid judging others and would rather attribute their choices and decisions to their circumstances and situations. It may be possible to manipulate you based on appeal to a larger good or misery alleviation particularly when associated facts and figures are presented. You face problems in following up on your larger dreams and aspirations primarily because you struggle with the ethicality of issues in certain situations. Happy to support in any activity that may benefit the socially and economically weaker sections, though you may not initiate or drive the same. "
+  },
+  {
+    "id": 4,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Altruistic Drive",
+    "statement_text": "When faced with a situation that requires you to make a choice between larger good and personal benefit you are likely to lean towards personal benefit rather than larger good. “What’s – In – It – For – Me?” is an important question for you. You are unlikely to act unless this question is answered. You may hold the view that I need to be take care of myself before I can take care of others. You may show a tendency to take credit for some of the results that may have been the outcome of the efforts of your team members. Acknowledging yourself is important. This may give the impression of you being “self – centered” "
+  },
+  {
+    "id": 5,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Altruistic Drive ",
+    "statement_text": "You are more focused on self and personal comfort or gain in the immediate surroundings. While you are concerned about what may impact you and your immediate environment, psychologically may be too far away from larger global issues. This may stop you from reflecting on or making an attempt at considering the larger implications of your actions and choices. “Here and Now” is important for you.  Return on investment or reward for action plays a crucial role in defining your action or lack of it. You are likely to give priority to personal happiness and success, at times even at the cost of others.  "
+  },
+  {
+    "id": 6,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Altruistic Drive ",
+    "statement_text": "Larger and societal issues do not bother you much. You believe in taking care of your immediate surrounding and people around you. The rest of the world can take care of itself. You work towards your objectives based on self-interest and that of those who matter to you rather than concern yourself with global objectives and purposes."
+  },
+  {
+    "id": 7,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Emotional Drive ",
+    "statement_text": "Emotionally charged situations stress you out and you may find yourself feeling overwhelmed. You are likely to be guided by the “logic of your heart” rather than rational arguments when making choices and decisions. What tugs at your heart is what gets acted upon. In your business or professional space you are likely to be guided by emotional satisfaction of achieving organizational or team objectives rather than driven by rewards of any kind. Because of this approach you may not be considered “competitive enough” and that may have a bearing on your future prospect within the organization. "
+  },
+  {
+    "id": 8,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Emotional Drive",
+    "statement_text": "Your choices and decisions may not be made based on logic and reason. You may prefer to call yourself as someone “who lives from the heart”. You find it easy to relate to people at an emotional plane, particularly those who may be distressed. You are willing to make sacrifices for loved ones and people who matter in your life. You consider material and professional success as means to achieving emotional satisfaction. You are comfortable undertaking tasks and activities that may be financially and physically draining if it has an emotional angle to it. Deep long-term relationships, loyalty and old-world values like sacrifice and commitments in relationships are important to you. Your professional relationships often lead to long lasting personal relationships even after professional association is over. "
+  },
+  {
+    "id": 9,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Emotional Drive ",
+    "statement_text": "You are likely to consider all aspects before deciding on any issue and would want to consider the larger picture. You value gut feel and respect emotions but you would seek some logic and substantive argument behind emotional choices and decision. You are generally conscious and aware of the needs of others in social environment and professional settings, but do not allow it to cloud your judgement. You are able to demonstrate social grace even in stressful situations. Emotions are expressed in moderation. In the professional space you are likely to be mindful of how expressive you are in emotionally charged situations. This allows you to make observations and comments that are well thought out and worded to suit the situation. "
+  },
+  {
+    "id": 10,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Emotional Drive",
+    "statement_text": "You are likely to make your decisions and choices rooted in logic and rational arguments. You do not want to make any decision that may have a touch of emotionality to it. You may believe that emotions impact judgements negatively and therefore need to be kept under wraps. You may feel distinctively uncomfortable in emotionally charged situations and may want to avoid them or get out of them soonest. Overt demonstration of emotions by others may reduce their standing in your view. "
+  },
+  {
+    "id": 11,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Emotional Drive ",
+    "statement_text": "Most, if not all, of your decisions and life choices are based on hard facts and data. While you value emotions, you understand that they cloud judgement and may be an impediment to objective thinking. Overt display of emotions of any kind is not considered good in most situations. However, when faced with irrational behaviour and unreasonable arguments you are likely to express your frustration as anger and it may take extreme forms at times. Your sharp tongue and critical approach to evaluating people and performance may end up hurting more people than you imagine. Deep relationships are never easy to manage particularly when emotions get very intense from the other side. This may scare you. You base your decisions on the basis of facts and figures and may struggle greatly in case they are missing. You may show keen interest in scientific discoveries and inventions and seeks objective knowledge. "
+  },
+  {
+    "id": 12,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Emotional Motivator",
+    "statement_text": "You are likely to make all your decisions and choices in cold blood. There is nothing that can impact your judgement except sound logic and reasoning. You seek data and facts before listening to any arguments or representations. You may believe that emotions generally do not deserve much merit and in the professional space you consider them to be a hinderance to effective work performance. "
+  },
+  {
+    "id": 13,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Power Drive ",
+    "statement_text": "You are likely to come across as highly competitive and driven as an individual and as a professional. Being the second best at anything is not an option for you. Achievements and related targets are important if you believe that they can enhance your standing as a person or professional and may add to your social and financial status. You are firm believer in hierarchy, however, it may be limited to expecting others to follow particularly if you are higher up in the ladder. You may not think much of breaking the protocol or hierarchical norms if you have to challenge someone sitting above you in the pecking order. This may become very pronounced if you believe that posing as a challenger can raise your standing and elevate you in the pecking order. "
+  },
+  {
+    "id": 14,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Power Drive ",
+    "statement_text": "You not only enjoy power and authority but actively seek to achieve such positions. However, you are conscious of the responsibilities that come with it. You may dither in decision making only when your personal position and the authority and clout that you may have is at risk. Generally, you enjoy making quick decisions since it gives you a sense of control and a feeling being in charge. Positions are aspired for to achieve larger good if supported by strong altruistic drive. You may often give the impression that you believe all is fair if success in material terms is at stake. Financial power and a taste for luxury is cultivated more to attain a higher social or professional status. You attach value to material wealth and position of power when interacting professionally or developing social contact. You are comfortable making quick decisions even with insufficient data. You are likely to use reward and punishment as tools of motivation. You love narrating stories and instances of your success and at times you may be guilty of exaggeration"
+  },
+  {
+    "id": 15,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Power Drive ",
+    "statement_text": "You appear to be balanced in your judgement and while you want to make it such that your personal interests are taken care of, you try and ensure that others are not impacted negatively. You are likely to seek power only if you are convinced that you can do the job well and better than most. This ensure that you are continuously seeking to upgrade yourself in terms of abilities. A strong emotional drive may prompt you to seek more material wealth for the sake of your family and loved ones. You would like to convince people and build consensus rather than use threats or coercion to get them onto your side. You are not particularly fond of using material profits and gains for motivating people. In the presence of a strong emotional drive, you may prefer to use emotional appeal rather than logic.  "
+  },
+  {
+    "id": 16,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Power Drive ",
+    "statement_text": "You attach little importance to position and authority. You believe that growth or progress along the social or professional ladder is a result of relentless effort and excellence rather than fiercely competitive approach. You are likely to demonstrate a high degree of comfort in your approach and environment. You find it easy to cheer and applaud the success achieved by others. In a competitive environment you are likely to adhere strictly by the rules even if nobody is watching or you find them working against you with easy possibilities of manipulation. When assigned a position of authority you are likely to come across as a very democratic leader and may end up spending time of seeking consensus on all issues. This is likely to impact your ability to make quick and effective decisions. It is also likely to make you appear weak and indecisive. "
+  },
+  {
+    "id": 17,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Power Drive ",
+    "statement_text": "You are apprehensive about the burden of responsibility and you may try to avoid responsibility for fear of failure. People’s opinion of you matter a lot more to you and therefore even when in a position of authority, you struggle to command the team effectively. You are likely to remain low key and try to remain unobtrusive in most social and even professional settings. As far as possible you avoid the limelight and public adulation. Relationships are more important to you than achieving success as defined by social and professional environment. You seek dependable, strong relationships and would be willing to make necessary sacrifices. You are likely to use a slow analytical approach to problem solving. This may impact the pace at which you make decisions.  You may avoid taking a stand on controversial issues and choose side with majority most of the time. "
+  },
+  {
+    "id": 18,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Power Drive ",
+    "statement_text": "You show a strong aversion to hierarchy and would like to operate in an environment which treats each individual as equal to another. While you may be politically neutral, socialist concepts are usually appealing to you. You may harbor doubts about your abilities and therefore would be reluctant to assume charge or take higher responsibilities. You avoid limelight and attention and seem most comfortable operating anonymously. You prefer to play the backroom boy/girl in most situations. "
+  },
+  {
+    "id": 19,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Existential Drive ",
+    "statement_text": "You actively seek to obtain the finest things in life. In this pursuit you may follow the principle of “End – Justifies – The Means”. You may have a tendency to over-indulge in “pleasures of the flesh”. This may lead you to develop strongly entrenched habits that may be damaging to you physically, socially and financially. You enjoy the limelight and attention even if it is momentary and undue. You like to dress well and take care of your personal appearance. Omar Khayyam’s “Bread, Wine and Thou” is a phrase that you really connect. Just that each has to be of the highest quality and standard. "
+  },
+  {
+    "id": 20,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Existential Drive ",
+    "statement_text": "You enjoy the luxuries and finer things in life, without necessarily owning them. You are likely to develop habits based on your senses – Taste; alcohol, tobacco, coffee, tea, spicy or rich food etc. Visual appeal; watching movies or videos of a particular genre that may be pleasant for you.  Auditory; music generally with preference of genre. In extreme cases you may be over-indulgent with food, drinks, or sex. You would generally avoid physically demanding and challenging tasks unless you have a strong Power Drive and you believe that such activities may help you achieve positions of power and/or sustain your indulgent lifestyle. Physical discomfort of any kind is a major issue for and therefore personal interest and comfort would reign supreme even at the cost of others. For you the line between right and wrong may often get blurred."
+  },
+  {
+    "id": 21,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Existential Drive ",
+    "statement_text": "You enjoy the good things in life in moderation and are usually aware of the stop line when engaging in any habit-forming activity or consumption. While you would like to see everyone comfortable and do everything in your power to ensure that people around you are taken care of, you follow the airlines emergency instructions “in case of an emergency please take care of yourself before assisting others. Self-preservation will always score higher for you. Therefore, you may be willing to share “good-things-in-life” once you have had his own fill."
+  },
+  {
+    "id": 22,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Existential Drive ",
+    "statement_text": "[NOT FILLED IN YET]"
+  },
+  {
+    "id": 23,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Existential Drive ",
+    "statement_text": "You may not take care of your own interests adequately. Often enough you may come across as self-sacrificing and not only are you likely make sacrifices for people who matter in your life but even those who may be unrelated. You are likely to demonstrate a strong sense of right and wrong. You are likely to be more aligned with a philosophical approach towards worldly pleasures and comforts and will avoid most things that may become a habit or may believe to be detrimental to you."
+  },
+  {
+    "id": 24,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Existential Drive",
+    "statement_text": "Personal comfort and safety are often sacrificed in the interests or for the well being of people who matter or for larger issues. Often enough you are willing to endure extreme discomfort and suffering in pursuance of your goal and objectives. Living a spartan life and shunning worldly pleasure is the ultimate test of character for you. Old world values of sacrifice and submission to the “Will of God” is held in high esteem by you. "
+  },
+  {
+    "id": 25,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Innovator Impulse",
+    "statement_text": "You are driven by new ideas and change. High risk projects excite you particularly if the results remain uncertain till the last moment. You need your dose of adrenaline on a regular basis. Sedentary and routine activities not only bore you but may actually generate a degree of frustration. Anything that is in existence for more than 24 hours needs to be reworked. For you there is no such thing as reinventing the wheel. A particular approach, method or system that you have to operate has to be customized, no matter how efficient it has been in the past. You like to leave your mark on everything that you. "
+  },
+  {
+    "id": 26,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Innovator Impulse ",
+    "statement_text": "You enjoy exploring new ideas. Happy to get involved in projects that demand a certain degree of risk and commensurate reward. Change excites you and you may find predictability and consistency boring. You are at your best when you are allowed to experiment and try out new ideas without worrying about the repercussions. Failure itself is treated as a challenge and that may spur you into more vigorous effort. You thrive in challenging environment"
+  },
+  {
+    "id": 27,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Innovator Impulse ",
+    "statement_text": "You enjoy reflecting on new ideas and discussing possibilities. However, giving these ideas an actionable shape or form remains a challenge for you. This prompts you to seek support and help from people who may have greater abilities in terms of building the idea into something that may be executable. You are comfortable sharing credit and that makes you a good team player"
+  },
+  {
+    "id": 28,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Innovator Impulse ",
+    "statement_text": "You may interest in new ideas but only at the conceptual and academic level. You would prefer to defer action on a new idea as long as possible. When you act upon it, it’s with a high degree of caution and reservation. Failure is something you loathe and therefore may show remarkable resistance to change in case of even minor risks involved in implementing a new idea."
+  },
+  {
+    "id": 29,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Innovator Impulse ",
+    "statement_text": "You are likely to be comfortable in predictable environment and may actually struggle with new ideas and change unless you have the assurance of knowing that there is help available if you have to accept or adopt something new. You will usually take time to accept new ideas and methodologies. This does not necessarily mean that you prefer no change or actively resist it; it simply indicates that your pace of taking to new ideas is slow and is likely to impact the pace at which you make decisions."
+  },
+  {
+    "id": 30,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Innovator impulse ",
+    "statement_text": "You believe in permanence and durability and therefore new ideas are discarded without deliberation. You believe, if there is a problem with the current process, system, equipment or approach it can be fixed by tinkering with the original one and no replacement is necessary. You may be of the view that replacing and existing system will disturb the entire system and that may unleash the genie in the bottle. Uncertainty is something that you would want to avoid."
+  },
+  {
+    "id": 31,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Adoptive Impulse ",
+    "statement_text": "You observe and follow the research, study or innovation that may be conducted in your area of work or anything that may have relevance to your life. You are quick to move with new ideas even if the results of it’s implementation and execution may be questionable or dubious. You are often found to be tweaking an idea and presenting it in a manner that makes it look original. This at times may not be done consciously but it may lead to embarrassment if you do not acknowledge the original idea and it’s creator"
+  },
+  {
+    "id": 32,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Adopter Impulse ",
+    "statement_text": "You like new ideas and are happy working with people who come up with new concepts. However, you may not lead or drive a new concept or innovation of any kind. You would rather wait for someone else to take the lead and test the idea before trying it yourself. You are not averse to change, in fact you are likely to welcome it as long as the risks involved are minimized or have been mitigated. Once you have taken care of the risks and the idea has been modified to suit your environment and situation, you are likely to become it's biggest advocate"
+  },
+  {
+    "id": 33,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Adopter Impulse ",
+    "statement_text": "You are able to apply your knowledge and understanding to work around a new idea. You seek validation and confirmation of it’s effectiveness before accepting anything new. You want to ensure that all your flanks are covered and that all threats and risks are either removed or budgeted for before you embark on a new journey. You do not seek adventure and change should come in as a process spread over a period of time rather than one tumultuous event. Uncertainty drains your energy and you may have difficulty in operating in ambiguous environment. You like driving processes that are well defined and have been effective over a period. "
+  },
+  {
+    "id": 34,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Adopter Impulse ",
+    "statement_text": "Tried and tested is what you prefer to go with. Anything – whether an idea or a product – needs to have a proven track record backed by testimonials for you to accept. That too only after you are convinced that it will give you the results that you seek. Even when you do that you would first like to go for a test run and fit it into your existing scheme of things. Your system or method does not adapt to the new idea; it’s the other way round. "
+  },
+  {
+    "id": 35,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Adopter Impulse ",
+    "statement_text": "You are comfortable in your zone. You follow the principle of “don’t fix it if it ain’t broke”. This may work well in predictable and if-then environment. But then life is not always predictable. You are likely to struggle the moment something new is introduced. Getting your head around anything new is a challenge and may even be unnerving at times. You respect experience – both your own and that of others and would generally refer to them while trying to find solutions to any problem."
+  },
+  {
+    "id": 36,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Adopter Impulse ",
+    "statement_text": "You actively shun new ideas. You believe that everything that has been practiced so far has been effective and the results cannot be improved. You likely to play the devil’s advocate for the best of ideas and highlight “improbable” fall outs. You may react negatively to unknow culture and people. "
+  },
+  {
+    "id": 37,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Evaluator Impulse ",
+    "statement_text": "You believe in empirical evidence for everything. Your principle is “seeing is believing”. You accept nothing at face value. Any testimonial has to be verified and validated before accepted. A process or an argument ahs to prove itself “beyond any reasonable doubt” before you accept it. Such an approach may earn you the label of “Doubting Thomas”. It may also make your friends and colleagues wary of sharing new ideas and thoughts with you for fear of outright rejection. What you describe as conviction may appear to be rigidity to others. "
+  },
+  {
+    "id": 38,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Evaluator Impulse ",
+    "statement_text": "You go by data and facts. You would like to look at the details of any project, operations, or idea to understand all the aspects before getting down to action. You prefer working in risk free environment. You are quality conscious and would like to ensure that the quality of your work is unquestionable. Being considered reliable is a high virtue for you and you try to maintain standards in all that you do. Anything new is viewed with suspicion. In a brainstorming session you enjoy playing the “Devil’s advocate.” Anything new must be validated and its effectiveness confirmed before you can make use of it. "
+  },
+  {
+    "id": 39,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Evaluator Impulse ",
+    "statement_text": "You use data and facts to buttress your arguments and usually do adequate amount of research (though not thorough). You may cherry pick your data to either support or negate an argument. You are comfortable working in flexible environment provided the duration and impact of such flexibility is adequately clear. To be appealing to you ideas must have some standards of success and defined rate of success or failure. You may be willing to take calculated risks."
+  },
+  {
+    "id": 40,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Evaluator Impulse ",
+    "statement_text": "You are likely to accept things and ideas without going through due diligence. You have limited attention to detail and that may impact your results and their quality adversely. You may attach greater value to verbal assurances rather than data backed argument. This may make you appear rather gullible. However, for the same reason you may be much trusted and liked by your colleagues and team members. "
+  },
+  {
+    "id": 41,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Evaluator Impulse ",
+    "statement_text": "You would rather work with “gut feel” than go through the details to understand the implication of an idea or the choice. You may struggle to maintain your focus particularly if the discussion is focused on raw data and facts rather than new exciting approach and activities. You trust instinctively. This may cause you to take unwarranted risks. "
+  },
+  {
+    "id": 42,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Evaluator Impulse ",
+    "statement_text": "You are trusting to the extent of being naïve. Your associates and team members may take advantage of your lack of attention to detail and lack of interest in scrutinizing and analyzing details. This may lead to serious repercussions both in terms of accountability as well as the quality of your results. This may also impact the consistency of your output and results. "
+  },
+  {
+    "id": 43,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Preserver Impulse ",
+    "statement_text": "The idea of questioning anything which has been in practice is beyond you. You believe that it is unnecessary to dismantle anything that is in existence and replacing them is a waste of time. You take a very grim and skeptical view of the history of human evolution and civilization. You believe that in an effort to get rid of smaller difficulties mankind has replaced them by greater difficulties. This makes you a strong “No Changer”. "
+  },
+  {
+    "id": 44,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Preserver Impulse ",
+    "statement_text": "You like to work in a predictable environment and need to be secure in the knowledge of certainty. Uncertainty or unplanned change makes you nervous. You are wary of anything new and would resist to the extent possible for you. You see merit in standard operating procedures and anything outside of it is questionable. The best of methods and techniques will have to pass through your rigorous questioning and validation before being implemented. You attach great value to old fashioned ways of doing things. Hierarchy and orderliness is important for you. "
+  },
+  {
+    "id": 45,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Preserver Impulse ",
+    "statement_text": "You like maintaining the status quo and anything new would be questioned (not necessarily with data and facts) with regard to it’s relevance and necessity. For you what has been working well should continue to work well until messed up by someone. Therefore, if something new has to come in it has to be of high impact and value. You are likely to introduce systems and process that can be auto-operated. Your own and experience of others may matter more than data and facts."
+  },
+  {
+    "id": 46,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Preserver Impulse ",
+    "statement_text": "While you may not explore new avenues and methods and techniques unless you believe that the continuation of the present one is counterproductive or leading to a “natural death” situation. However, this is something that happens easily. You need hard evidence to support a new idea. The probing is deep and thorough and you would visualize all possible scenario before venturing into any thing new. This ultra-cautious approach may be criticized or valued depending on the situation or role you play. "
+  },
+  {
+    "id": 47,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Preserver Impulse ",
+    "statement_text": "You tend to get “bored” with steadiness and predictability in your environment. You wish to live a life which is exciting and offers a variety of experiences. Exploring “a better way of doing things” is something that excites you. Anything that has worked well so far can work better and is worth dismantling. You are likely to thrive in unpredictable and chaotic environments. In the organizational context you can contribute in a big way with your unusual ideas and innovation. However, you may struggle when it comes to execution. You may tend to give up projects mid-way in case it doesn’t go per plan or involves complexities of any kind. "
+  },
+  {
+    "id": 48,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Preserver Impulse ",
+    "statement_text": "You are unlikely to follow standard procedures and would tweak everything that can be tweaked. You may struggle to replicate your own processes. This is likely to earn the label of “unpredictable and erratic”. You may find it difficult to explain your success formula and give the impression being reckless. Your seniors may trust with high stakes issues or challenges. "
+  },
+  {
+    "id": 49,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Authoritative Style ",
+    "statement_text": "At the best of time you come across as commanding and decisive; at other times you may appear to be overbearing and controlling. This approach in uncertain situation may help you take charge and can be of value. However, this prevents you from listening to views that may be contrary to your own, giving the impression of you being dictatorial. You may end up making choices that are generally accepted by others more out of fear than for merit. This inherent forced imposition of your choices and decisions may impact the morale of your team and can actually adversely affect the outcome."
+  },
+  {
+    "id": 50,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Authoritative Style ",
+    "statement_text": "You like to take charge of conversations and drive activities. Issuing orders is easy for you. You may show a tendency to be abrasive and curt especially if you are under pressure. Airing your own ideas may be challenging in the presence of authority figure or when you are not assigned a position of authority. You are likely to show anger rather easily and be expressive of other emotions as well."
+  },
+  {
+    "id": 51,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Authoritative Style ",
+    "statement_text": "You enjoy position of authority and have a quiet confident demeanor. Your anger is usually couched in sarcasm. In situations where you are not assigned a position or where you do not have any authority or control, you may prefer to keep to yourself and get involved only if asked to. Participating in team activities is exciting for you particularly if your ideas and pursued and built into actionable agenda. You are comfortable modifying your own ideas and thoughts in case you find merit in the other person’s argument. "
+  },
+  {
+    "id": 52,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Authoritative Style ",
+    "statement_text": "You like to create a team of supportive independent operators and do not believe in asserting your authority unnecessarily. In fact you may consider it to be unproductive and a sign of weakness. You prefer to get into consultations before arriving at any decision that may have a bearing on team performance or morale. This at times may be interpreted as a sign of weakness by outsiders and bystanders. This may  also be used by unscrupulous team members to undermine your position. "
+  },
+  {
+    "id": 53,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Authoritative Style ",
+    "statement_text": "You appear to be shy and quiet. You are typically reluctant to air your views except when you feel you are in a “safe zone”. This gives an impression of you lacking in confidence. You are usually non-committal about your own ideas. When expressing your opinion, you tend to add too many qualifiers. “Speak when spoken to” is the principle that you may follow. While this may have merit, it may be seen as arrogance or recalcitrant behaviour. "
+  },
+  {
+    "id": 54,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Authoritative Style ",
+    "statement_text": "You prefer Individual Contributor role rather than lead a team. You seek excellence and believe that the best result can be produced only through solo effort. If pushed into a leadership, you may end up doing most of the tasks of your subordinates. You may show no aggression even in high pressure situation. The calmness demonstrated in tough situations may be seen as one of your strengths. You struggle to have discipline related conversations except for focusing on the rules and standards. "
+  },
+  {
+    "id": 55,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Directive Style ",
+    "statement_text": "Anything that is not in the rule book or is not as per the defined SOP is strictly prohibited so far as you are concerned. Hierarchy and positions matter a lot. It’s not what is said but who is saying it is of greater importance to you. You use both data and your positional expertise to present your argument – “I know what I am talking about” comes out very clearly. You are likely to have a thorough understanding of the rules as well as the system. Very strong detail orientation enhances your analytical abilities and you show remarkable ability to connect the dots. "
+  },
+  {
+    "id": 56,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Directive Style ",
+    "statement_text": "You make sure that you are aware of the hierarchy and the rules and prefer to play by the book. Do’s and Don’ts of any kind and in any situation are of utmost importance. You want instructions to be followed as per the rule book. Arguments of any kind against the norms or an authority figure is not acceptable to you. Your desire to stick to protocol and norms may get in the way of your pace of doing things as well as the innovation that may be possible. You rely on data and facts to buttress your arguments and would concede gracefully in case someone else has authentic facts and figures contrary to your own"
+  },
+  {
+    "id": 57,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Directive Style ",
+    "statement_text": "You understand the value and merit of rules and standards. Ideally you would not want to cross the boundaries and would like to be on the right side of the rules. However, you are likely to take advantage of the lacuna in the rules if you find them getting in the way of what you wish to achieve. You adopt pleasant conversational tone while communicating with others. While you respect hierarchy, you are not bound by it. Expressing yourself is not too difficult"
+  },
+  {
+    "id": 58,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Directive Style ",
+    "statement_text": "You believe that rules and standards are only the nature arrow and that they can be bent and modified if necessary. You may use data selectively to validate your own arguments, ignoring facts that may not align with your own argument. You show a remarkable tendency to overstep – often enough without realizing. This may lead to a lack of trust between you and your supervisor. Your team members may find your fun to work with in normal routine situations but in a crisis that may express doubt about your abilities. "
+  },
+  {
+    "id": 59,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Directive Style ",
+    "statement_text": "You may give the impression of being uncaring about the rules and often enough you may not even bother to know them. You are free flowing in your communication and may even wander off topic while discussing serious issues. A certain kind of casualness may be seen in your approach to tasks and people. Your respect for hierarchy is limited to the fact of you being placed lower in the pecking order particularly in a professional setting."
+  },
+  {
+    "id": 60,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Directive Factor ",
+    "statement_text": "You are most comfortable creating and following your own rules. While exercising authority, you may redefine your own standards and people around you are expected to follow it. You are unlikely to care much for norms and standards if they dilute or pose a threat to your own standing and position of power. "
+  },
+  {
+    "id": 61,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Emotive Style",
+    "statement_text": "You put your heart into whatever you do and you let the world know it. This may come out as a strength in situations that demands more heart than ability in delivering results. However, over demonstration of you remotion – positive and negative – may earn you’re the label of being temperamental. The fluidity of your expression may be too transparent for you to get into negotiations that are high stake and long drawn. You like to believe that people who connect with you emotionally are better motivated and are likely to deliver better results."
+  },
+  {
+    "id": 62,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Emotive Style ",
+    "statement_text": "You are expressive of your emotions and make no bones about it. While communicating you are likely to use superlatives even in situations that do not merit use of such words. This may not necessarily remain at the verbal level. You may feel the emotion as you say it and your expressions are likely to support your choice of words. You use emotions rather than logic and facts to back your arguments. You may feel a little uncomfortable in situations that do not allow for free expression of emotions. Your performance and effort may drop substantially if you are not emotionally committed to the task on hand. "
+  },
+  {
+    "id": 63,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Emotive Style ",
+    "statement_text": "You are aware of your emotions and manage them well. You choose to display or hold them back depending on your assessment of the environment. This gives a very balanced approach to your arguments and you can debate on issues without demonstrating extreme emotions. You use praise and reprimand judiciously. Emotions are used only when you believe that it’s the only way to get through to an audience. You are good at using humor to defuse an intense situation."
+  },
+  {
+    "id": 64,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Emotive Style ",
+    "statement_text": "You use mild words and expressions and are quite deliberate in expressing your emotions. You do well to hide your emotions while negotiating and that gives you an edge. You use the appeal of data and facts rather than emotions to establish your arguments and achieve your objectives. With you team members you may appear a little stand-offish and unconcerned about their issues and problems. While they may respect you for your abilities, they may not connect at a personal level"
+  },
+  {
+    "id": 65,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Emotive Style ",
+    "statement_text": "You give the impression of being dispassionate about most things in life. It takes a lot to arouse strong emotions in you – or at least the expression of strong emotions. You are good at masking your feelings and it may be quite difficult for any observer to figure out what may be going through your mind. This becomes a major advantage when you are negotiating deals. "
+  },
+  {
+    "id": 66,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Emotive Style ",
+    "statement_text": "You may have earned labels like “poker faced” “stoic” as well as “flat toned”. You struggle to express yourself emotionally even with people who consider themselves to be close to use. You use objective, functional and non-flowery language. This gives you the image of a no-nonsense person. The image while helpful in most situations may make you appear insensitive. "
+  },
+  {
+    "id": 67,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Placative Style ",
+    "statement_text": "You actively avoid conflicts and appear to be a peace-maker – at times an appeaser. Your strong aversion to conflict and disagreement may across as a weakness and people around you may take advantage it. Often enough, despite your belief to the contrary, you end up agreeing to what others may be suggesting or asking you to do. Your reluctance to assert yourself may work against you in situations where credit is claimed by others. You go out of your way to help your clients and colleagues even if it is not meant to be your job. "
+  },
+  {
+    "id": 68,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Placative Style ",
+    "statement_text": "You have an approach which gives the impression that you would like to avoid conflict and disagreement even at the cost of what may be very important to you. In your conversations you may show a tendency to touch the other person on the shoulder or hold hands while talking to them, even if you it is first interaction with the individual. In case of disagreement, you are likely to pull back rather than try and win the argument even if you know you right. "
+  },
+  {
+    "id": 69,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Placative Style ",
+    "statement_text": "You speak calmly and generally try to get everyone on your side. You do not like to operate in a hostile environment and find it energy sapping. However, when faced with a situation, you are likely to let others know of your disillusionment and then pull back rather than quit quietly or concede without presenting your side. You are good at debates and can make meaningful contributions in brainstorming sessions. "
+  },
+  {
+    "id": 70,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Placative Style ",
+    "statement_text": "While not eager to pick up an argument, you do not shy away from one either. You are strongly assertive and firm in your arguments and stand by what you believe in even if there is disagreement with individuals holding positions of power. This may give the impression of you being a crusader or rebel. However, when you present your disagreement in a reasonable, manner, it is looked at as valuable inputs."
+  },
+  {
+    "id": 71,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Placative Style ",
+    "statement_text": "You may appear quite aggressive in your communication and you are comfortable in expressing your disagreements even with authority figure. You are more concerned about the outcome than the opinion that people may form of you. When involved in a task or a project the intensity of your focus on the task may cause you to ignore the people side of the operation and that may create unhappiness and disenchantment amongst people. "
+  },
+  {
+    "id": 72,
+    "product_type": "EXECUTIVE",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Placative Style ",
+    "statement_text": "Your demeanor is one of very strong self-assurance and that may be construed as arrogance. The tone and the body language adopted in certain situations may say “My way or the highway”, and that may be a put off for most of the people around you. Making adjustments or accommodating others opinions into what you want done is a rarity and that may create the impression of you being a dictatorial person. Picking up arguments is easy and you usually do not yield easily. This combative approach may help win some brownie points in certain situations but would impacts relationships in the long run. "
+  },
+  {
+    "id": 73,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Altruistic Drive",
+    "statement_text": "Larger and societal issues do not bother you much. You believe in taking care of your immediate surrounding and people around you. The rest of the world can take care of itself. You work towards your objectives based on self interest and that of those who matter to you rather than concern yourself with global objectives and purposes."
+  },
+  {
+    "id": 74,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Altruistic Drive",
+    "statement_text": "You are more focused on self and personal comfort or gain in the immediate surroundings. While you are concerned about what may impact you and your immediate environment, psychologically may be too far away from larger global issues. This may stop you from reflecting on or making an attempt at considering the larger implications of your actions and choices. “Here and Now” is important for you. Return on investment or reward for action plays a crucial role in defining your action or lack of it. You are likely to give priority to personal happiness and success, at times even at the cost of others."
+  },
+  {
+    "id": 75,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Altruistic Drive",
+    "statement_text": "You are reflective in your approach. You have a desire to help and doing good for others but you also have clearly defined boundaries. Therefore, you may stop short of going beyond certain limits. Values and old-world approach to life sits well with you though you are not rigid about it. You avoid judging others and would rather attribute their choices and decisions to their circumstances and situations. It may be possible to manipulate you based on appeal to a larger good or misery alleviation particularly when associated facts and figures are presented. You face problems in following up on your larger dreams and aspirations primarily because you struggle with the ethicality of issues in certain situations. Happy to support in any activity that may benefit the socially and economically weaker sections, though you may not initiate or drive the same."
+  },
+  {
+    "id": 76,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Altruistic Drive",
+    "statement_text": "You are reflective in your approach. You have a desire to help and doing good for others but you also have clearly defined boundaries. Therefore, you may stop short of going beyond certain limits. Values and old-world approach to life sits well with you though you are not rigid about it. You avoid judging others and would rather attribute their choices and decisions to their circumstances and situations. It may be possible to manipulate you based on appeal to a larger good or misery alleviation particularly when associated facts and figures are presented. You face problems in following up on your larger dreams and aspirations primarily because you struggle with the ethicality of issues in certain situations. Happy to support in any activity that may benefit the socially and economically weaker sections, though you may not initiate or drive the same."
+  },
+  {
+    "id": 77,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Altruistic Drive",
+    "statement_text": "You are ever willing to make sacrifices for larger good. Your decisions and choices are governed by your perceptions of their larger implications for the people and society. You are likely to have the big picture in mind and may not care much about personal gains and benefits. You are gifted with the ability to empathize and understand others’ problems easily. This helps you connect with people rather easily and you may find yourself often surrounded by individuals who may need help. Usually a good listener, you may struggle to express yourself adequately particularly on issues that are of personal interest to you. You can be very stubborn and fight relentlessly for causes that may impact larger society."
+  },
+  {
+    "id": 78,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 1,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Altruistic Drive",
+    "statement_text": "You are ever willing to make sacrifices for larger good. Your decisions and choices are governed by your perceptions of their larger implications for the people and society. You are likely to have the big picture in mind and may not care much about personal gains and benefits. You are gifted with the ability to empathize and understand others’ problems easily. This helps you connect with people rather easily and you may find yourself often surrounded by individuals who may need help. Usually a good listener, you may struggle to express yourself adequately particularly on issues that are of personal interest to you. You can be very stubborn and fight relentlessly for causes that may impact larger society."
+  },
+  {
+    "id": 79,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Emotional Drive",
+    "statement_text": "Absence of Emotional Drive (0): (insert something here)"
+  },
+  {
+    "id": 80,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Emotional Drive",
+    "statement_text": "Most, if not all, of your decisions and life choices are based on hard facts and data. While you value emotions, you understand that they cloud judgement and may be an impediment to objective thinking. Overt display of emotions of any kind is not considered good in most situations. However, when faced with irrational behaviour and unreasonable arguments you are likely to express your frustration as anger and it may take extreme forms at times. Your sharp tongue and critical approach to evaluating people and performance may end up hurting more people than you imagine. Deep relationships are never easy to manage particularly when emotions get very intense from the other side. This may scare you. You base your decisions on the basis of facts and figures and may struggle greatly in case they are missing. You may show keen interest in scientific discoveries and inventions and seeks objective knowledge."
+  },
+  {
+    "id": 81,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Emotional Drive",
+    "statement_text": "You are likely to consider all aspects before deciding on any issue and would want to consider the larger picture. You value gut feel and respect emotions but you would seek some logic and substantive argument behind emotional choices and decision. You are generally conscious and aware of the needs of others in social environment and professional settings, but do not allow it to cloud your judgement. You are able to demonstrate social grace even in stressful situations. Emotions are expressed in moderation. In the professional space you are likely to be mindful of how expressive you are in emotionally charged situations. This allows you to make observations and comments that are well thought out and worded to suit the situation."
+  },
+  {
+    "id": 82,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Emotional Drive",
+    "statement_text": "You are likely to consider all aspects before deciding on any issue and would want to consider the larger picture. You value gut feel and respect emotions but you would seek some logic and substantive argument behind emotional choices and decision. You are generally conscious and aware of the needs of others in social environment and professional settings, but do not allow it to cloud your judgement. You are able to demonstrate social grace even in stressful situations. Emotions are expressed in moderation. In the professional space you are likely to be mindful of how expressive you are in emotionally charged situations. This allows you to make observations and comments that are well thought out and worded to suit the situation."
+  },
+  {
+    "id": 83,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Emotional Drive",
+    "statement_text": "Your choices and decisions may not be made based on logic and reason. You may prefer to call yourself as someone “who lives from the heart”. You find it easy to relate to people at an emotional plane, particularly those who may be distressed. You are willing to make sacrifices for loved ones and people who matter in your life. You consider material and professional success as means to achieving emotional satisfaction. You are comfortable undertaking tasks and activities that may be financially and physically draining if it has an emotional angle to it. Deep long-term relationships, loyalty and old-world values like sacrifice and commitments in relationships are important to you. Your professional relationships often lead to long lasting personal relationships even after professional association is over."
+  },
+  {
+    "id": 84,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 2,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Emotional Drive",
+    "statement_text": "Your choices and decisions may not be made based on logic and reason. You may prefer to call yourself as someone “who lives from the heart”. You find it easy to relate to people at an emotional plane, particularly those who may be distressed. You are willing to make sacrifices for loved ones and people who matter in your life. You consider material and professional success as means to achieving emotional satisfaction. You are comfortable undertaking tasks and activities that may be financially and physically draining if it has an emotional angle to it. Deep long-term relationships, loyalty and old-world values like sacrifice and commitments in relationships are important to you. Your professional relationships often lead to long lasting personal relationships even after professional association is over."
+  },
+  {
+    "id": 85,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Power Drive",
+    "statement_text": "Absence of Power Drive (0): (Insert something here)"
+  },
+  {
+    "id": 86,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Power Drive",
+    "statement_text": "You are apprehensive about the burden of responsibility and you may try to avoid responsibility for fear of failure. People’s opinion of you matter a lot more to you and therefore even when in a position of authority, you struggle to command the team effectively. You are likely to remain low key and try to remain unobtrusive in most social and even professional settings. As far as possible you avoid the limelight and public adulation. Relationships are more important to you than achieving success as defined by social and professional environment. You seek dependable, strong relationships and would be willing to make necessary sacrifices. You are likely to use a slow analytical approach to problem solving. This may impact the pace at which you make decisions. You may avoid taking a stand on controversial issues and choose side with majority most of the time."
+  },
+  {
+    "id": 87,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Power Drive",
+    "statement_text": "You appear to be balanced in your judgement and while you want to make it such that your personal interests are taken care of, you try and ensure that others are not impacted negatively. You are likely to seek power only if you are convinced that you can do the job well and better than most. This ensure that you are continuously seeking to upgrade yourself in terms of abilities. A strong emotional drive may prompt you to seek more material wealth for the sake of your family and loved ones. You would like to convince people and build consensus rather than use threats or coercion to get them onto your side. You are not particularly fond of using material profits and gains for motivating people. In the presence of a strong emotional drive, you may prefer to use emotional appeal rather than logic."
+  },
+  {
+    "id": 88,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Power Drive",
+    "statement_text": "You appear to be balanced in your judgement and while you want to make it such that your personal interests are taken care of, you try and ensure that others are not impacted negatively. You are likely to seek power only if you are convinced that you can do the job well and better than most. This ensure that you are continuously seeking to upgrade yourself in terms of abilities. A strong emotional drive may prompt you to seek more material wealth for the sake of your family and loved ones. You would like to convince people and build consensus rather than use threats or coercion to get them onto your side. You are not particularly fond of using material profits and gains for motivating people. In the presence of a strong emotional drive, you may prefer to use emotional appeal rather than logic."
+  },
+  {
+    "id": 89,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Power Drive",
+    "statement_text": "You not only enjoy power and authority but actively seek to achieve such positions. However, you are conscious of the responsibilities that come with it. You may dither in decision making only when your personal position and the authority and clout that you may have is at risk. Generally, you enjoy making quick decisions since it gives you a sense of control and a feeling being in charge. Positions are aspired for to achieve larger good if supported by strong altruistic drive. You may often give the impression that you believe all is fair if success in material terms is at stake. Financial power and a taste for luxury is cultivated more to attain a higher social or professional status. You attach value to material wealth and position of power when interacting professionally or developing social contact. You are comfortable making quick decisions even with insufficient data. You are likely to use reward and punishment as tools of motivation. You love narrating stories and instances of your success and at times you may be guilty of exaggeration."
+  },
+  {
+    "id": 90,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 3,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Power Drive",
+    "statement_text": "You not only enjoy power and authority but actively seek to achieve such positions. However, you are conscious of the responsibilities that come with it. You may dither in decision making only when your personal position and the authority and clout that you may have is at risk. Generally, you enjoy making quick decisions since it gives you a sense of control and a feeling being in charge. Positions are aspired for to achieve larger good if supported by strong altruistic drive. You may often give the impression that you believe all is fair if success in material terms is at stake. Financial power and a taste for luxury is cultivated more to attain a higher social or professional status. You attach value to material wealth and position of power when interacting professionally or developing social contact. You are comfortable making quick decisions even with insufficient data. You are likely to use reward and punishment as tools of motivation. You love narrating stories and instances of your success and at times you may be guilty of exaggeration."
+  },
+  {
+    "id": 91,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Existential Drive",
+    "statement_text": "Absence of Existential Drive (0): Personal comfort and safety are often sacrificed in the interests or for the well-being of people who matter or for larger issues. Often enough you are willing to endure extreme discomfort and suffering in pursuance of your goal and objectives."
+  },
+  {
+    "id": 92,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Existential Drive",
+    "statement_text": "You may not take care of your own interests adequately. Often enough you may come across as self-sacrificing and not only are you likely make sacrifices for people who matter in your life but even those who may be unrelated. You are likely to demonstrate a strong sense of right and wrong. You are likely to be more aligned with a philosophical approach towards worldly pleasures and comforts and will avoid most things that may become a habit or may believe to be detrimental to you."
+  },
+  {
+    "id": 93,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Existential Drive",
+    "statement_text": "You enjoy the good things in life in moderation and are usually aware of the stop line when engaging in any habit-forming activity or consumption. While you would like to see everyone comfortable and do everything in your power to ensure that people around you are taken care of, you follow the airlines emergency instructions “in case of an emergency please take care of yourself before assisting others. Self preservation will always score higher for you. Therefore, you may be willing to share “good-things-in-life” once you have had his own fill."
+  },
+  {
+    "id": 94,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Existential Drive",
+    "statement_text": "You enjoy the good things in life in moderation and are usually aware of the stop line when engaging in any habit-forming activity or consumption. While you would like to see everyone comfortable and do everything in your power to ensure that people around you are taken care of, you follow the airlines emergency instructions “in case of an emergency please take care of yourself before assisting others. Self preservation will always score higher for you. Therefore, you may be willing to share “good-things-in-life” once you have had his own fill."
+  },
+  {
+    "id": 95,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Existential Drive",
+    "statement_text": "You enjoy the luxuries and finer things in life, without necessarily owning them. You are likely to develop habits based on your senses – Taste; alcohol, tobacco, coffee, tea, spicy or rich food etc. Visual appeal; watching movies or videos of a particular genre that may be pleasant for you. Auditory; music generally with preference of genre. In extreme cases you may be over-indulgent with food, drinks, or sex. You would generally avoid physically demanding and challenging tasks unless you have a strong Power Drive and you believe that such activities may help you achieve positions of power and/or sustain your indulgent lifestyle. Physical discomfort of any kind is a major issue for and therefore personal interest and comfort would reign supreme even at the cost of others. For you the line between right and wrong may often get blurred."
+  },
+  {
+    "id": 96,
+    "product_type": "BASIC",
+    "behavioural_type_id": 1,
+    "factor_id": 4,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Existential Drive",
+    "statement_text": "You enjoy the luxuries and finer things in life, without necessarily owning them. You are likely to develop habits based on your senses – Taste; alcohol, tobacco, coffee, tea, spicy or rich food etc. Visual appeal; watching movies or videos of a particular genre that may be pleasant for you. Auditory; music generally with preference of genre. In extreme cases you may be over-indulgent with food, drinks, or sex. You would generally avoid physically demanding and challenging tasks unless you have a strong Power Drive and you believe that such activities may help you achieve positions of power and/or sustain your indulgent lifestyle. Physical discomfort of any kind is a major issue for and therefore personal interest and comfort would reign supreme even at the cost of others. For you the line between right and wrong may often get blurred."
+  },
+  {
+    "id": 97,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Innovator Impulse",
+    "statement_text": "Absence of Innovator Impulse (1): (insert something here)"
+  },
+  {
+    "id": 98,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Innovator Impulse",
+    "statement_text": "You are likely to be comfortable in predictable environment and may actually struggle with new ideas and change unless you have the assurance of knowing that there is help available if you have to accept or adopt something new. You will usually take time to accept new ideas and methodologies. This does not necessarily mean that you prefer no change or actively resist it; it simply indicates that your pace of taking to new ideas is slow and is likely to impact the pace at which you make decisions."
+  },
+  {
+    "id": 99,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Innovator Impulse",
+    "statement_text": "You enjoy reflecting on new ideas and discussing possibilities. However, giving these ideas an actionable shape or form remains a challenge for you. This prompts you to seek support and help from people who may have greater abilities in terms of building the idea into something that may be executable. You are comfortable sharing credit and that makes you a good team player."
+  },
+  {
+    "id": 100,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Innovator Impulse",
+    "statement_text": "You enjoy reflecting on new ideas and discussing possibilities. However, giving these ideas an actionable shape or form remains a challenge for you. This prompts you to seek support and help from people who may have greater abilities in terms of building the idea into something that may be executable. You are comfortable sharing credit and that makes you a good team player."
+  },
+  {
+    "id": 101,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Innovator Impulse",
+    "statement_text": "You enjoy exploring new ideas. Happy to get involved in projects that demand a certain degree of risk and commensurate reward. Change excites you and you may find predictability and consistency boring. You are at your best when you are allowed to experiment and try out new ideas without worrying about the repercussions. Failure itself is treated as a challenge and that may spur you into more vigorous effort. You thrive in challenging environment."
+  },
+  {
+    "id": 102,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 5,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Innovator Impulse",
+    "statement_text": "You enjoy exploring new ideas. Happy to get involved in projects that demand a certain degree of risk and commensurate reward. Change excites you and you may find predictability and consistency boring. You are at your best when you are allowed to experiment and try out new ideas without worrying about the repercussions. Failure itself is treated as a challenge and that may spur you into more vigorous effort. You thrive in challenging environment."
+  },
+  {
+    "id": 103,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Adopter Impulse",
+    "statement_text": "Absence of Adopter Impulse (0): (Insert something here)"
+  },
+  {
+    "id": 104,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Adopter Impulse",
+    "statement_text": "You are comfortable in your zone. You follow the principle of “don’t fix it if it ain’t broke”. This may work well in predictable and if-then environment. But then life is not always predictable. You are likely to struggle the moment something new is introduced. Getting your head around anything new is a challenge and may even be unnerving at times. You respect experience – both your own and that of others and would generally refer to them while trying to find solutions to any problem."
+  },
+  {
+    "id": 105,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Adopter Impulse",
+    "statement_text": "You are able to apply your knowledge and understanding to work around a new idea. You seek validation and confirmation of it’s effectiveness before accepting anything new. You want to ensure that all your flanks are covered and that all threats and risks are either removed or budgeted for before you embark on a new journey. You do not seek adventure and change should come in as a process spread over a period of time rather than one tumultuous event. Uncertainty drains your energy and you may have difficulty in operating in ambiguous environment. You like driving processes that are well defined and have been effective over a period."
+  },
+  {
+    "id": 106,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Adopter Impulse",
+    "statement_text": "You are able to apply your knowledge and understanding to work around a new idea. You seek validation and confirmation of it’s effectiveness before accepting anything new. You want to ensure that all your flanks are covered and that all threats and risks are either removed or budgeted for before you embark on a new journey. You do not seek adventure and change should come in as a process spread over a period of time rather than one tumultuous event. Uncertainty drains your energy and you may have difficulty in operating in ambiguous environment. You like driving processes that are well defined and have been effective over a period."
+  },
+  {
+    "id": 107,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Adopter Impulse",
+    "statement_text": "You like new ideas and are happy working with people who come up with new concepts. However, you may not lead or drive a new concept or innovation of any kind. You would rather wait for someone else to take the lead and test the idea before trying it yourself. You are not averse to change, in fact you are likely to welcome it as long as the risks involved are minimized or have been mitigated. Once you have taken care of the risks and the idea has been modified to suit your environment and situation, you are likely to become it’s biggest advocate."
+  },
+  {
+    "id": 108,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 6,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Adopter Impulse",
+    "statement_text": "You like new ideas and are happy working with people who come up with new concepts. However, you may not lead or drive a new concept or innovation of any kind. You would rather wait for someone else to take the lead and test the idea before trying it yourself. You are not averse to change, in fact you are likely to welcome it as long as the risks involved are minimized or have been mitigated. Once you have taken care of the risks and the idea has been modified to suit your environment and situation, you are likely to become it’s biggest advocate."
+  },
+  {
+    "id": 109,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Evaluator Impulse",
+    "statement_text": "Absence of Evaluator Impulse (0): (insert something here)"
+  },
+  {
+    "id": 110,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Evaluator Impulse",
+    "statement_text": "You would rather work with “gut feel” than go through the details to understand the implication of an idea or the choice. You may struggle to maintain your focus particularly if the discussion is focused on raw data and facts rather than new exciting approach and activities. You trust instinctively. This may cause you to take unwarranted risks. In most cases you may not even realize the degree of risk/threat involved."
+  },
+  {
+    "id": 111,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Evaluator Impulse",
+    "statement_text": "You use data and facts to buttress your arguments and usually do adequate amount of research (though not thorough). You may cherry pick your data to either support or negate an argument. You are comfortable working in flexible environment provided the duration and impact of such flexibility is adequately clear. To be appealing to you ideas must have some standards of success and defined rate of success or failure. You may be willing to take calculated risks."
+  },
+  {
+    "id": 112,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Evaluator Impulse",
+    "statement_text": "You use data and facts to buttress your arguments and usually do adequate amount of research (though not thorough). You may cherry pick your data to either support or negate an argument. You are comfortable working in flexible environment provided the duration and impact of such flexibility is adequately clear. To be appealing to you ideas must have some standards of success and defined rate of success or failure. You may be willing to take calculated risks."
+  },
+  {
+    "id": 113,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Evaluator Impulse",
+    "statement_text": "You go by data and facts. You would like to look at the details of any project, operations, or idea to understand all the aspects before getting down to action. You prefer working in risk free environment. You are quality conscious and would like to ensure that the quality of your work is unquestionable. Being considered reliable is a high virtue for you and you try to maintain standards in all that you do. Anything new is viewed with suspicion. In a brainstorming session you enjoy playing the “Devil’s advocate.” Any thing new must be validated and its effectiveness confirmed before you can make use of it."
+  },
+  {
+    "id": 114,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 7,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Evaluator Impulse",
+    "statement_text": "You go by data and facts. You would like to look at the details of any project, operations, or idea to understand all the aspects before getting down to action. You prefer working in risk free environment. You are quality conscious and would like to ensure that the quality of your work is unquestionable. Being considered reliable is a high virtue for you and you try to maintain standards in all that you do. Anything new is viewed with suspicion. In a brainstorming session you enjoy playing the “Devil’s advocate.” Any thing new must be validated and its effectiveness confirmed before you can make use of it."
+  },
+  {
+    "id": 115,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Preserver Impulse",
+    "statement_text": "You are unlikely to follow standard procedures and would tweak everything that can be tweaked. You may struggle to replicate your own processes. You may find it difficult to explain your success formula. This may make you an unpredictable performer."
+  },
+  {
+    "id": 116,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Preserver Impulse",
+    "statement_text": "You tend to get “bored” with steadiness and predictability in your environment. You wish to live a life which is exciting and offers a variety of experiences. Exploring “a better way of doing things” is something that excites you. Anything that has worked well so far can work better and is worth dismantling. You are likely to thrive in unpredictable and chaotic environments. In the organizational context you can contribute in a big way with your unusual ideas and innovation. However, you may struggle when it comes to execution. You may tend to give up projects mid-way in case it doesn’t go per plan or involves complexities of any kind."
+  },
+  {
+    "id": 117,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Preserver Impulse",
+    "statement_text": "You like maintaining the status quo and anything new would be questioned (not necessarily with data and facts) with regard to it’s relevance and necessity. For you what has been working well should continue to work well until messed up by someone. Therefore, if something new has to come in it has to be of high impact and value. You are likely to introduce systems and process that can be auto-operated. Your own and experience of others may matter more than data and facts."
+  },
+  {
+    "id": 118,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Preserver Impulse",
+    "statement_text": "You like maintaining the status quo and anything new would be questioned (not necessarily with data and facts) with regard to it’s relevance and necessity. For you what has been working well should continue to work well until messed up by someone. Therefore, if something new has to come in it has to be of high impact and value. You are likely to introduce systems and process that can be auto-operated. Your own and experience of others may matter more than data and facts."
+  },
+  {
+    "id": 119,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Preserver Impulse",
+    "statement_text": "You like to work in a predictable environment and need to be secure in the knowledge of certainty. Uncertainty or unplanned change makes you nervous. You are wary of anything new and would resist to the extent possible for you. You see merit in standard operating procedures and anything outside of it is questionable. The best of methods and techniques will have to pass through your rigorous questioning and validation before being implemented. You attach great value to old fashioned ways of doing things. Hierarchy and orderliness is important for you."
+  },
+  {
+    "id": 120,
+    "product_type": "BASIC",
+    "behavioural_type_id": 2,
+    "factor_id": 8,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Preserver Impulse",
+    "statement_text": "You like to work in a predictable environment and need to be secure in the knowledge of certainty. Uncertainty or unplanned change makes you nervous. You are wary of anything new and would resist to the extent possible for you. You see merit in standard operating procedures and anything outside of it is questionable. The best of methods and techniques will have to pass through your rigorous questioning and validation before being implemented. You attach great value to old fashioned ways of doing things. Hierarchy and orderliness is important for you."
+  },
+  {
+    "id": 121,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Authoritative Style",
+    "statement_text": "You prefer Individual Contributor role rather than lead a team. You seek excellence and believe that the best result can be produced only through solo effort. If pushed into a leadership, you may end up doing most of the tasks of your subordinates. You may show no aggression even in high pressure situation. The calmness demonstrated in tough situations may be seen as one of your strengths. You have a very soft approach to getting things done even with your subordinates. You struggle to have discipline related conversations except for focusing on the rules and standards. When faced with making or communicating an unpopular or harsh decision you would rather have some one else do it."
+  },
+  {
+    "id": 122,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Authoritative Style",
+    "statement_text": "You appear to be shy and quiet. You are typically reluctant to air your views except when you feel you are in a “safe zone”. This gives an impression of you lacking in confidence. You are usually non-committal about your own ideas. When expressing your opinion, you tend to add too many qualifiers. “Speak when spoken to” is the principle that you may follow. While this may have merit, it may be seen as arrogance or recalcitrant behaviour."
+  },
+  {
+    "id": 123,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Authoritative Style",
+    "statement_text": "You enjoy position of authority and have a quiet confident demeanor. Your anger is usually couched in sarcasm. In situations where you are not assigned a position or where you do not have any authority or control, you may prefer to keep to yourself and get involved only if asked to. Participating in team activities is exciting for you particularly if your ideas and pursued and build into actionable agenda. You are comfortable modifying your own ideas and thoughts in case you find merit in the other person’s argument."
+  },
+  {
+    "id": 124,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Authoritative Style",
+    "statement_text": "You enjoy position of authority and have a quiet confident demeanor. Your anger is usually couched in sarcasm. In situations where you are not assigned a position or where you do not have any authority or control, you may prefer to keep to yourself and get involved only if asked to. Participating in team activities is exciting for you particularly if your ideas and pursued and build into actionable agenda. You are comfortable modifying your own ideas and thoughts in case you find merit in the other person’s argument."
+  },
+  {
+    "id": 125,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Authoritative Style",
+    "statement_text": "You like to take charge of conversations and drive activities. Issuing orders is easy for you. However, you tend to withdraw in case of push back particularly from a superior authority. You may show a tendency to be abrasive and curt especially if you are under pressure. Airing your own ideas may be challenging in the presence of authority figure or when you are not assigned a position of authority. You are likely to show anger rather easily and be expressive of other emotions as well."
+  },
+  {
+    "id": 126,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 9,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Authoritative Style",
+    "statement_text": "You like to take charge of conversations and drive activities. Issuing orders is easy for you. However, you tend to withdraw in case of push back particularly from a superior authority. You may show a tendency to be abrasive and curt especially if you are under pressure. Airing your own ideas may be challenging in the presence of authority figure or when you are not assigned a position of authority. You are likely to show anger rather easily and be expressive of other emotions as well."
+  },
+  {
+    "id": 127,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Directive Style",
+    "statement_text": "You are most comfortable creating and following your own rules. While exercising authority, you may redefine your own standards and people around you are expected to follow it. You are unlikely to care much for norms and standards if they dilute or pose a threat to your own standing and position of power."
+  },
+  {
+    "id": 128,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Directive Style",
+    "statement_text": "You may give the impression of being uncaring about the rules and often enough you may not even bother to know them. You are free flowing in your communication and may even wander off topic while discussing serious issues. A certain kind of casualness may be seen in your approach to tasks and people. Your respect for hierarchy is limited to the fact of you being placed lower in the pecking order particularly in a professional setting."
+  },
+  {
+    "id": 129,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Directive Style",
+    "statement_text": "You understand the value and merit of rules and standards. Ideally you would not want to cross the boundaries and would like to be on the right side of the rules. However, you are likely to take advantage of the lacuna in the rules if you find them getting in the way of what you wish to achieve. You adopt pleasant conversational tone while communicating with others. While you respect hierarchy, you are not bound by it. Expressing yourself is not too difficult."
+  },
+  {
+    "id": 130,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Directive Style",
+    "statement_text": "You understand the value and merit of rules and standards. Ideally you would not want to cross the boundaries and would like to be on the right side of the rules. However, you are likely to take advantage of the lacuna in the rules if you find them getting in the way of what you wish to achieve. You adopt pleasant conversational tone while communicating with others. While you respect hierarchy, you are not bound by it. Expressing yourself is not too difficult."
+  },
+  {
+    "id": 131,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Directive Style",
+    "statement_text": "You make sure that you are aware of the hierarchy and the rules and prefer to play by the book. Do’s and Don’ts of any kind and in any situation are of utmost importance. You want instructions to be followed as per the rule book. Arguments of any kind against the norms or an authority figure is not acceptable to you. Your desire to stick to protocol and norms may get in the way of your pace of doing things as well as the innovation that may be possible. You rely on data and facts to buttress your arguments and would concede gracefully in case someone else has authentic facts and figures contrary to your own."
+  },
+  {
+    "id": 132,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 10,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Directive Style",
+    "statement_text": "You make sure that you are aware of the hierarchy and the rules and prefer to play by the book. Do’s and Don’ts of any kind and in any situation are of utmost importance. You want instructions to be followed as per the rule book. Arguments of any kind against the norms or an authority figure is not acceptable to you. Your desire to stick to protocol and norms may get in the way of your pace of doing things as well as the innovation that may be possible. You rely on data and facts to buttress your arguments and would concede gracefully in case someone else has authentic facts and figures contrary to your own."
+  },
+  {
+    "id": 133,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Emotive Style",
+    "statement_text": "Absence of Emotive Style (0): (insert something here)"
+  },
+  {
+    "id": 134,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Emotive Style",
+    "statement_text": "You give the impression of being dispassionate about most things in life. It takes a lot to arouse strong emotions in you – or at least the expression of strong emotions. You are good at masking your feelings and it may be quite difficult for any observer to figure out what may be going through your mind. This becomes a major advantage when you are negotiating deals."
+  },
+  {
+    "id": 135,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Emotive Style",
+    "statement_text": "You are aware of your emotions and manage them well. You choose to display or hold them back depending on your assessment of the environment. This gives a very balanced approach to your arguments and you can debate on issues without demonstrating extreme emotions. You use praise and reprimand judiciously. Emotions are used only when you believe that it’s the only way to get through to an audience. You are good at using humor to defuse an intense situation."
+  },
+  {
+    "id": 136,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Emotive Style",
+    "statement_text": "You are aware of your emotions and manage them well. You choose to display or hold them back depending on your assessment of the environment. This gives a very balanced approach to your arguments and you can debate on issues without demonstrating extreme emotions. You use praise and reprimand judiciously. Emotions are used only when you believe that it’s the only way to get through to an audience. You are good at using humor to defuse an intense situation."
+  },
+  {
+    "id": 137,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Emotive Style",
+    "statement_text": "You are expressive of your emotions and make no bones about it. While communicating you are likely to use superlatives even in situations that do not merit use of such words. This may not necessarily remain at the verbal level. You may feel the emotion as you say it and your expressions are likely to support your choice of words. You use emotions rather than logic and facts to back your arguments. You may feel a little uncomfortable in situations that do not allow for free expression of emotions. Your performance and effort may drop substantially if you are not emotionally committed to the task on hand."
+  },
+  {
+    "id": 138,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 11,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Emotive Style",
+    "statement_text": "You are expressive of your emotions and make no bones about it. While communicating you are likely to use superlatives even in situations that do not merit use of such words. This may not necessarily remain at the verbal level. You may feel the emotion as you say it and your expressions are likely to support your choice of words. You use emotions rather than logic and facts to back your arguments. You may feel a little uncomfortable in situations that do not allow for free expression of emotions. Your performance and effort may drop substantially if you are not emotionally committed to the task on hand."
+  },
+  {
+    "id": 139,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 0,
+    "score_label": "0",
+    "title": "Absence of Placative Style",
+    "statement_text": "Absence of Placative Style (0): (insert something here)"
+  },
+  {
+    "id": 140,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 1,
+    "score_label": "1",
+    "title": "Weak Placative Style",
+    "statement_text": "You may appear quite aggressive in your communication and you are comfortable in expressing your disagreements even with authority figure. You are more concerned about the outcome than the opinion that people may form of you. When involved in a task or a project the intensity of your focus on the task may cause you to ignore the people side of the operation and that may create unhappiness and disenchantment amongst people."
+  },
+  {
+    "id": 141,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 2,
+    "score_label": "2",
+    "title": "Mild Placative Style",
+    "statement_text": "You speak calmly and generally try to get everyone on your side. You do not like to operate in a hostile environment and find it energy sapping. However, when faced with a situation, you are likely to let others know of your disillusionment and then pull back rather than quit quietly or concede without presenting your side. You are good at debates and can make meaningful contributions in brainstorming sessions."
+  },
+  {
+    "id": 142,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 3,
+    "score_label": "3",
+    "title": "Moderate Placative Style",
+    "statement_text": "You speak calmly and generally try to get everyone on your side. You do not like to operate in a hostile environment and find it energy sapping. However, when faced with a situation, you are likely to let others know of your disillusionment and then pull back rather than quit quietly or concede without presenting your side. You are good at debates and can make meaningful contributions in brainstorming sessions."
+  },
+  {
+    "id": 143,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 4,
+    "score_label": "4",
+    "title": "Strong Placative Style",
+    "statement_text": "You have an approach which gives the impression that you would like to avoid conflict and disagreement even at the cost of what may be very important to you. In your conversations you may show a tendency to touch the other person on the shoulder or hold hands while talking to them, even if you it is first interaction with the individual. In case of disagreement, you are likely to pull back rather than try and win the argument even if you know you right."
+  },
+  {
+    "id": 144,
+    "product_type": "BASIC",
+    "behavioural_type_id": 3,
+    "factor_id": 12,
+    "score": 5,
+    "score_label": "5",
+    "title": "Very Strong Placative Style",
+    "statement_text": "You have an approach which gives the impression that you would like to avoid conflict and disagreement even at the cost of what may be very important to you. In your conversations you may show a tendency to touch the other person on the shoulder or hold hands while talking to them, even if you it is first interaction with the individual. In case of disagreement, you are likely to pull back rather than try and win the argument even if you know you right."
+  }
+]

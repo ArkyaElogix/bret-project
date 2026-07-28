@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "code": "A",
+    "name": "Natural-Motivator",
+    "instructions": "Please choose the statement that you find most appropriate. In case you find both true of you choose the statement that connects with you most strongly. In case you feel neither is true of you, choose the one which is more likely to be true of you. ",
+    "order_index": 0
+  },
+  {
+    "id": 2,
+    "code": "B",
+    "name": "Conditioned",
+    "instructions": "On the following pages are several pairs of statements describing possible behavioral responses. For each pair, please choose one statement that is most likely to be true of you. ",
+    "order_index": 1
+  },
+  {
+    "id": 3,
+    "code": "C",
+    "name": "Learned",
+    "instructions": "On the following pages are several pairs of statements describing possible behavioral responses. For each pair, please choose one statement that is most likely to be true of you. ",
+    "order_index": 2
+  }
+]
