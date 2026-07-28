@@ -14,6 +14,12 @@
   overflow: hidden;
 }
 
+.bret-report-body,
+.bret-report-body * {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 .bret-topbar {
   background: #1e293b;
   color: #fff;
@@ -284,8 +290,10 @@
 
 .bret-vertical-bar-fill {
   width: 100%;
+  height: 100%;
   border-radius: 4px 4px 0 0;
-  transition: height 0.5s ease;
+  transform-origin: bottom;
+  transition: transform 0.5s ease;
 }
 
 .bret-vertical-bar-label {
@@ -400,5 +408,362 @@
 
   .bret-report-body {
     padding: 20px;
+  }
+
+  .bret-section-header {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* Prevent sections from being split across pages */
+
+  .bret-profile-layout,
+  .bret-score-panel-vertical,
+  .bret-chart-wrapper,
+  .bret-obs-card,
+  .bret-summary-card,
+  .bret-definition-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .bret-obs-grid {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* Force bar chart fills to render without transition delay */
+  .bret-vertical-bar-fill {
+    transition: none !important;
+  }
+
+  /* Ensure chart container height resolves correctly in print */
+  .bret-chart-wrapper {
+    height: 200px;
+  }
+
+  .bret-vertical-bar-track {
+    height: calc(100% - 30px);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   OVERALL OBSERVATIONS & KEY TAKEAWAYS — redesigned layout
+═══════════════════════════════════════════════════════════════ */
+
+.bret-obs-section {
+  padding: 24px 26px;
+}
+
+.bret-obs-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.bret-obs-section-header .bret-section-header {
+  margin: 0;
+}
+
+.bret-obs-ai-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c3aed;
+  background: #ede9fe;
+  border-radius: 20px;
+  padding: 3px 10px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Two-column grid */
+.bret-obs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.bret-obs-grid--mt {
+  margin-top: 16px;
+}
+
+/* Individual card */
+.bret-obs-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Card header: badge + title */
+.bret-obs-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.bret-obs-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Colored circle badges */
+.bret-obs-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.bret-obs-badge--orange {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.bret-obs-badge--blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.bret-obs-badge--indigo {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.bret-obs-badge--violet {
+  background: #f5f3ff;
+  color: #7c3aed;
+}
+
+/* Integrated pattern paragraph */
+.bret-obs-integrated {
+  font-size: 13px;
+  line-height: 1.75;
+  color: #475569;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Accent pills / sub-labels */
+.bret-obs-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 3px 8px;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
+.bret-obs-pill--teal {
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.bret-obs-pill--rose {
+  background: #fff1f2;
+  color: #e11d48;
+}
+
+.bret-obs-pill--gray {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+/* Bullet list */
+.bret-obs-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bret-obs-list li {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.6;
+  padding-left: 14px;
+  position: relative;
+}
+
+.bret-obs-list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: #94a3b8;
+}
+
+.bret-obs-list--spaced li {
+  margin-bottom: 4px;
+}
+
+.bret-obs-score {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* 90-Day Roadmap phases */
+.bret-obs-roadmap {
+  display: flex;
+  gap: 10px;
+  flex: 1;
+}
+
+.bret-obs-phase {
+  flex: 1;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 3px solid transparent;
+}
+
+.bret-obs-phase--blue {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.bret-obs-phase--teal {
+  border-color: #14b8a6;
+  background: #f0fdfa;
+}
+
+.bret-obs-phase--green {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.bret-obs-phase-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.bret-obs-phase p {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #475569;
+  margin: 0;
+}
+
+/* SSC Framework */
+.bret-obs-ssc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.bret-obs-ssc-item {
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bret-obs-ssc-item p {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.bret-obs-ssc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border-radius: 4px;
+  padding: 2px 7px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.bret-obs-ssc--start {
+  background: #f0fdf4;
+}
+
+.bret-obs-ssc--start .bret-obs-ssc-label {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.bret-obs-ssc--stop {
+  background: #fff1f2;
+}
+
+.bret-obs-ssc--stop .bret-obs-ssc-label {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+
+.bret-obs-ssc--continue {
+  background: #eff6ff;
+}
+
+.bret-obs-ssc--continue .bret-obs-ssc-label {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* Leadership Dynamics cards */
+.bret-obs-leadership {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.bret-obs-leadership-card {
+  border-radius: 8px;
+  padding: 14px 16px;
+  border-left: 4px solid transparent;
+}
+
+.bret-obs-leadership-card p {
+  font-size: 13px;
+  color: #475569;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.bret-obs-leadership-card--teal {
+  background: #f0fdfa;
+  border-color: #14b8a6;
+}
+
+.bret-obs-leadership-card--green {
+  background: #f0fdf4;
+  border-color: #22c55e;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .bret-obs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bret-obs-roadmap {
+    flex-direction: column;
   }
 }

@@ -122,7 +122,12 @@ function renderProfileSection(section: ReportSection, index: number) {
                     <div className="bret-vertical-bar-track">
                       <div
                         className="bret-vertical-bar-fill"
-                        style={{ height: `${pct}%`, background: BAR_COLORS[factorIndex % BAR_COLORS.length] }}
+                        style={{
+                          height: `100%`,
+                          transform: `scaleY(${pct / 100})`,
+                          transformOrigin: 'bottom',
+                          background: BAR_COLORS[factorIndex % BAR_COLORS.length]
+                        }}
                       />
                     </div>
                     <span className="bret-vertical-bar-label">{factor.factor_name}</span>
@@ -177,56 +182,258 @@ function renderDefinitionsSection(section: ReportSection, index: number) {
   );
 }
 
+// function parseAiBullets(raw: string): string[] {
+//   return raw
+//     .split('\n')
+//     .map((s) => s.replace(/^[•\-]\s*/, '').trim())
+//     .filter(Boolean);
+// }
+
+// function parseJsonFactor(statement: string | undefined): Record<string, string> {
+//   if (!statement) return {};
+//   try { return JSON.parse(statement); } catch { return {}; }
+// }
+
+function parseAiBullets(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split('\n')
+    .map((s) => s.replace(/^[•\-]\s*/, '').trim())
+    .filter(Boolean);
+}
+
+function parseJsonFactor(statement: string | null | undefined): any {
+  if (!statement) return {};
+  try { return JSON.parse(statement); } catch { return {}; }
+}
+
+
 function renderTakeawaysSection(report: SessionReport) {
-  const takeaways = getDerivedTakeaways(report);
+  const fallback = getDerivedTakeaways(report);
+
+  // ── AI data: Overall Observations section ──────────────────────────────
+  const aiObsSection = report.sections.find(
+    (s) => s.section_name === 'Overall Observations'
+  );
+  const integratedFactor = aiObsSection?.factors.find((f) =>
+    f.factor_name?.toLowerCase().includes('integrated')
+  );
+  const keyTakeawaysFactor = aiObsSection?.factors.find((f) =>
+    f.factor_name?.toLowerCase().includes('takeaway')
+  );
+  const aiKeyTakeaways = keyTakeawaysFactor?.statement
+    ? parseAiBullets(keyTakeawaysFactor.statement)
+    : null;
+
+  // ── AI data: Action Agenda section ─────────────────────────────────────
+  const agendaSection = report.sections.find(
+    (s) => s.section_name === 'Action Agenda'
+  );
+  const focusAreasFactor = agendaSection?.factors.find(
+    (f) => f.factor_name === 'Focus Areas'
+  );
+  const roadmapFactor = agendaSection?.factors.find(
+    (f) => f.factor_name === 'Roadmap'
+  );
+  const sscFactor = agendaSection?.factors.find(
+    (f) => f.factor_name === 'SSC Framework'
+  );
+
+  const aiRoadmap = parseJsonFactor(roadmapFactor?.statement);
+  const aiSsc = parseJsonFactor(sscFactor?.statement);
+  const aiFocusAreas = focusAreasFactor?.statement
+    ? parseAiBullets(focusAreasFactor.statement)
+    : null;
+
+  // ── Merged content: AI-first, fallback to derived ──────────────────────
+  const focusAreaText = integratedFactor?.statement || fallback.focusArea;
+  const actionItems =
+    aiFocusAreas && aiFocusAreas.length
+      ? aiFocusAreas
+      : aiKeyTakeaways?.slice(0, 3) && aiKeyTakeaways.slice(0, 3).length
+        ? aiKeyTakeaways.slice(0, 3)
+        : fallback.actionPlan;
+
+  const leadershipItems =
+    aiKeyTakeaways && aiKeyTakeaways.length > 3
+      ? aiKeyTakeaways.slice(3)
+      : fallback.leadership;
+
+  const roadmapPhases =
+    aiRoadmap['30'] || aiRoadmap['60'] || aiRoadmap['90']
+      ? [
+        { label: '30 Days: Reflect', text: aiRoadmap['30'] || fallback.roadmap[0] },
+        { label: '60 Days: Engage', text: aiRoadmap['60'] || fallback.roadmap[1] },
+        { label: '90 Days: Integrate', text: aiRoadmap['90'] || fallback.roadmap[2] },
+      ]
+      : fallback.roadmap.map((text, i) => ({
+        label: ['30 Days: Reflect', '60 Days: Engage', '90 Days: Integrate'][i],
+        text,
+      }));
+
+  // ── Score-derived data (always from scores — most accurate) ─────────────
+  const profileSections = report.sections.filter((s) =>
+    SECTION_CODES_WITH_SUMMARY.includes(s.section_code)
+  );
+  const allFactors = profileSections.flatMap((s) =>
+    s.factors.filter((f) => !isCompositeFactor(f))
+  );
+  const topStrengths = [...allFactors]
+    .sort((a, b) => (b.score || 0) - (a.score || 0))
+    .slice(0, 3);
+  const devPriorities = [...allFactors]
+    .sort((a, b) => (a.score || 0) - (b.score || 0))
+    .slice(0, 4);
+
+  const isAiPowered = !!(integratedFactor || agendaSection);
+
+  const phaseColors = [
+    'bret-obs-phase--blue',
+    'bret-obs-phase--teal',
+    'bret-obs-phase--green',
+  ] as const;
 
   return (
-    <section className="bret-section">
-      <h2 className="bret-section-header">Overall Observations & Key Takeaways</h2>
-      <div className="bret-takeaways-grid">
-        <div className="bret-takeaway-card bret-takeaway-highlight">
-          <h3>Focus Area</h3>
-          <p>{takeaways.focusArea}</p>
+    <section className="bret-section bret-obs-section">
+      <div className="bret-obs-section-header">
+        <h2 className="bret-section-header">Overall Observations &amp; Key Takeaways</h2>
+        {isAiPowered && (
+          <span className="bret-obs-ai-badge">✦ AI Generated</span>
+        )}
+      </div>
+
+      {/* ── Row 1: Focus Areas  |  90-Day Roadmap ── */}
+      <div className="bret-obs-grid">
+        {/* LEFT: Focus Areas */}
+        <div className="bret-obs-card">
+          <div className="bret-obs-card-header">
+            <span className="bret-obs-badge bret-obs-badge--orange">⬡</span>
+            <span className="bret-obs-card-title">Focus Areas</span>
+          </div>
+          <p className="bret-obs-integrated">{focusAreaText}</p>
+
+          <div className="bret-obs-pill bret-obs-pill--teal">STRENGTHS TO LEVERAGE</div>
+          <ul className="bret-obs-list">
+            {topStrengths.map((f, i) => (
+              <li key={i}>
+                {f.factor_name}
+                <span className="bret-obs-score"> ({f.score}/5)</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="bret-obs-pill bret-obs-pill--rose">DEVELOPMENT PRIORITIES</div>
+          <ul className="bret-obs-list">
+            {devPriorities.map((f, i) => (
+              <li key={i}>
+                {f.factor_name}
+                <span className="bret-obs-score"> ({f.score}/5)</span>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="bret-takeaway-card">
-          <h3>Strengths</h3>
-          <p>{takeaways.strengths}</p>
-        </div>
-        <div className="bret-takeaway-card">
-          <h3>Development Focus</h3>
-          <p>{takeaways.development}</p>
+
+        {/* RIGHT: 90-Day Roadmap */}
+        <div className="bret-obs-card">
+          <div className="bret-obs-card-header">
+            <span className="bret-obs-badge bret-obs-badge--blue">📅</span>
+            <span className="bret-obs-card-title">90-Day Roadmap</span>
+          </div>
+          <div className="bret-obs-roadmap">
+            {roadmapPhases.map((phase, i) => (
+              <div key={i} className={`bret-obs-phase ${phaseColors[i]}`}>
+                <div className="bret-obs-phase-label">{phase.label}</div>
+                {typeof phase.text === 'string' ? (
+                  <p>{phase.text}</p>
+                ) : (
+                  <div>
+                    {phase.text.action && (
+                      <p><strong>Action:</strong> {phase.text.action}</p>
+                    )}
+                    {phase.text.goal && (
+                      <div className='font-semibold text-blue-600'><p><strong>Goal:</strong> {phase.text.goal}</p></div>
+                    )}
+                    {/* If there are other keys, render them as fallback lines */}
+                    {Object.keys(phase.text).filter(k => k !== 'action' && k !== 'goal').map((k) => (
+                      <p key={k}><strong>{k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}:</strong> {String(phase.text[k])}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="bret-takeaways-grid bret-takeaways-secondary">
-        <div className="bret-takeaway-card">
-          <h3>Action Plan</h3>
-          <ul>
-            {takeaways.actionPlan.map((step, index) => (
-              <li key={index}>{step}</li>
+      {/* ── Row 2: Key Takeaways  |  Leadership Dynamics ── */}
+      <div className="bret-obs-grid bret-obs-grid--mt">
+        {/* LEFT: Key Takeaways / Action Plan */}
+        <div className="bret-obs-card">
+          <div className="bret-obs-card-header">
+            <span className="bret-obs-badge bret-obs-badge--indigo">ℹ</span>
+            <span className="bret-obs-card-title">Key Takeaways &amp; Action Plan</span>
+          </div>
+          <ul className="bret-obs-list bret-obs-list--spaced">
+            {actionItems.map((item, i) => (
+              <li key={i}>{item}</li>
             ))}
           </ul>
+
+          {/* SSC Framework — only shown when AI data is present */}
+          {(aiSsc.start || aiSsc.stop || aiSsc['continue']) && (
+            <>
+              <div className="bret-obs-pill bret-obs-pill--gray" style={{ marginTop: '16px' }}>
+                SSC FRAMEWORK
+              </div>
+              <div className="bret-obs-ssc">
+                {aiSsc.start && (
+                  <div className="bret-obs-ssc-item bret-obs-ssc--start">
+                    <span className="bret-obs-ssc-label">START</span>
+                    <p>{aiSsc.start}</p>
+                  </div>
+                )}
+                {aiSsc.stop && (
+                  <div className="bret-obs-ssc-item bret-obs-ssc--stop">
+                    <span className="bret-obs-ssc-label">STOP</span>
+                    <p>{aiSsc.stop}</p>
+                  </div>
+                )}
+                {aiSsc['continue'] && (
+                  <div className="bret-obs-ssc-item bret-obs-ssc--continue">
+                    <span className="bret-obs-ssc-label">CONTINUE</span>
+                    <p>{aiSsc['continue']}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
-        <div className="bret-takeaway-card">
-          <h3>90-Day Roadmap</h3>
-          <ul>
-            {takeaways.roadmap.map((step, index) => (
-              <li key={index}>{step}</li>
+
+        {/* RIGHT: Leadership Dynamics */}
+        <div className="bret-obs-card">
+          <div className="bret-obs-card-header">
+            <span className="bret-obs-badge bret-obs-badge--violet">H</span>
+            <span className="bret-obs-card-title">Leadership Dynamics</span>
+          </div>
+          <div className="bret-obs-leadership">
+            {leadershipItems.map((item, i) => (
+              <div
+                key={i}
+                className={`bret-obs-leadership-card ${i % 2 === 0
+                  ? 'bret-obs-leadership-card--teal'
+                  : 'bret-obs-leadership-card--green'
+                  }`}
+              >
+                <p>{item}</p>
+              </div>
             ))}
-          </ul>
-        </div>
-        <div className="bret-takeaway-card">
-          <h3>Leadership Dynamics</h3>
-          <ul>
-            {takeaways.leadership.map((step, index) => (
-              <li key={index}>{step}</li>
-            ))}
-          </ul>
+          </div>
         </div>
       </div>
     </section>
   );
 }
+
 
 export function SessionReportPage() {
   const { id } = useParams<{ id: string }>();
@@ -300,7 +507,7 @@ export function SessionReportPage() {
             <div className="bret-cover-card">
               <div className="bret-cover-label font-bold text-black text-lg">Name: {report.user.name}</div>
               <div className="bret-cover-meta font-semibold text-yellow-700">User Type: {report.user.product_type}</div>
-              
+
             </div>
           </div>
 

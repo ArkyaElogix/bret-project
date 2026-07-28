@@ -430,8 +430,8 @@ class AIReportService:
                     {"role": "system", "content": "You are a behavioral assessment expert writing personalized factor descriptions about change."},
                     {"role": "user", "content": desc_prompt}
                 ],
-                temperature=0.6,
-                max_tokens=150
+                temperature=0.5,
+                max_tokens=60
             )
             
             factor_descriptions.append({
@@ -474,7 +474,7 @@ class AIReportService:
                 {"role": "user", "content": composite_prompt}
             ],
             temperature=0.7,
-            max_tokens=300
+            max_tokens=250
         )
         
         # Generate individual factor descriptions
@@ -496,8 +496,8 @@ class AIReportService:
                     {"role": "system", "content": "You are a behavioral assessment expert writing personalized factor descriptions about communication."},
                     {"role": "user", "content": desc_prompt}
                 ],
-                temperature=0.6,
-                max_tokens=150
+                temperature=0.5,
+                max_tokens=60
             )
             
             factor_descriptions.append({
@@ -546,7 +546,7 @@ class AIReportService:
                 {"role": "user", "content": orientation_prompt}
             ],
             temperature=0.7,
-            max_tokens=400,
+            max_tokens=300,
             response_format={"type": "json_object"}
         )
         

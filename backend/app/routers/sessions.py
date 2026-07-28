@@ -8,6 +8,7 @@ logged-in token, not a client-supplied value. Regular users can only
 access their own sessions; admins can access any session (needed for
 reviewing responses later).
 """
+import json
 import os
 from typing import Any, Dict, List
 from datetime import datetime
@@ -814,5 +815,126 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
                 "statement": "\n".join(f"• {item}" for item in observations["key_takeaways"])
             })
         sections.append(observations_section)
-    
+    agenda = ai_report.get("action_agenda", {})
+    if agenda:
+        agenda_section = {
+            "section_id": 0,
+            "section_code": "AGENDA",
+            "section_name": "Action Agenda",
+            "factors": []
+        }
+        # Focus areas
+        if agenda.get("focus_areas"):
+            agenda_section["factors"].append({
+                "factor_id": 0,
+                "factor_name": "Focus Areas",
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": "Focus Areas",
+                "statement": "\n".join(f"• {item}" for item in agenda["focus_areas"])
+            })
+        # 90-Day Roadmap
+        # roadmap = agenda.get("roadmap", {})
+        # if roadmap:
+        #     agenda_section["factors"].append({
+        #         "factor_id": 0,
+        #         "factor_name": "Roadmap",
+        #         "raw_score": 0,
+        #         "score": 0,
+        #         "score_label": None,
+        #         "statement_title": "90-Day Roadmap",
+        #         "statement": json.dumps({
+        #             "30": roadmap.get("30", ""),
+        #             "60": roadmap.get("60", ""),
+        #             "90": roadmap.get("90", "")
+        #         })
+        #     })
+                # 90-Day Roadmap
+        roadmap = agenda.get("roadmap", {})
+        if roadmap:
+            # Helper to resiliently find keys containing '30', '60', or '90'
+            def get_roadmap_phase(rd, phase):
+                for key, value in rd.items():
+                    if str(phase) in str(key):
+                        return value
+                return ""
+
+            # Ensure each roadmap phase is converted to a plain string so the
+            # frontend does not receive nested objects (which React cannot render
+            # directly as children).
+            def stringify_phase(val):
+                if val is None:
+                    return ""
+                if isinstance(val, (str, int, float)):
+                    return str(val)
+                # If it's a dict or list, make a readable string representation
+                if isinstance(val, dict):
+                    return "\n".join(f"{k.title()}: {v}" for k, v in val.items())
+                if isinstance(val, list):
+                    parts = []
+                    for item in val:
+                        if isinstance(item, dict):
+                            parts.append("\n".join(f"{k.title()}: {v}" for k, v in item.items()))
+                        else:
+                            parts.append(str(item))
+                    return "\n\n".join(parts)
+                try:
+                    return json.dumps(val)
+                except Exception:
+                    return str(val)
+
+            agenda_section["factors"].append({
+                "factor_id": 0,
+                "factor_name": "Roadmap",
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": "90-Day Roadmap",
+                "statement": json.dumps({
+                    "30": stringify_phase(get_roadmap_phase(roadmap, 30)),
+                    "60": stringify_phase(get_roadmap_phase(roadmap, 60)),
+                    "90": stringify_phase(get_roadmap_phase(roadmap, 90)),
+                })
+            })
+
+        # SSC Framework
+        ssc = agenda.get("ssc", {})
+        if ssc:
+    # Ensure SSC pieces are strings (they may be objects from the AI)
+            def ssc_str(v):
+                if v is None:
+                    return ""
+                if isinstance(v, (str, int, float)):
+                    return str(v)
+                if isinstance(v, dict):
+                    return "\n".join(f"{k.title()}: {val}" for k, val in v.items())
+                if isinstance(v, list):
+                    parts = []
+                    for item in v:
+                        if isinstance(item, dict):
+                            parts.append("\n".join(f"{k.title()}: {val}" for k, val in item.items()))
+                        else:
+                            parts.append(str(item))
+                    return "\n\n".join(parts)
+                try:
+                    return json.dumps(v)
+                except Exception:
+                    return str(v)
+
+            agenda_section["factors"].append({
+                "factor_id": 0,
+                "factor_name": "SSC Framework",
+                "raw_score": 0,
+                "score": 0,
+                "score_label": None,
+                "statement_title": "SSC Framework",
+                "statement": json.dumps({
+                    "start": ssc_str(ssc.get("start", "")),
+                    "stop": ssc_str(ssc.get("stop", "")),
+                    "continue": ssc_str(ssc.get("continue", ""))
+                })
+            })
+        sections.append(agenda_section)
     return sections
+

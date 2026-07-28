@@ -5,6 +5,7 @@ export interface User {
   name: string
   email: string
   role: 'ADMIN' | 'USER'
+  product_type: 'BASIC' | 'EXECUTIVE'
 }
 
 /**
@@ -21,11 +22,12 @@ export async function createUser(
   name: string,
   email: string,
   password: string,
-  role: 'ADMIN' | 'USER'
+  role: 'ADMIN' | 'USER',
+  product_type: 'BASIC' | 'EXECUTIVE',
 ): Promise<User> {
   return apiRequest<User>('/users/', {
     method: 'POST',
-    body: { name, email, password, role },
+    body: { name, email, password, role, product_type },
   })
 }
 
@@ -46,5 +48,15 @@ export async function changePassword(
   return apiRequest<User>(`/users/${id}/password`, {
     method: 'PATCH',
     body: { new_password: newPassword },
+  })
+}
+
+export async function changeUserType(
+  id: number,
+  productType: 'BASIC' | 'EXECUTIVE'
+): Promise<User> {
+  return apiRequest<User>(`/users/${id}/type`, {
+    method: 'PATCH',
+    body: { product_type: productType },
   })
 }

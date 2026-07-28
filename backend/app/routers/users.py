@@ -28,12 +28,15 @@ def create_user(
 
     if payload.role not in (UserRole.ADMIN.value, UserRole.USER.value):
         raise HTTPException(status_code=400, detail="role must be ADMIN or USER")
+    if payload.product_type not in (ProductType.BASIC.value, ProductType.EXECUTIVE.value):
+        raise HTTPException(status_code=400, detail="product_type must be BASIC or EXECUTIVE")
 
     user = User(
         name=payload.name,
         email=payload.email,
         password_hash=hash_password(payload.password),
         role=payload.role,
+        product_type=payload.product_type,
     )
     db.add(user)
     db.commit()

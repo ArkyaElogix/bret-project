@@ -138,7 +138,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
     role: str = "USER"  # "ADMIN" or "USER"
-
+    product_type: str = "BASIC"  # "BASIC" or "EXECUTIVE"
 
 class UserOut(BaseModel):
     id: int
