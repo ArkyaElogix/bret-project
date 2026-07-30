@@ -9,7 +9,7 @@ env/
 .env
 .env.*
 *.sqlite3
-
+db_backups/
 # Node / frontend
 node_modules/
 dist/
