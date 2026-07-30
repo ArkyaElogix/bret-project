@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { clearToken } from '../api/client'
+import { ThemeToggle } from './ThemeToggle'
 
 interface PortalLayoutProps {
   title: string
@@ -15,7 +16,7 @@ export default function PortalLayout({ title, children }: PortalLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#211E1E]">
       {/* Top navigation bar */}
       <header className="bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -28,10 +29,9 @@ export default function PortalLayout({ title, children }: PortalLayoutProps) {
             <NavLink
               to="/portal"
               className={({ isActive }) =>
-                `rounded-md px-3 py-1.5 text-sm transition ${
-                  isActive
-                    ? 'bg-slate-700 text-white'
-                    : 'text-slate-300 hover:bg-slate-800'
+                `rounded-md px-3 py-1.5 text-sm transition ${isActive
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-300 hover:bg-slate-800'
                 }`
               }
             >
@@ -40,10 +40,9 @@ export default function PortalLayout({ title, children }: PortalLayoutProps) {
             <NavLink
               to="/portal/profile"
               className={({ isActive }) =>
-                `rounded-md px-3 py-1.5 text-sm transition ${
-                  isActive
-                    ? 'bg-slate-700 text-white'
-                    : 'text-slate-300 hover:bg-slate-800'
+                `rounded-md px-3 py-1.5 text-sm transition ${isActive
+                  ? 'bg-slate-700 text-white'
+                  : 'text-slate-300 hover:bg-slate-800'
                 }`
               }
             >
@@ -55,6 +54,7 @@ export default function PortalLayout({ title, children }: PortalLayoutProps) {
             >
               Logout
             </button>
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -62,7 +62,7 @@ export default function PortalLayout({ title, children }: PortalLayoutProps) {
       {/* Main content */}
       <main className="max-w-4xl mx-auto p-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">{title}</h1>
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{title}</h1>
         </div>
         {children}
       </main>

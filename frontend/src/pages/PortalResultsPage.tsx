@@ -53,7 +53,7 @@ export default function PortalResultsPage() {
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm mb-4">
           {error}
         </div>
-        <Link to="/portal" className="text-blue-600 hover:underline text-sm">← Back to Forms</Link>
+        <Link to="/portal" className="text-blue-600 hover:underline text-sm">← Back to Questionnaire</Link>
       </PortalLayout>
     )
   }
@@ -65,7 +65,7 @@ export default function PortalResultsPage() {
           No results are available for this session yet.
         </div>
         <Link to="/portal" className="text-blue-600 hover:underline text-sm mt-4 inline-block">
-          ← Back to Forms
+          ← Back to Questionnaire
         </Link>
       </PortalLayout>
     )

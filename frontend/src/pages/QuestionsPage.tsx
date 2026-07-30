@@ -88,10 +88,41 @@ export default function QuestionsPage() {
   function getFactorsForSection(sectionId: number) {
     return factors.filter((factor) => factor.behavioural_type_id === sectionId)
   }
-
+  function isSectionAtMaxQuestions(sectionId: number) {
+  return getQuestionsForSection(sectionId).length >= 10
+}
   function getQuestionsForSection(sectionId: number) {
     return questions.filter((question) => question.behavioural_type_id === sectionId)
   }
+
+  function getCompletionStatus() {
+  if (sections.length !== 3) {
+    return {
+      isComplete: false,
+      message: 'This Questionnaire needs 3 sections before it can be activated.',
+    }
+  }
+
+  const sectionStatus = sections.map((section) => ({
+    section,
+    count: getQuestionsForSection(section.id).length,
+  }))
+
+  const incompleteSection = sectionStatus.find((item) => item.count !== 10)
+
+  if (incompleteSection) {
+    return {
+      isComplete: false,
+      message: `${incompleteSection.section.code} needs ${incompleteSection.count}/10 questions before activation.`,
+    }
+  }
+
+  return {
+    isComplete: true,
+    message: 'Complete and ready to activate.',
+  }
+}
+
   function getFactorUsageCount(
     sectionId: number,
     factorId: number,
@@ -108,46 +139,60 @@ export default function QuestionsPage() {
     return count
   }
   function handleStartAdding(sectionId: number) {
-    setAddingToSection(sectionId)
-    const existing = getQuestionsForSection(sectionId)
-    const nextNumber = existing.length > 0 ? Math.max(...existing.map((question) => question.number)) + 1 : 1
-    setNewNumber(nextNumber)
-    setNewOptionA('')
-    setNewOptionB('')
-    const factors = getFactorsForSection(sectionId)
-    const defaultFactor = factors.length > 0 ? factors[0].id : 0
-    setNewFactorA(defaultFactor)
-    setNewFactorB(defaultFactor)
-    setCreateError(null)
+  const existing = getQuestionsForSection(sectionId)
+  if (existing.length >= 10) {
+    setCreateError('This section already has the maximum of 10 questions.')
+    return
   }
+
+  setAddingToSection(sectionId)
+  const nextNumber =
+    existing.length > 0
+      ? Math.max(...existing.map((question) => question.number)) + 1
+      : 1
+  setNewNumber(nextNumber)
+  setNewOptionA('')
+  setNewOptionB('')
+  const factors = getFactorsForSection(sectionId)
+  const defaultFactor = factors.length > 0 ? factors[0].id : 0
+  setNewFactorA(defaultFactor)
+  setNewFactorB(defaultFactor)
+  setCreateError(null)
+}
 
   function handleCancelAdding() {
     setAddingToSection(null)
   }
 
   async function handleCreateQuestion(e: FormEvent, sectionId: number) {
-    e.preventDefault()
-    setCreating(true)
-    setCreateError(null)
-    try {
-      await createQuestion(
-        formId,
-        sectionId,
-        newNumber,
-        newOptionA.trim(),
-        newOptionB.trim(),
-        newFactorA,
-        newFactorB
-      )
-      setAddingToSection(null)
-      const questionsData = await listQuestions({ form_id: formId })
-      setQuestions(questionsData)
-    } catch (err) {
-      setCreateError(err instanceof ApiError ? err.message : 'Failed to create question.')
-    } finally {
-      setCreating(false)
-    }
+  e.preventDefault()
+  setCreateError(null)
+
+  const existing = getQuestionsForSection(sectionId)
+  if (existing.length >= 10) {
+    setCreateError('This section already has the maximum of 10 questions.')
+    return
   }
+
+  setCreating(true)
+  try {
+    await createQuestion(
+      formId,
+      sectionId,
+      newNumber,
+      newOptionA.trim(),
+      newOptionB.trim(),
+      newFactorA,
+      newFactorB
+    )
+    setAddingToSection(null)
+    await loadData()
+  } catch (err) {
+    setCreateError(err instanceof ApiError ? err.message : 'Failed to create question.')
+  } finally {
+    setCreating(false)
+  }
+}
 
   function handleStartEditing(question: Question) {
     setEditingId(question.id)
@@ -178,8 +223,7 @@ export default function QuestionsPage() {
         option_b_factor_id: editFactorB,
       })
       setEditingId(null)
-      const questionsData = await listQuestions({ form_id: formId })
-      setQuestions(questionsData)
+      await loadData()
     } catch (err) {
       setEditError(err instanceof ApiError ? err.message : 'Failed to update question.')
     } finally {
@@ -199,8 +243,7 @@ export default function QuestionsPage() {
     try {
       await deleteQuestion(id)
       setConfirmDeleteId(null)
-      const questionsData = await listQuestions({ form_id: formId })
-      setQuestions(questionsData)
+      await loadData()
     } catch (err) {
       setDeleteError({ id, message: err instanceof ApiError ? err.message : 'Failed to delete question.' })
     } finally {
@@ -269,18 +312,57 @@ export default function QuestionsPage() {
     )
   }
 
+  const completionStatus = getCompletionStatus()
+
   return (
     <AdminLayout title="Manage Questionnaire">
       <div className="max-w-7xl space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <Link to="/forms" className="text-blue-600 hover:underline text-sm inline-block mb-3">
+            <Link to="/forms" className="text-blue-600 dark:text-blue-200 hover:underline text-sm inline-block mb-3">
               &larr; Back to Questionnaire's page
             </Link>
-            <h1 className="text-2xl font-bold text-gray-800">{form.name}</h1>
-            <p className="mt-2 text-sm text-gray-500">
+            {/* <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">{form.name}</h1>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-100">
               Manage sections and questions for this form from one place.
-            </p>
+            </p> */}
+
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+  {form.name}
+  <span className="ml-2 text-lg font-normal text-gray-400">ID: {form.id}</span>
+</h1>
+
+<div className="mt-2 flex flex-wrap items-center gap-2">
+  <span
+    className={`inline-block rounded-full px-2 py-1 text-xs ${
+      form.is_active
+        ? 'bg-green-100 text-green-700'
+        : 'bg-gray-100 text-gray-700'
+    }`}
+  >
+    {form.is_active ? 'Active Form' : 'Inactive Form'}
+  </span>
+
+  <span
+    className={`inline-block rounded-full px-2 py-1 text-xs ${
+      completionStatus.isComplete
+        ? 'bg-emerald-100 text-emerald-700'
+        : 'bg-amber-100 text-amber-700'
+    }`}
+  >
+    {completionStatus.isComplete ? 'Complete' : 'Incomplete'}
+  </span>
+</div>
+
+{!completionStatus.isComplete && (
+  <p className="mt-2 text-sm text-amber-700">
+    {completionStatus.message}
+  </p>
+)}
+
+<p className="mt-2 text-sm text-gray-500 dark:text-gray-100">
+  Manage sections and questions for this Questionnaire from one place.
+</p>
           </div>
           <Link to={`/forms/${form.id}`} className="rounded bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
             View Details
@@ -327,7 +409,9 @@ export default function QuestionsPage() {
 
                 <div className="p-6">
                   <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Questions</h3>
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+                      Questions
+                    </h3>
                     <button
                       onClick={() => handleStartAdding(section.id)}
                       className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
@@ -335,6 +419,11 @@ export default function QuestionsPage() {
                       + Add Question
                     </button>
                   </div>
+                  {isSectionAtMaxQuestions(section.id) && (
+                    <p className="text-l font-bold text-red-600 mt-1">
+                      This section already contains 10 questions.
+                    </p>
+                  )}
 
                   {addingToSection === section.id && (
                     <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
@@ -592,13 +681,13 @@ export default function QuestionsPage() {
                                 <>
                                   <button
                                     onClick={() => handleStartEditing(question)}
-                                    className="rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50"
+                                    className="bg-white dark:bg-[#A384BD] text-black dark:text-gray-900 rounded border border-gray-300 dark:border-gray-900 px-2 py-1 text-xs hover:bg-gray-50"
                                   >
                                     Edit
                                   </button>
                                   <button
                                     onClick={() => handleRequestDelete(question.id)}
-                                    className="rounded border border-red-300 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
+                                    className="bg-white dark:bg-[#A384BD]  dark:text-red-800 rounded border border-red-300 dark:border-red-900 px-2 py-1 text-xs text-red-600 hover:bg-red-50"
                                   >
                                     Delete
                                   </button>

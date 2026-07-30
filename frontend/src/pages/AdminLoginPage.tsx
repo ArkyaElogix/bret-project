@@ -38,29 +38,29 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form
         onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-4"
+        className="bg-white dark:bg-gray-800 dark:text-gray-100 shadow-md rounded-lg p-8 w-full max-w-sm space-y-4"
       >
-        <h1 className="text-xl font-semibold text-gray-800">BRET Admin Login</h1>
+        <h1 className="text-xl font-semibold text-gray-800 dark:bg-gray-800 dark:text-gray-100">BRET Admin Login</h1>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:bg-gray-800 dark:text-gray-100 ">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm dark:text-gray-100 bg white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1 dark:bg-gray-800 dark:text-gray-100">Password</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm dark:text-gray-100 bg white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -75,7 +75,7 @@ export default function AdminLoginPage() {
         </button>
 
         <p className="text-center text-xs text-gray-500 pt-2">
-          <Link to="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 dark:text-blue-200 hover:underline">
             ← Back to candidate login
           </Link>
         </p>

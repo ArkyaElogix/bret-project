@@ -10,12 +10,13 @@ reviewing responses later).
 """
 import json
 import os
+import time
 from typing import Any, Dict, List
 from datetime import datetime
 from app.services.ai_report_service import AIReportService
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.models.models import (
     AssessmentSession,
     Response as ResponseModel,
@@ -343,10 +344,43 @@ def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict
         "sections": sections,
     }
 
+def delayed_cache_report(session_id: int, ai_report: dict, is_test_bypass: bool):
+    """
+    Waits 60 seconds before caching the report to ensure all AI background 
+    processes have completely finalized the data structure.
+    """
+    time.sleep(60)
+    
+    # We must create a fresh database session because the original one 
+    # attached to the request will already be closed by this time.
+    db = SessionLocal()
+    try:
+        session = db.query(AssessmentSession).filter(AssessmentSession.id == session_id).first()
+        if not session:
+            return
+            
+        # Verify it's a complete report
+        is_complete = all(key in ai_report for key in [
+            "overall_observations", 
+            "action_agenda",
+            "drives_profile"
+        ])
+        
+        # Only cache if it's complete, and either it's a test bypass or it hasn't been cached yet
+        if is_complete and (not session.ai_report_data or is_test_bypass):
+            session.ai_report_data = ai_report
+            db.commit()
+            
+    except Exception as e:
+        print(f"Delayed cache failed: {e}")
+    finally:
+        db.close()
+
 
 @router.get("/{session_id}/report", response_model=SessionReportOut)
 def get_session_report(
     session_id: int,
+    background_tasks: BackgroundTasks,  # <--- Add this parameter
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -359,20 +393,31 @@ def get_session_report(
 
     if use_ai:
         try:
-            ai_service = AIReportService()
-            ai_report = ai_service.generate_report(session_id, db)
+            is_test_bypass = (current_user.role == UserRole.ADMIN and session.user_id == current_user.id)
+            
+            ai_report = None
+            
+            # Use cached report if it exists and we are not bypassing
+            if session.ai_report_data and not is_test_bypass:
+                ai_report = session.ai_report_data
+            else:
+                # Generate new report
+                ai_service = AIReportService()
+                ai_report = ai_service.generate_report(session_id, db)
+                
+                # Send the caching task to the background to wait 60 seconds
+                background_tasks.add_task(delayed_cache_report, session_id, ai_report, is_test_bypass)
+
+            # Format the raw AI dictionary for the UI
             ai_sections = _format_ai_report_for_response(ai_report, db)
             
-            # Get the full basic payload to extract static definition sections
             basic_payload = _build_basic_report_payload(session, db)
             
-            # Definitions and discovery letter come from the static payload
             static_sections = [
                 s for s in basic_payload["sections"]
                 if s["section_code"] in ("LETTER", "DEF")
             ]
             
-            # Prepend static definitions, then append AI-generated profile sections
             return {
                 "session": session,
                 "user": basic_payload["user"],

@@ -13,6 +13,7 @@ Revision notes (per mentor feedback):
 
 import enum
 from datetime import datetime
+import hashlib
 
 from sqlalchemy import (
     Column,
@@ -24,6 +25,7 @@ from sqlalchemy import (
     DateTime,
     Boolean,
     UniqueConstraint,
+    JSON,
 )
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -204,7 +206,7 @@ class AssessmentSession(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
     submitted_at = Column(DateTime, nullable=True)
-
+    ai_report_data = Column(JSON, nullable=True)
     user = relationship("User", back_populates="sessions")
     form = relationship("Form", back_populates="sessions")
     responses = relationship(
@@ -290,3 +292,24 @@ class ReportStatement(Base):
             name="uq_report_statement_lookup"
         ),
     )
+
+
+class PasswordResetToken(Base):
+    """Stores hashed password-reset tokens issued via /auth/forgot-password.
+    The raw token is sent in the email link only; the DB only ever holds its
+    SHA-256 hash, so a DB leak cannot be used to reset passwords."""
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    token_hash = Column(String(255), nullable=False, unique=True)
+    expires_at = Column(DateTime, nullable=False)
+    used = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User")
+
+    @staticmethod
+    def hash_token(raw_token: str) -> str:
+        """Return the SHA-256 hex digest of a raw token string."""
+        return hashlib.sha256(raw_token.encode()).hexdigest()

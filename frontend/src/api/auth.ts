@@ -39,3 +39,17 @@ export async function registerCandidate(
     body: { name, email, password, product_type: productType },
   })
 }
+
+export async function forgotPassword(email: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/auth/forgot-password', {
+    method: 'POST',
+    body: { email },
+  })
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>('/auth/reset-password', {
+    method: 'POST',
+    body: { token, new_password: newPassword },
+  })
+}

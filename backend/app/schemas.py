@@ -154,6 +154,15 @@ class PasswordChange(BaseModel):
     new_password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+
 class FormCreate(BaseModel):
     name: str
     is_active: bool = False

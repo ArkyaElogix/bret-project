@@ -53,7 +53,7 @@ export default function FormsPage() {
 
   async function handleToggleActive(form: Form) {
     if (!form.is_active && !form.is_complete) {
-      setPopupError(`Cannot activate "${form.name}" until it is complete.`)
+      setPopupError(`Cannot activate "${form.name}" until it has all 30 questions filled up.`)
       return
     }
 
@@ -140,22 +140,22 @@ export default function FormsPage() {
     <AdminLayout title="Questionnaires">
       <div className="max-w-4xl space-y-8">
         {/* Create form */}
-        <form onSubmit={handleCreate} className="bg-white shadow rounded-lg p-6 space-y-4">
-          <h2 className="text-sm font-medium text-gray-700">Create a new questionnaire</h2>
+        <form onSubmit={handleCreate} className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-4">
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">Create a new questionnaire</h2>
 
           <div>
-            <label className="block text-sm text-gray-600 mb-1">Name</label>
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Name</label>
             <input
               type="text"
               required
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g. BRET v2"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-gray-600">
+          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
             <input
               type="checkbox"
               checked={newIsActive}
@@ -176,14 +176,14 @@ export default function FormsPage() {
         </form>
 
         {/* List */}
-        <div className="bg-white shadow rounded-lg divide-y">
-          {loading && <p className="p-6 text-sm text-gray-500">Loading Questionnaires...</p>}
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg divide-y dark:divide-gray-700">
+          {loading && <p className="p-6 text-sm text-gray-500 dark:text-gray-400">Loading Questionnaires...</p>}
           {error && <p className="p-6 text-sm text-red-600">{error}</p>}
           {!loading && !error && forms.length === 0 && (
-            <p className="p-6 text-sm text-gray-500">No Questionnaires yet. Create one above.</p>
+            <p className="p-6 text-sm text-gray-500 dark:text-gray-400">No Questionnaires yet. Create one above.</p>
           )}
           {popupError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 shadow-sm">
+          <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/50 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-300 shadow-sm">
             {popupError}
           </div>
         )}
@@ -192,29 +192,24 @@ export default function FormsPage() {
             forms.map((form) => (
               <div key={form.id} className="p-4 flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-800">{form.name}</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{form.name}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {/*form.is_active && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                      Active
-                    </span>
-                  )*/}
                   <button
                     onClick={() => handleToggleActive(form)}
                     disabled={togglingId === form.id}
-                    className={`text-xs px-3 py-1 rounded ${form.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} disabled:opacity-50`}
+                    className={`text-xs px-3 py-1 rounded ${form.is_active ? 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300 dark:hover:bg-green-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'} disabled:opacity-50`}
                   > Active: {form.is_active ? 'Yes' : 'No'}
                   </button>
                   <Link
                     to={`/forms/${form.id}`}
-                    className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50"
+                    className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/50"
                   >
                     View Details
                   </Link>
                   <Link
                     to={`/forms/${form.id}/edit`}
-                    className="text-xs border border-slate-300 text-slate-700 rounded px-3 py-1 hover:bg-slate-50"
+                    className="text-xs border border-slate-300 text-slate-700 rounded px-3 py-1 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     Manage Questionnaire
                   </Link>
@@ -231,7 +226,7 @@ export default function FormsPage() {
                       <button
                         onClick={() => { setConfirmDeleteId(null); setDeleteError(null) }}
                         disabled={deleting}
-                        className="text-xs border border-gray-300 rounded px-2.5 py-1 hover:bg-gray-50 disabled:opacity-50"
+                        className="text-xs border border-gray-300 rounded px-2.5 py-1 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
                       >
                         Cancel
                       </button>
@@ -239,7 +234,7 @@ export default function FormsPage() {
                   ) : (
                     <button
                       onClick={() => { setConfirmDeleteId(form.id); setDeleteError(null) }}
-                      className="text-xs border border-red-300 text-red-600 rounded px-3 py-1 hover:bg-red-50"
+                      className="text-xs border border-red-300 text-red-600 rounded px-3 py-1 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/50"
                     >
                       Delete
                     </button>

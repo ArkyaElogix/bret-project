@@ -42,6 +42,37 @@ def count_factor_usage(
 
     return total
 
+def count_questions_in_section(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    exclude_question_id: int | None = None,
+) -> int:
+    query = db.query(Question).filter(
+        Question.form_id == form_id,
+        Question.behavioural_type_id == behavioural_type_id,
+    )
+    if exclude_question_id is not None:
+        query = query.filter(Question.id != exclude_question_id)
+    return query.count()
+
+def validate_section_question_limit(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    exclude_question_id: int | None = None,
+):
+    if count_questions_in_section(
+        db,
+        form_id=form_id,
+        behavioural_type_id=behavioural_type_id,
+        exclude_question_id=exclude_question_id,
+    ) >= 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Each section can contain at most 10 questions.",
+        )
+
 def deactivate_form_for_edit(db: Session, form) -> None:
     if form.is_active:
         form.is_active = False
@@ -115,6 +146,11 @@ def create_question(
 
     validate_factor_for_section(db, payload.option_a_factor_id, payload.behavioural_type_id)
     validate_factor_for_section(db, payload.option_b_factor_id, payload.behavioural_type_id)
+    validate_section_question_limit(
+        db,
+        form_id=payload.form_id,
+        behavioural_type_id=payload.behavioural_type_id,
+    )
     validate_factor_usage_limit(db, form_id=payload.form_id, behavioural_type_id=payload.behavioural_type_id, option_a_factor_id=payload.option_a_factor_id, option_b_factor_id=payload.option_b_factor_id)
     question = Question(**payload.model_dump())
     db.add(question)
@@ -185,6 +221,12 @@ def update_question(
 
     validate_factor_for_section(db, payload.option_a_factor_id, target_section_id)
     validate_factor_for_section(db, payload.option_b_factor_id, target_section_id)
+    validate_section_question_limit(
+        db,
+        form_id=question.form_id,
+        behavioural_type_id=target_section_id,
+        exclude_question_id=question.id,
+    )
     validate_factor_usage_limit(
         db,
         form_id=question.form_id,

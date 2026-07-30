@@ -42,6 +42,14 @@ export default function PortalProfilePage() {
                 <p className="text-xs uppercase tracking-wide text-red-600">Account Name</p>
                 <p className="text-sm font-medium text-gray-800">{user.name}</p>
               </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-red-950">Assessment Tier</p>
+                <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                  {user.product_type === 'EXECUTIVE' ? 'Executive' : 'Basic'}
+                </span>
+              </div>
+
               <div>
                 <p className="text-xs uppercase tracking-wide text-red-950">Account type</p>
                 <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">

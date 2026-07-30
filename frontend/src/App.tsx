@@ -13,6 +13,9 @@ import PortalProfilePage from './pages/PortalProfilePage'
 import PortalAssessmentPage from './pages/PortalAssessmentPage'
 import PortalResultsPage from './pages/PortalResultsPage'
 import { SessionReportPage } from './pages/SessionReportPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+
 
 export default function App() {
   return (
@@ -102,11 +105,14 @@ export default function App() {
           </UserRoute>
         }
       />
+      
 
       {/* Public */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/" element={<Navigate to="/forms" replace />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
   )
 }

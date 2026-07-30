@@ -275,7 +275,7 @@ export default function PortalFormsPage() {
 
                 <button
                   onClick={() => navigate(`/portal/sessions/${session.id}/results`)}
-                  className="border border-gray-300 rounded px-4 py-1.5 text-sm hover:bg-gray-50"
+                  className="border border-gray-300 dark:border-gray-600 rounded px-4 py-1.5 text-sm text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   View Result
                 </button>

@@ -73,11 +73,11 @@ export default function FormDetailsPage() {
       <div className="max-w-5xl space-y-8">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <Link to="/forms" className="text-blue-600 hover:underline text-sm inline-block mb-3">
+            <Link to="/forms" className="text-blue-600 dark:text-blue-200 hover:underline text-sm inline-block mb-3">
               &larr; Back to Questionnaires page
             </Link>
-            <h1 className="text-2xl font-bold text-gray-800">{form.name}</h1>
-            <p className="text-sm text-gray-500 mt-2">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 ">{form.name}</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-100 mt-2">
               View-only overview of the sections, questions, and mapping factors for this Questionnaire.
             </p>
           </div>
