@@ -9,7 +9,7 @@ export function ThemeToggle() {
             className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
             aria-label="Toggle Dark Mode"
         >
-            {theme === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode"}
+            {theme === "dark" ? "☀️" : "🌙"}
         </button>
     );
 }

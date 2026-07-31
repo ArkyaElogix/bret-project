@@ -136,7 +136,7 @@ export default function PortalAssessmentPage() {
     return (
       <PortalLayout title="Assessment">
         <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
-          <p className="text-sm text-gray-700">This assessment has already been submitted.</p>
+          <p className="text-sm text-gray-700">This questionnaire has already been submitted.</p>
           <Link
             to={`/portal/sessions/${sessionId}/results`}
             className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
@@ -153,13 +153,13 @@ export default function PortalAssessmentPage() {
     <PortalLayout title="Assessment Unavailable">
       <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
         <p className="text-sm text-gray-700">
-          This assessment is no longer available.
+          This questionnaire is no longer available.
         </p>
         <Link
           to="/portal"
           className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
         >
-          Back to Forms
+          Back to Questionnaires Page
         </Link>
       </div>
     </PortalLayout>
@@ -211,8 +211,8 @@ export default function PortalAssessmentPage() {
         )}
 
         {!allAnswered && (
-          <p className="text-xs text-gray-500">
-            Answer all {totalQuestions} questions to enable submission. Your answers are saved automatically as you go.
+          <p className="text-xs text-gray-700 font-bold">
+            Answer all {totalQuestions} choices to enable submission. Your answers are saved automatically as you go.
           </p>
         )}
 
@@ -238,7 +238,7 @@ export default function PortalAssessmentPage() {
                   return (
                     <div key={question.id} className="p-6">
                       <p className="text-sm font-semibold text-gray-500 mb-3">
-                        Question {question.number}
+                        Choice {question.number}
                       </p>
                       <div className="grid gap-3 md:grid-cols-2">
                         {(['A', 'B'] as Option[]).map((opt) => {
@@ -283,7 +283,7 @@ export default function PortalAssessmentPage() {
               disabled={!allAnswered || submitting}
               className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
             >
-              {submitting ? 'Submitting...' : 'Submit Assessment'}
+              {submitting ? 'Submitting...' : 'Submit Questionnaire'}
         </button>
       </div>
     </PortalLayout>

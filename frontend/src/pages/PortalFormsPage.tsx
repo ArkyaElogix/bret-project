@@ -102,7 +102,7 @@ export default function PortalFormsPage() {
   return (
     <PortalLayout title="Available Assessments">
       <div className="space-y-6">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 dark:text-gray-100">
           These are the assessments currently available to you. You can only work on one assessment at a time — finish any in-progress assessment before starting a new one.
         </p>
 

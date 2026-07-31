@@ -16,7 +16,7 @@ export default function PortalLayout({ title, children }: PortalLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#211E1E]">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#5e5a5a]">
       {/* Top navigation bar */}
       <header className="bg-slate-900 text-white">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">

@@ -1,12 +1,15 @@
-.bret-page-shell {
+bret-page-shell {
   min-height: 100vh;
   background: #f8faff;
   padding: 24px;
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
+/* Widened from 1200px so sections have room to breathe like slides on
+   large screens. Still shrinks fine on smaller viewports since nothing
+   below this is a fixed px width beyond max-width. */
 .bret-report-shell {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background: #fff;
   border-radius: 16px;
@@ -58,6 +61,11 @@
   color: #fff;
 }
 
+.bret-topbar-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .bret-report-body {
   padding: 32px 36px 40px;
 }
@@ -68,8 +76,11 @@
   padding: 40px 42px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 18px;
   margin-bottom: 24px;
+  /* Give the cover a slide-like presence rather than a thin banner */
+  min-height: 320px;
 }
 
 .bret-cover h1 {
@@ -132,8 +143,8 @@
 }
 
 .bret-summary-card {
-  background: #f8faff;
-  border-left: 4px solid #1b4fd8;
+  background: #e7ebf3;
+  border-left: 4px solid #e6339b;
   padding: 16px 20px;
   margin-bottom: 16px;
 }
@@ -190,16 +201,20 @@
   color: #1e293b;
 }
 
+/* Slightly favors the chart column less and the content column more on
+   normal widths; on very wide screens (see min-width:1400px block below)
+   this widens further into a more horizontal, slide-like split. */
 .bret-profile-layout {
   display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(0, 1.5fr);
-  gap: 32px;
+  grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr);
+  gap: 20px;
+  align-items: start;
+  min-width: 0;
 }
 
+.bret-score-panel-vertical,
 .bret-profile-main {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  min-width: 330px;
 }
 
 .bret-factor-list {
@@ -236,7 +251,7 @@
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 24px;
+  padding: 10px;
   align-self: start;
   display: flex;
   flex-direction: column;
@@ -244,10 +259,33 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
+/*
+   ── Bar chart sizing: fixed pixel values only, everywhere, in every
+   context (screen AND print). No percentages, no transforms.
+
+   Why: the previous approach (percentage heights, and before that
+   `transform: scaleY()`) both belong to categories of Chromium print bugs
+   where a value that depends on something computed at layout time --
+   a percentage resolved against an ancestor, or a transform requiring its
+   own compositing pass -- gets recalculated when the print engine performs
+   a page-break re-layout (which this stylesheet triggers heavily via
+   `page-break-before: always` on every section). In practice this shows
+   up as exactly what was seen in print preview: the first bar in a chart
+   keeps the height/color from the initial layout pass, and every sibling
+   after it loses it on the re-layout and renders blank.
+
+   Fixed pixel values have nothing to recompute, so there's nothing for
+   that re-layout pass to get wrong. CHART_TRACK_HEIGHT_PX below (148)
+   must match the constant of the same name in the component -- the
+   component now computes each bar's height directly in pixels
+   (Math.round((score/5) * CHART_TRACK_HEIGHT_PX)) instead of a
+   percentage or a transform.
+*/
 .bret-chart-wrapper {
   display: flex;
-  height: 240px;
-  gap: 12px;
+  height: 190px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .bret-chart-y-axis {
@@ -256,58 +294,86 @@
   justify-content: space-between;
   align-items: flex-end;
   font-size: 10px;
-  color: #94a3b8;
-  padding-bottom: 30px;
+  color: #41474e;
+  /* Matches the label row height reserved below (42px) so the axis
+     numbers stay aligned with the bar tops/baseline. */
+  padding-bottom: 42px;
+}
+
+.bret-profile-main,
+.bret-score-panel-vertical,
+.bret-chart-container {
+  min-width: 0;
 }
 
 .bret-chart-container {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: flex-end;
-  flex: 1;
-  border-bottom: 1px solid #e2e8f0;
-  border-left: 1px solid #e2e8f0;
-  position: relative;
+  height: 190px;
+  min-width: 0;
+  overflow: hidden;
+  gap: 8px;
+  padding: 0 6px;
 }
 
 .bret-vertical-bar-group {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  height: 100%;
+  gap: 8px;
+  height: 190px;
   justify-content: flex-end;
   z-index: 1;
+  min-width: 56px;
+  max-width: 56px;
+  flex: 0 0 56px;
 }
 
 .bret-vertical-bar-track {
-  width: 48px;
-  height: calc(100% - 30px);
-  background: transparent;
+  width: 100%;
+  /* Fixed. Must match CHART_TRACK_HEIGHT_PX in the component. */
+  height: 148px;
+  background: #f1f5f9;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
+  border-radius: 8px;
+  padding-bottom: 4px;
 }
 
 .bret-vertical-bar-fill {
   width: 100%;
-  height: 100%;
-  border-radius: 4px 4px 0 0;
-  transform-origin: bottom;
-  transition: transform 0.5s ease;
+  border-radius: 8px 8px 0 0;
+  /* Height is now set as a literal px value via inline style from the
+     component -- nothing here to override it, and no transition on
+     height so there's no risk of a print snapshot catching a
+     mid-animation frame. */
 }
 
 .bret-vertical-bar-label {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 9.5px;
+  font-weight: 700;
   color: #475569;
   text-align: center;
-  width: 60px;
-  height: 18px;
+  width: 100%;
+  max-width: 56px;
+  height: 36px;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: horizontal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  padding: 0 1px;
 }
 
 .bret-chart-legend {
   font-size: 11px;
-  color: #94a3b8;
+  color: #132e53;
   text-align: center;
   margin-top: 4px;
 }
@@ -388,11 +454,50 @@
   .bret-definitions {
     grid-template-columns: 1fr;
   }
+
+  .bret-vertical-bar-label {
+    max-width: 56px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WIDE / "DECK" LAYOUT — large screens get a more horizontal split
+   so each section reads more like a slide than a stacked document.
+   Purely additive: falls back to the layout above on narrower screens.
+═══════════════════════════════════════════════════════════════ */
+@media (min-width: 1400px) {
+  .bret-profile-layout {
+    grid-template-columns: minmax(320px, 0.7fr) minmax(0, 2fr);
+    gap: 40px;
+  }
+
+  /* Let the factor descriptions flow into two columns instead of one
+     long vertical stack, since there's horizontal room to spare. */
+  .bret-factor-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+  }
+
+  .bret-definitions {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .bret-cover {
+    min-height: 380px;
+  }
 }
 
 @media print {
   .no-print {
     display: none !important;
+  }
+
+  /* Landscape page so each printed section reads closer to a slide than
+     a tall document page. */
+  @page {
+    size: landscape;
+    margin: 14mm;
   }
 
   .bret-page-shell {
@@ -416,8 +521,7 @@
   }
 
   /* Prevent sections from being split across pages */
-
-  .bret-profile-layout,
+  .bret-section,
   .bret-score-panel-vertical,
   .bret-chart-wrapper,
   .bret-obs-card,
@@ -427,26 +531,217 @@
     page-break-inside: avoid;
   }
 
+  /* Give every profile section a full fresh page rather than letting it
+     start partway down whatever space was left by the previous section. */
+  .bret-section {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .bret-section:first-child {
+    break-before: auto;
+    page-break-before: avoid;
+  }
+
   .bret-obs-grid {
     break-inside: auto;
     page-break-inside: auto;
   }
 
-  /* Force bar chart fills to render without transition delay */
-  .bret-vertical-bar-fill {
-    transition: none !important;
+  /* On a landscape page there's more width than height available, so
+     let the profile layout use it the same way the wide-screen block
+     above does. */
+  .bret-profile-layout {
+    grid-template-columns: minmax(280px, 0.8fr) minmax(0, 2fr);
+    gap: 14px;
   }
 
-  /* Ensure chart container height resolves correctly in print */
-  .bret-chart-wrapper {
-    height: 200px;
+  /* Compact vertical sizing for print only -- this only touches spacing/
+     font-size, never the chart's own dimensions (those are now fixed
+     pixel values shared identically between screen and print, see above,
+     specifically so there is nothing left for print to recompute). */
+  .bret-section {
+    padding: 14px 18px;
   }
 
-  .bret-vertical-bar-track {
-    height: calc(100% - 30px);
+  .bret-score-panel-vertical {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .bret-summary-card {
+    padding: 10px 14px;
+    margin-bottom: 10px;
+  }
+
+  .bret-summary-card p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .bret-factor-list {
+    gap: 8px 20px;
+  }
+
+  .bret-factor-item {
+    padding: 4px 0;
+    gap: 2px;
+  }
+
+  .bret-factor-name,
+  .bret-factor-score {
+    font-size: 12px;
+  }
+
+  .bret-factor-description {
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  /* The screen view only shows the active .bret-slide; printing needs
+     every slide visible again, one per page, regardless of which one
+     was on screen when "Print / Save PDF" was clicked. */
+  .bret-slide-stage {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .bret-slide {
+    display: block !important;
+    animation: none;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .bret-slide:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .bret-factor-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
   }
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   SLIDE-BY-SLIDE VIEWER
+   On screen: only the active .bret-slide is shown, others are kept
+   mounted but hidden (so switching is instant, no remount/refetch).
+   In print: overridden above so every slide becomes its own page.
+═══════════════════════════════════════════════════════════════ */
+
+.bret-slide-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 10px 16px;
+  background: #f8faff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.bret-slide-nav-button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.bret-slide-nav-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.bret-slide-nav-button:not(:disabled):hover {
+  background: #eef2ff;
+  border-color: #1b4fd8;
+}
+
+.bret-slide-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.bret-slide-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: none;
+  background: #cbd5e1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.bret-slide-dot--active {
+  background: #1b4fd8;
+  width: 22px;
+  border-radius: 5px;
+}
+
+.bret-slide-counter {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.bret-slide-stage {
+  /* Room to scroll within a slide on shorter screens if a section's
+     content runs long, without breaking the "one view at a time" feel. */
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.bret-slide {
+  animation: bret-slide-fade-in 0.18s ease;
+}
+
+.bret-slide--hidden {
+  display: none !important;
+}
+
+@keyframes bret-slide-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bret-slide-hint {
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 10px 0 0;
+}
+
+@media (max-width: 640px) {
+  .bret-slide-nav {
+    justify-content: center;
+  }
+
+  .bret-slide-counter {
+    width: 100%;
+    text-align: center;
+  }
+}
 
 /* ═══════════════════════════════════════════════════════════════
    OVERALL OBSERVATIONS & KEY TAKEAWAYS — redesigned layout

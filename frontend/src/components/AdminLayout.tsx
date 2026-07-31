@@ -11,7 +11,7 @@ export default function AdminLayout({
   children,
 }: AdminLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-gray-100 dark:bg-[#211E1E]">
+    <div className="flex min-h-screen bg-gray-100 dark:bg-[#444242]">
       <Sidebar />
 
       <main className="flex-1 p-8">
