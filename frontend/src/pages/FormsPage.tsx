@@ -1,3 +1,4 @@
+//admin-side view
 import { useEffect, useState, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { listForms, createForm, deleteForm, updateForm, Form } from '../api/forms'

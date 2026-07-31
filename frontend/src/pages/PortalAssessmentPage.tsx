@@ -179,10 +179,22 @@ export default function PortalAssessmentPage() {
       <div className="space-y-6">
         {/* Progress + submit bar */}
         <div className="bg-white shadow rounded-lg p-5 flex items-center justify-between gap-4 flex-wrap">
+          <div className="max-w-2xl ">
+            <p className="text-sm text-blue-900 font-semibold leading-6">
+              This Assessment is designed to help you understand your behavioural response to different triggers and situations. It is divided into three sections.
+<ul className='list-style-type: square;'><li >Section A identifies your key and pre-dominant drivers and Motivators.</li>
+<li>Section B identifies your Change and Adaptability quotient through your response to uncertainty.</li>
+<li>Section C identifies your Communication style.</li></ul>
+Each section has a set of instruction before the start. 
+Please read and follow the instructions since they are different for each section.
+
+          </p>
+          </div>
           <div className="flex-1 min-w-[200px]">
             <p className="text-sm font-medium text-gray-800">
               Progress: {answeredCount} of {totalQuestions} answered
             </p>
+            
             <div className="mt-2 h-2 w-64 max-w-full bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 transition-all duration-300"
@@ -211,7 +223,7 @@ export default function PortalAssessmentPage() {
         )}
 
         {!allAnswered && (
-          <p className="text-xs text-gray-700 font-bold">
+          <p className="text-xs text-gray-700 dark:text-blue-300 font-bold">
             Answer all {totalQuestions} choices to enable submission. Your answers are saved automatically as you go.
           </p>
         )}

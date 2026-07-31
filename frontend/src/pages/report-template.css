@@ -1,4 +1,4 @@
-bret-page-shell {
+.bret-page-shell {
   min-height: 100vh;
   background: #f8faff;
   padding: 24px;
@@ -286,6 +286,7 @@ bret-page-shell {
   height: 190px;
   gap: 10px;
   min-width: 0;
+  justify-content: center;
 }
 
 .bret-chart-y-axis {
@@ -531,28 +532,28 @@ bret-page-shell {
     page-break-inside: avoid;
   }
 
-  /* Give every profile section a full fresh page rather than letting it
-     start partway down whatever space was left by the previous section. */
-  .bret-section {
-    break-before: page;
-    page-break-before: always;
-  }
-
-  .bret-section:first-child {
-    break-before: auto;
-    page-break-before: avoid;
-  }
+  /* Sections now flow naturally instead of each forcing a brand new page
+     (previously `.bret-section { page-break-before: always }`). That rule
+     meant a section always started on a fresh page regardless of how much
+     room was left on the current one -- since AI-generated text length
+     varies per session, this produced large blank gaps whenever a section
+     happened to be short. Letting the browser paginate normally, combined
+     with `break-inside: avoid` above on the individual cards/blocks (so
+     nothing splits mid-sentence), gives a much more compact, densely
+     packed export -- a section only jumps to a new page if it genuinely
+     doesn't fit on the current one. */
 
   .bret-obs-grid {
     break-inside: auto;
     page-break-inside: auto;
   }
 
-  /* On a landscape page there's more width than height available, so
-     let the profile layout use it the same way the wide-screen block
-     above does. */
+  /* Deliberately NOT overriding .bret-profile-layout's grid-template-columns
+     here anymore -- it now inherits the same chart:text ratio used on
+     screen (minmax(260px,0.78fr) minmax(0,1.22fr)) so the PDF/print output
+     matches the web view's proportions instead of using a separately
+     cramped print-only ratio. Only the gap is tightened for print. */
   .bret-profile-layout {
-    grid-template-columns: minmax(280px, 0.8fr) minmax(0, 2fr);
     gap: 14px;
   }
 

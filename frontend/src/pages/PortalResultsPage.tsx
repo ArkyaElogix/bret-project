@@ -1,3 +1,4 @@
+//for candidate view of results
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getSessionResults, SectionResult } from '../api/sessions'
@@ -74,8 +75,8 @@ export default function PortalResultsPage() {
   return (
     <PortalLayout title="Your Results">
       <div className="space-y-8">
-        <Link to="/portal" className="text-blue-600 hover:underline text-sm inline-block">
-          ← Back to Forms
+        <Link to="/portal" className="text-blue-600 dark:text-blue-300 hover:underline text-sm inline-block">
+          ← Back to Questionnaire
         </Link>
 
         <div className="bg-white rounded-xl shadow border border-gray-100 p-10">

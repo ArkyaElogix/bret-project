@@ -239,6 +239,7 @@ class ReportSectionOut(BaseModel):
     section_id: int
     section_code: str
     section_name: str
+    section_definitions: str | None = None
     factors: list[ReportFactorOut]
 class SessionReportOut(BaseModel):
     session: SessionOut

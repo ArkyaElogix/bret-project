@@ -106,6 +106,7 @@ def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict
             "section_id": 1002,
             "section_code": "DEF",
             "section_name": "Definitions: Drives",
+            "section_definitions": "Drives act as the deep-seated currents guiding your behavioral journey. Contemplating these intrinsic impulses reveals the 'WHY' behind your interactions and decisions.",
             "factors": [
                 _build_basic_report_factor(
                     1,
@@ -141,6 +142,7 @@ def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict
             "section_id": 1003,
             "section_code": "DEF",
             "section_name": "Definitions: Conditioning Factors",
+            "section_definitions": "Conditioning factors reflect our internal compass for navigating change. They describe how we mindfully interpret shifts in our environment, balancing the urge for novelty with the wisdom of stability and established order.",
             "factors": [
                 _build_basic_report_factor(
                     5,
@@ -176,6 +178,7 @@ def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict
             "section_id": 1004,
             "section_code": "DEF",
             "section_name": "Definitions: Acquired Factors",
+            "section_definitions": "Acquired factors represent the intentional communication styles we cultivate to navigate our environment. They reflect how we thoughtfully adapt our expression to connect, influence, and respond to the world around us",
             "factors": [
                 _build_basic_report_factor(
                     9,

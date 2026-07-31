@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { Link, useParams } from 'react-router-dom';
 import { getSessionReport, type ReportFactor, type ReportSection, type SessionReport } from '../api/sessions';
 import './report-template.css';
+import { pdf } from '@react-pdf/renderer';
+import { ReportPrintDocument } from './reportPrintDocument';
 
 const SECTION_CODES_WITH_SUMMARY = ['A', 'B', 'C'];
 const BAR_COLORS = ['#1B4FD8', '#14B8A6', '#8B5CF6', '#F59E0B'];
@@ -130,6 +132,11 @@ function renderDefinitionsSection(section: ReportSection, index: number) {
   return (
     <section key={index} className="bret-section">
       <h2 className="bret-section-header">{section.section_name}</h2>
+      {section.section_definitions ? (
+        <div className="bret-definition-summary" style={{fontSize:'0.85em', padding:'20px', fontFamily:'Arial, sans-serif', color:'teal', fontWeight:'bold', fontStyle:'italic'}}>
+          <p>{section.section_definitions}</p>
+        </div>
+      ) : null}
       <div className="bret-definitions">
         {section.factors.map((factor, factorIndex) => (
           <div key={factorIndex} className="bret-definition-card">
@@ -150,6 +157,23 @@ function parseAiBullets(raw: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
+async function handleDownloadPdf(report: SessionReport) {
+  try {
+    const blob = await pdf(<ReportPrintDocument report={report} />).toBlob();
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `BRET-Report-${(report.user?.name || 'user').replace(/\s+/g, '-')}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error('PDF export failed:', err);
+    alert('PDF export failed. Please check the report data and try again.');
+  }
+}
 function parseJsonFactor(statement: string | null | undefined): any {
   if (!statement) return {};
   try { return JSON.parse(statement); } catch { return {}; }
@@ -251,14 +275,14 @@ function renderTakeawaysSection(report: SessionReport) {
             <span className="bret-obs-badge bret-obs-badge--orange">⬡</span>
             <span className="bret-obs-card-title">Focus Areas</span>
           </div>
-          <p className="bret-obs-integrated">{focusAreaText}</p>
+          <p className="bret-obs-integrated font-semibold text-gray-800">{focusAreaText}</p>
 
           <div className="bret-obs-pill bret-obs-pill--teal">STRENGTHS TO LEVERAGE</div>
           <ul className="bret-obs-list">
             {topStrengths.map((f, i) => (
               <li key={i}>
                 {f.factor_name}
-                <span className="bret-obs-score"> ({f.score}/5)</span>
+                <span className="bret-obs-score text-black"> ({f.score}/5)</span>
               </li>
             ))}
           </ul>
@@ -268,7 +292,7 @@ function renderTakeawaysSection(report: SessionReport) {
             {devPriorities.map((f, i) => (
               <li key={i}>
                 {f.factor_name}
-                <span className="bret-obs-score"> ({f.score}/5)</span>
+                <span className="bret-obs-score text-black"> ({f.score}/5)</span>
               </li>
             ))}
           </ul>
@@ -432,7 +456,7 @@ function renderFullReport(report: SessionReport) {
         <section className="bret-section">
           <h2 className="bret-section-header">Overall Observations  <span className='rounded bg-blue-300'>✦</span></h2>
           <div className="bret-summary-card">
-            <p>
+            <p className='text-gray-800'>
               {overallObservations.factors[0]?.statement ||
                 'Overall observations will appear here once the report content is generated.'}
             </p>
@@ -636,14 +660,23 @@ export function SessionReportPage() {
             button is disabled there with a tooltip nudging them to
             switch first.
           */}
-          <button
+          {/* <button
             onClick={() => window.print()}
             className="bret-topbar-primary"
             disabled={viewMode === 'slides'}
             title={viewMode === 'slides' ? 'Switch to Full Page to print or save as PDF' : undefined}
           >
             Print / Save PDF
+          </button> */}
+          <button
+            type='button'
+              onClick={() => handleDownloadPdf(report)}
+              className="bret-topbar-primary"
+            >
+            Print / Save PDF
           </button>
+
+
         </div>
 
         <div className="bret-report-body">

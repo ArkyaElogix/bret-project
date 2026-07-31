@@ -142,6 +142,7 @@ export interface ReportSection {
   section_id: number;
   section_code: string;
   section_name: string;
+  section_definitions?: string;
   factors: ReportFactor[];
 }
 
