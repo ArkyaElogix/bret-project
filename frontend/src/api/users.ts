@@ -60,3 +60,14 @@ export async function changeUserType(
     body: { product_type: productType },
   })
 }
+
+export async function exportMyData(): Promise<any> {
+  return apiRequest<any>('/users/me/export')
+}
+
+export async function deleteMe(password: string): Promise<void> {
+  await apiRequest<void>('/users/me', {
+    method: 'DELETE',
+    body: { password },
+  })
+}

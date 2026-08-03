@@ -64,7 +64,7 @@ export default function FormsPage() {
       await updateForm(form.id, form.name, !form.is_active)
       await loadForms()
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to toggle active status.')
+      setPopupError(err instanceof ApiError ? err.message : 'Failed to toggle active status.')
     } finally {
       setTogglingId(null)
     }
@@ -184,10 +184,10 @@ export default function FormsPage() {
             <p className="p-6 text-sm text-gray-500 dark:text-gray-400">No Questionnaires yet. Create one above.</p>
           )}
           {popupError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/50 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-300 shadow-sm">
-            {popupError}
-          </div>
-        )}
+            <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/50 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-300 shadow-sm">
+              {popupError}
+            </div>
+          )}
           {!loading &&
             !error &&
             forms.map((form) => (

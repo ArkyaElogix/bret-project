@@ -9,9 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.models import User, UserRole, ProductType
-from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate
-from app.security import hash_password
-from app.auth import require_admin
+from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate, UserDeleteRequest
+from app.security import hash_password, verify_password
+from app.auth import require_admin, get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -48,9 +48,74 @@ def create_user(
 def list_users(db: Session = Depends(get_db), _admin: User = Depends(require_admin)):
     return db.query(User).order_by(User.id).all()
 
+@router.get("/me/export")
+def export_my_data(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """GDPR Right to Access: Export all user data as JSON."""
+    user_data = {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "role": current_user.role.value,
+        "product_type": current_user.product_type.value,
+        "created_at": current_user.created_at.isoformat(),
+        "sessions": []
+    }
+
+    for session in current_user.sessions:
+        session_data = {
+            "session_id": session.id,
+            "form_id": session.form_id,
+            "status": session.status.value,
+            "created_at": session.created_at.isoformat(),
+            "submitted_at": session.submitted_at.isoformat() if session.submitted_at else None,
+            "responses": [
+                {
+                    "question_id": r.question_id,
+                    "chosen_option": r.chosen_option.value,
+                    "answered_at": r.answered_at.isoformat()
+                } for r in session.responses
+            ],
+            "scores": [
+                {
+                    "section_id": s.section_id,
+                    "factor_id": s.factor_id,
+                    "score": s.score
+                } for s in session.section_scores
+            ]
+        }
+        # Include AI Report if generated
+        if session.ai_report_data:
+            session_data["ai_report"] = session.ai_report_data
+            
+        user_data["sessions"].append(session_data)
+
+    return user_data
+
+
+@router.delete("/me", status_code=204)
+def delete_me(
+    payload: UserDeleteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """GDPR Right to be Forgotten: Delete own account with password confirmation.
+    Cascades to delete all associated sessions and responses."""
+    
+    # 1. Verify password
+    if not verify_password(payload.password, current_user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect password. Account deletion failed.")
+
+    # 2. Delete user (sessions, responses, and scores will cascade)
+    db.delete(current_user)
+    db.commit()
 
 @router.get("/{user_id}", response_model=UserOut)
-def get_user(user_id: int, db: Session = Depends(get_db)):
+def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),):
+    if current_user.role!= UserRole.ADMIN and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Not authorized to access this user")
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -114,3 +179,5 @@ def change_user_type(
     db.commit()
     db.refresh(user)
     return user
+
+

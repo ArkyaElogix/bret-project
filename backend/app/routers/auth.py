@@ -38,8 +38,8 @@ def admin_login(payload: LoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if user.role != UserRole.ADMIN:
         raise HTTPException(
-            status_code=403,
-            detail="Admin access required. Use the candidate login instead.",
+            status_code=401,
+            detail="Invalid email or password",
         )
 
     token = create_access_token(user)

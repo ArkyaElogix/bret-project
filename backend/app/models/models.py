@@ -189,7 +189,7 @@ class User(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
-    sessions = relationship("AssessmentSession", back_populates="user")
+    sessions = relationship("AssessmentSession", back_populates="user", cascade="all, delete-orphan")
 
 
 class AssessmentSession(Base):

@@ -44,28 +44,38 @@ export const styles = StyleSheet.create({
 
   // ── Cover page ──────────────────────────────────────────────
   coverWrap: {
-    backgroundColor: colors.bg,
+    backgroundColor: '#e3eaecff',
     borderRadius: 16,
     padding: 36,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    gap: 16,
+    flexDirection: 'row',   // Changed from 'column' to 'row'
+    alignItems: 'center',   // Vertically centers both columns
+    gap: 24,
     minHeight: 420,
   },
+  coverLeftColumn: {
+    width: '50%',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  coverRightColumn: {
+    width: '50%',
+    flexDirection: 'column',
+    alignItems: 'center',   // Horizontally centers the card in the right column
+  },
   coverTitle: {
-    fontSize: 30,
+    fontSize: 36,
     fontWeight: 700,
     color: colors.slate900,
   },
   coverSubtitle: {
-    fontSize: 13,
+    fontSize: 14,
     lineHeight: 1.7,
-    color: colors.slate500,
+    color: '#554dc7ff',
     fontStyle: 'italic',
     maxWidth: 420,
   },
   coverCard: {
-    backgroundColor: colors.chipBg,
+    backgroundColor: '#d6d5f5ff',
     borderRadius: 12,
     padding: 16,
     flexDirection: 'column',
@@ -73,17 +83,90 @@ export const styles = StyleSheet.create({
     maxWidth: 280,
   },
   coverLabel: {
-    fontSize: 10,
+    fontSize: 16,
     fontWeight: 700,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    color: colors.slate500,
+
   },
   coverMeta: {
     fontSize: 12,
     fontWeight: 600,
     color: '#a16207',
   },
+  // ── Discovery Letter ─────────────────────────────────────────
+  letterLayout: {
+    flexDirection: 'row',
+    gap: 24,
+    marginTop: 20,
+  },
+  letterLeftColumn: {
+    width: '30%',
+    flexDirection: 'column',
+    gap: 12,
+    backgroundColor: '#92b2b6ff',
+    borderRadius: 16,
+    padding: 22,
+  },
+  letterRightColumn: {
+    width: '70%',
+    flexDirection: 'column',
+    gap: 16,
+    backgroundColor: '#cacfd4ff',
+    borderRadius: 16,
+    padding: 22,
+  },
+  letterTitle: {
+    fontSize: 30,
+    fontWeight: 600,
+    color: '#132154',
+    paddingBottom: 15,
+  },
+  letterSubtitle: {
+    fontSize: 20,
+    fontStyle: 'italic',
+    color: '#000000',
+
+    lineHeight: 1.5,
+    paddingTop: 15,
+  },
+  letterGreeting: {
+    fontSize: 20,
+    fontWeight: 700,
+    color: colors.blue, // This is the dark/black color
+    paddingBottom: 30,      // Space between the name and the teal body text
+  },
+
+  letterBody: {
+    fontSize: 16,
+    lineHeight: 1.6,
+    color: colors.slate900,
+  },
+  // ── Icons & Section Headers ──────────────────────────────────
+  iconPlaceholderLarge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.blue,
+    marginBottom: 8,
+  },
+  iconPlaceholderSmall: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.blue,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+  },
+  // ── Definition Border Colors ─────────────────────────────────
+  borderCyan: { borderLeftColor: '#b4d0d4ff' },
+  borderBlue: { borderLeftColor: colors.blue },
+  borderDarkBlue: { borderLeftColor: '#1e3a8a' },
+  borderSlate: { borderLeftColor: colors.slate400 },
 
   // ── Generic section shell ───────────────────────────────────
   section: {
@@ -93,7 +176,7 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
   },
   sectionHeader: {
-    fontSize: 17,
+    fontSize: 32,
     fontWeight: 700,
     color: colors.slate900,
     marginBottom: 12,
@@ -108,15 +191,15 @@ export const styles = StyleSheet.create({
   summaryCardLabel: {
     color: colors.blue,
     textTransform: 'uppercase',
-    fontSize: 9,
+    fontSize: 12,
     letterSpacing: 0.5,
     marginBottom: 6,
     fontWeight: 700,
   },
   summaryCardText: {
     fontStyle: 'italic',
-    fontSize: 11,
-    lineHeight: 1.6,
+    fontSize: 12,
+    lineHeight: 1.8,
     color: colors.slate600,
   },
 
@@ -124,34 +207,42 @@ export const styles = StyleSheet.create({
   definitionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 14,
+    gap: 24,
+    marginTop: 10,
   },
   definitionCard: {
     width: '47%',
-    borderLeft: `3px solid ${colors.blue}`,
-    paddingLeft: 12,
+    borderLeft: `4px solid ${colors.blue}`,
+    padding: '16px',
     marginBottom: 10,
+    backgroundColor: '#fafbfc',
+    minHeight: 120,
+  },
+  definitionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
   },
   definitionTitle: {
-    fontSize: 12,
+    fontSize: 18,
     fontWeight: 700,
     color: colors.slate900,
-    marginBottom: 4,
   },
   definitionText: {
-    fontSize: 10.5,
+    fontSize: 13,
     lineHeight: 1.6,
     color: colors.slate600,
   },
-    definitionSummary: {
+  definitionSummary: {
     marginBottom: 12,
     padding: 12,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#d0ddebff',
     borderLeft: `4px solid ${colors.blue}`,
     borderRadius: 10,
   },
   definitionSummaryText: {
-    fontSize: 10.5,
+    fontSize: 13,
     lineHeight: 1.6,
     color: colors.slate600,
   },
@@ -185,22 +276,22 @@ export const styles = StyleSheet.create({
     gap: 6,
   },
   factorName: {
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 700,
-    color: colors.slate500,
+    color: colors.slate900,
   },
   factorScore: {
-    fontSize: 11,
-    color: colors.slate400,
+    fontSize: 12,
+    color: colors.slate900,
   },
   factorDescription: {
-    fontSize: 10,
+    fontSize: 11,
     lineHeight: 1.55,
     color: colors.slate600,
   },
   chartLegend: {
     fontSize: 9,
-    color: '#132e53',
+    color: '#2269ccff',
     textAlign: 'center',
     marginTop: 4,
   },

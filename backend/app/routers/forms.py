@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.models import Form, AssessmentSession, User
+from app.models.models import Form, AssessmentSession, User, SessionStatus
 from app.schemas import FormCreate, FormUpdate, FormOut
 from app.auth import require_admin, get_current_user
 from app.services.form_completion import is_form_complete
@@ -73,6 +73,21 @@ def update_form(
                 status_code=400,
                 detail="Cannot activate form: each section must contain exactly 10 questions.",
             )
+    elif updates.get("is_active") is False:
+        active_session_count = (
+            db.query(AssessmentSession)
+            .filter(
+                AssessmentSession.form_id == form_id,
+                AssessmentSession.status == SessionStatus.in_progress
+            )
+            .count()
+        )
+        if active_session_count > 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot deactivate form: {active_session_count} session(s) are currently in progress.",
+            )
+
     for field, value in updates.items():
         setattr(form, field, value)
 

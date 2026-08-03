@@ -168,7 +168,7 @@
 .bret-summary-card p {
   font-style: italic;
   font-size: 14px;
-  color: #475569;
+  color: #3b5377;
   line-height: 1.7;
   margin: 0;
 }
@@ -720,6 +720,7 @@
     opacity: 0;
     transform: translateY(4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

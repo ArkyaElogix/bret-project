@@ -97,9 +97,9 @@ export default function PortalAssessmentPage() {
 
   async function handleSubmit() {
     if (form && !form.is_active) {
-    setSubmitError('This assessment is no longer available.')
-    return
-  }
+      setSubmitError('This assessment is no longer available.')
+      return
+    }
     setSubmitting(true)
     setSubmitError(null)
     try {
@@ -149,22 +149,22 @@ export default function PortalAssessmentPage() {
   }
 
   if (form && !form.is_active) {
-  return (
-    <PortalLayout title="Assessment Unavailable">
-      <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
-        <p className="text-sm text-gray-700">
-          This questionnaire is no longer available.
-        </p>
-        <Link
-          to="/portal"
-          className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
-        >
-          Back to Questionnaires Page
-        </Link>
-      </div>
-    </PortalLayout>
-  )
-}
+    return (
+      <PortalLayout title="Assessment Unavailable">
+        <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
+          <p className="text-sm text-gray-700">
+            This questionnaire is no longer available.
+          </p>
+          <Link
+            to="/portal"
+            className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
+          >
+            Back to Questionnaires Page
+          </Link>
+        </div>
+      </PortalLayout>
+    )
+  }
 
   const totalQuestions = questions.length
   const answeredCount = questions.filter((q) => answers[q.id]).length
@@ -182,19 +182,19 @@ export default function PortalAssessmentPage() {
           <div className="max-w-2xl ">
             <p className="text-sm text-blue-900 font-semibold leading-6">
               This Assessment is designed to help you understand your behavioural response to different triggers and situations. It is divided into three sections.
-<ul className='list-style-type: square;'><li >Section A identifies your key and pre-dominant drivers and Motivators.</li>
-<li>Section B identifies your Change and Adaptability quotient through your response to uncertainty.</li>
-<li>Section C identifies your Communication style.</li></ul>
-Each section has a set of instruction before the start. 
-Please read and follow the instructions since they are different for each section.
+              <ul className='list-style-type: square;'><li >Section A identifies your key and pre-dominant drivers and Motivators.</li>
+                <li>Section B identifies your Change and Adaptability quotient through your response to uncertainty.</li>
+                <li>Section C identifies your Communication style.</li></ul>
+              Each section has a set of instruction before the start.
+              Please read and follow the instructions since they are different for each section.
 
-          </p>
+            </p>
           </div>
           <div className="flex-1 min-w-[200px]">
             <p className="text-sm font-medium text-gray-800">
               Progress: {answeredCount} of {totalQuestions} answered
             </p>
-            
+
             <div className="mt-2 h-2 w-64 max-w-full bg-gray-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-blue-500 transition-all duration-300"
@@ -249,9 +249,7 @@ Please read and follow the instructions since they are different for each sectio
                   const saving = savingIds.has(question.id)
                   return (
                     <div key={question.id} className="p-6">
-                      <p className="text-sm font-semibold text-gray-500 mb-3">
-                        Choice {question.number}
-                      </p>
+
                       <div className="grid gap-3 md:grid-cols-2">
                         {(['A', 'B'] as Option[]).map((opt) => {
                           const isSel = selected === opt
@@ -261,14 +259,13 @@ Please read and follow the instructions since they are different for each sectio
                               key={opt}
                               type="button"
                               onClick={() => handleSelect(question.id, opt)}
-                              className={`text-left rounded-lg border p-4 transition ${
-                                isSel
+                              className={`text-left rounded-lg border p-4 transition ${isSel
                                   ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
                                   : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                              }`}
+                                }`}
                             >
                               <span className="text-xs font-bold text-gray-400 mr-2">
-                                Option {opt}
+                                {question.number} {opt}
                               </span>
                               <span className="text-sm text-gray-700">{text}</span>
                             </button>
@@ -291,11 +288,11 @@ Please read and follow the instructions since they are different for each sectio
           )
         })}
         <button
-              onClick={handleSubmit}
-              disabled={!allAnswered || submitting}
-              className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-            >
-              {submitting ? 'Submitting...' : 'Submit Questionnaire'}
+          onClick={handleSubmit}
+          disabled={!allAnswered || submitting}
+          className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+        >
+          {submitting ? 'Submitting...' : 'Submit Questionnaire'}
         </button>
       </div>
     </PortalLayout>

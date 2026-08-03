@@ -18,8 +18,12 @@ from app.models.models import User, UserRole
 
 load_dotenv()
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-change-me")
-JWT_ALGORITHM = "HS256"
+JWT_SECRET_KEY= os.getenv("JWT_SECRET_KEY")
+if not JWT_SECRET_KEY:
+    raise RuntimeError("JWT_SECRET_KEY must be set in the environment.")
+if len(JWT_SECRET_KEY) < 32:
+    raise RuntimeError("JWT_SECRET_KEY must be at least 32 characters long.")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM","HS256")
 JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "120"))
 
 bearer_scheme = HTTPBearer()

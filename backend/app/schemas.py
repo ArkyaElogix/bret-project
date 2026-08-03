@@ -153,6 +153,9 @@ class UserOut(BaseModel):
 class PasswordChange(BaseModel):
     new_password: str
 
+class UserDeleteRequest(BaseModel):
+    password: str
+
 
 class ForgotPasswordRequest(BaseModel):
     email: str
