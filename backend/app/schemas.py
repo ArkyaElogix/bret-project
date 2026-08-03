@@ -125,6 +125,7 @@ class CandidateRegisterRequest(BaseModel):
     email: str
     password: str
     product_type: str
+    consent_accepted: bool
 
 
 class TokenResponse(BaseModel):
@@ -249,3 +250,14 @@ class SessionReportOut(BaseModel):
     user: dict[str, Any]
     form: dict[str, Any]
     sections: list[ReportSectionOut]
+
+class AuditLogOut(BaseModel):
+    id: int
+    action: str
+    user_id: Optional[int] = None
+    target_user_id: Optional[int] = None
+    ip_address: Optional[str] = None
+    detail: Optional[str] = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

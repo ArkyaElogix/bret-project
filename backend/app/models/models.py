@@ -51,6 +51,18 @@ class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     USER = "USER"
 
+class AuditAction(str, enum.Enum):
+    """Enum of privacy-sensitive actions recorded in the audit log."""
+    USER_REGISTER            = "USER_REGISTER"
+    USER_LOGIN               = "USER_LOGIN"
+    USER_LOGOUT              = "USER_LOGOUT"
+    DATA_EXPORT              = "DATA_EXPORT"
+    ACCOUNT_DELETE           = "ACCOUNT_DELETE"
+    PASSWORD_RESET_REQUEST   = "PASSWORD_RESET_REQUEST"
+    PASSWORD_RESET_COMPLETE  = "PASSWORD_RESET_COMPLETE"
+    ADMIN_VIEW_USER          = "ADMIN_VIEW_USER"
+    ADMIN_VIEW_SESSION       = "ADMIN_VIEW_SESSION"
+    CONSENT_GIVEN            = "CONSENT_GIVEN"
 
 # class Form(Base):
 #     """A specific version/set of questions, e.g. 'BRET v1', 'BRET Executive 2027'.
@@ -189,7 +201,15 @@ class User(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
+    # --- Privacy lifecycle metadata ---
+    consent_given_at     = Column(DateTime, nullable=True)  # when user accepted the privacy notice
+    deleted_at           = Column(DateTime, nullable=True)  # soft-delete timestamp (None = active)
+    anonymized_at        = Column(DateTime, nullable=True)  # when PII was scrubbed
+    retention_expires_at = Column(DateTime, nullable=True)  # scheduled hard-delete date
+    last_accessed_at     = Column(DateTime, nullable=True)  # last successful login
+
     sessions = relationship("AssessmentSession", back_populates="user", cascade="all, delete-orphan")
+    audit_logs = relationship("AuditLog", foreign_keys="AuditLog.user_id", back_populates="user")
 
 
 class AssessmentSession(Base):
@@ -313,3 +333,21 @@ class PasswordResetToken(Base):
     def hash_token(raw_token: str) -> str:
         """Return the SHA-256 hex digest of a raw token string."""
         return hashlib.sha256(raw_token.encode()).hexdigest()
+
+
+class AuditLog(Base):
+    """Structured audit trail for all privacy-sensitive actions.
+    Kept separate from application logs so it can be queried and exported independently."""
+    __tablename__ = "audit_logs"
+
+    id             = Column(Integer, primary_key=True, autoincrement=True)
+    action         = Column(Enum(AuditAction), nullable=False)
+    # actor: who performed the action (None for unauthenticated flows e.g. forgot-password)
+    user_id        = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # target: the user the action was performed *on* (differs from user_id for admin ops)
+    target_user_id = Column(Integer, nullable=True)
+    ip_address     = Column(String(45), nullable=True)   # supports IPv6
+    detail         = Column(Text, nullable=True)          # JSON blob for extra context
+    created_at     = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user = relationship("User", foreign_keys=[user_id], back_populates="audit_logs")

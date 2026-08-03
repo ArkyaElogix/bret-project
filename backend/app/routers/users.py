@@ -3,18 +3,45 @@ Endpoints for managing Users. Note: this is just CRUD with password
 hashing on create — actual login/auth (tokens, sessions) is a separate
 piece to build later.
 """
-
-from fastapi import APIRouter, Depends, HTTPException
+import json
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.database import get_db
-from app.models.models import User, UserRole, ProductType
-from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate, UserDeleteRequest
+from app.models.models import User, UserRole, ProductType, AuditLog, AuditAction
+from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate, UserDeleteRequest, AuditLogOut
 from app.security import hash_password, verify_password
 from app.auth import require_admin, get_current_user
 
+
 router = APIRouter(prefix="/users", tags=["Users"])
 
+def _write_audit(
+    db: Session,
+    action: AuditAction,
+    *,
+    user_id: int | None = None,
+    target_user_id: int | None = None,
+    ip: str | None = None,
+    detail: dict | None = None,
+) -> None:
+    try:
+        db.add(AuditLog(
+            action=action,
+            user_id=user_id,
+            target_user_id=target_user_id,
+            ip_address=ip,
+            detail=json.dumps(detail) if detail else None,
+        ))
+        db.flush()
+    except Exception:
+        pass
+def _client_ip(request: Request) -> str | None:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else None
 
 @router.post("/", response_model=UserOut, status_code=201)
 def create_user(
@@ -50,10 +77,14 @@ def list_users(db: Session = Depends(get_db), _admin: User = Depends(require_adm
 
 @router.get("/me/export")
 def export_my_data(
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     """GDPR Right to Access: Export all user data as JSON."""
+    _write_audit(db, AuditAction.DATA_EXPORT,
+                 user_id=current_user.id, ip=_client_ip(request))
+
     user_data = {
         "id": current_user.id,
         "name": current_user.name,
@@ -61,7 +92,8 @@ def export_my_data(
         "role": current_user.role.value,
         "product_type": current_user.product_type.value,
         "created_at": current_user.created_at.isoformat(),
-        "sessions": []
+        "consent_given_at": current_user.consent_given_at.isoformat() if current_user.consent_given_at else None,
+        "sessions": [],
     }
 
     for session in current_user.sessions:
@@ -75,42 +107,49 @@ def export_my_data(
                 {
                     "question_id": r.question_id,
                     "chosen_option": r.chosen_option.value,
-                    "answered_at": r.answered_at.isoformat()
-                } for r in session.responses
+                    "answered_at": r.answered_at.isoformat(),
+                }
+                for r in session.responses
             ],
             "scores": [
                 {
                     "section_id": s.section_id,
                     "factor_id": s.factor_id,
-                    "score": s.score
-                } for s in session.section_scores
-            ]
+                    "score": s.score,
+                }
+                for s in session.section_scores
+            ],
         }
-        # Include AI Report if generated
         if session.ai_report_data:
             session_data["ai_report"] = session.ai_report_data
-            
         user_data["sessions"].append(session_data)
 
+    db.commit()  # flush audit log
     return user_data
+
 
 
 @router.delete("/me", status_code=204)
 def delete_me(
     payload: UserDeleteRequest,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """GDPR Right to be Forgotten: Delete own account with password confirmation.
-    Cascades to delete all associated sessions and responses."""
-    
-    # 1. Verify password
+    """GDPR Right to be Forgotten: Soft-delete own account with password confirmation.
+    Sets deleted_at; hard-delete / anonymization happens in the Phase 2 retention job."""
+
     if not verify_password(payload.password, current_user.password_hash):
         raise HTTPException(status_code=401, detail="Incorrect password. Account deletion failed.")
 
-    # 2. Delete user (sessions, responses, and scores will cascade)
-    db.delete(current_user)
+    # Soft-delete: mark timestamp, invalidate token so existing sessions expire immediately
+    current_user.deleted_at = datetime.utcnow()
+    current_user.token_version += 1  # invalidates all outstanding JWTs
+
+    _write_audit(db, AuditAction.ACCOUNT_DELETE,
+                 user_id=current_user.id, ip=_client_ip(request))
     db.commit()
+
 
 @router.get("/{user_id}", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),):
@@ -180,4 +219,17 @@ def change_user_type(
     db.refresh(user)
     return user
 
+@router.get("/admin/audit-log", response_model=list[AuditLogOut])
+def get_audit_log(
+    limit: int = 200,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Admin-only: return the most recent audit log entries."""
+    return (
+        db.query(AuditLog)
+        .order_by(AuditLog.created_at.desc())
+        .limit(limit)
+        .all()
+    )
 

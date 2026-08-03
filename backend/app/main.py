@@ -1,7 +1,8 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import questions, behavioural_types, behavioural_factors, forms, users, sessions, auth
+from app.routers import questions, behavioural_types, behavioural_factors, forms, users, sessions, auth, audit
 
 app = FastAPI(title="BRET Assessment API")
 
@@ -26,7 +27,7 @@ app.include_router(behavioural_factors.router)
 app.include_router(questions.router)
 app.include_router(users.router)
 app.include_router(sessions.router)
-
+app.include_router(audit.router)
 
 @app.get("/")
 def root():
