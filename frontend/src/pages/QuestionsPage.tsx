@@ -273,7 +273,7 @@ export default function QuestionsPage() {
 
   function FactorReference() {
     return (
-      <aside className="self-start rounded-lg border border-gray-200 bg-white shadow-sm lg:sticky lg:top-6">
+    <aside className="self-start rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:sticky lg:top-6">
         <details open>
           <summary className="cursor-pointer list-none border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800">
             Available Factors
@@ -379,8 +379,8 @@ export default function QuestionsPage() {
             const sectionQuestions = getQuestionsForSection(section.id)
             const sectionFactors = getFactorsForSection(section.id)
             return (
-              <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                <div className="flex items-start justify-between gap-4 border-b border-gray-200 bg-slate-50 px-6 py-4">
+            <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div className="flex items-start justify-between gap-4 border-b border-gray-200 bg-slate-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/60">
                   <div>
                     <h2 className="text-lg font-bold text-gray-800">
                       {section.code} - {section.name}
@@ -426,7 +426,7 @@ export default function QuestionsPage() {
                   )}
 
                   {addingToSection === section.id && (
-                    <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
+                    <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/40 dark:bg-blue-950/30">
                       <form onSubmit={(e) => handleCreateQuestion(e, section.id)} className="space-y-4">
                         <h3 className="text-sm font-semibold text-blue-900">New Question</h3>
                         <div className="grid gap-4 lg:grid-cols-12">
@@ -639,7 +639,7 @@ export default function QuestionsPage() {
                           <div className="flex flex-col gap-4 py-4 md:flex-row md:items-start">
                             <div className="w-8 shrink-0 text-sm font-semibold text-gray-400">{question.number}.</div>
                             <div className="grid flex-1 gap-4 md:grid-cols-2">
-                              <div className="rounded border border-gray-200 bg-gray-50 p-3">
+                              <div className="rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/60">
                                 <p className="text-sm font-medium text-gray-700">Option A</p>
                                 <p className="mt-1 text-sm text-gray-600">{question.option_a_text}</p>
                                 {question.option_a_factor_id && (
@@ -648,7 +648,7 @@ export default function QuestionsPage() {
                                   </p>
                                 )}
                               </div>
-                              <div className="rounded border border-gray-200 bg-gray-50 p-3">
+                              <div className="rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/60">
                                 <p className="text-sm font-medium text-gray-700">Option B</p>
                                 <p className="mt-1 text-sm text-gray-600">{question.option_b_text}</p>
                                 {question.option_b_factor_id && (

@@ -98,7 +98,7 @@ export default function FormDetailsPage() {
             {sections.map((section) => {
               const sectionQuestions = getQuestionsForSection(section.id)
               return (
-                <div key={section.id} className="rounded-lg border border-gray-200 bg-white shadow-sm">
+                <div key={section.id} className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                   <div className="border-b border-gray-200 bg-slate-50 px-6 py-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>

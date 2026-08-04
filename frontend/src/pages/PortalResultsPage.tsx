@@ -62,7 +62,7 @@ export default function PortalResultsPage() {
   if (sections.length === 0) {
     return (
       <PortalLayout title="Your Results">
-        <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
+        <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500 dark:bg-gray-800 dark:border dark:border-gray-700">
           No results are available for this session yet.
         </div>
         <Link to="/portal" className="text-blue-600 hover:underline text-sm mt-4 inline-block">
@@ -79,7 +79,7 @@ export default function PortalResultsPage() {
           ← Back to Questionnaire
         </Link>
 
-        <div className="bg-white rounded-xl shadow border border-gray-100 p-10">
+        <div className="bg-white rounded-xl shadow border border-gray-100 p-10 dark:bg-gray-800 dark:border-gray-700">
 
           <h1 className="text-2xl font-bold text-gray-900">Your Behavioural Profile</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -98,7 +98,7 @@ export default function PortalResultsPage() {
         {sections.map((section) => {
           const top = section.factors[0]
           return (
-            <div key={section.section_id} className="bg-white rounded-xl shadow border border-gray-100 p-6 space-y-5">
+            <div key={section.section_id} className="bg-white rounded-xl shadow border border-gray-100 p-6 space-y-5 dark:bg-gray-800 dark:border-gray-700">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <h2 className="text-lg font-semibold text-gray-800">
                   {section.section_code} - {section.section_name}

@@ -6,6 +6,19 @@ import { Link } from 'react-router-dom'
 import AdminLayout from '../components/AdminLayout'
 import { ApiError } from '../api/client'
 
+function formatSessionStatus(status: Session['status']) {
+  switch (status) {
+    case 'in_progress':
+      return 'In progress'
+    case 'submitted':
+      return 'Submitted'
+    default:
+      return String(status)
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (ch) => ch.toUpperCase())
+  }
+}
+
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
@@ -62,11 +75,11 @@ export default function SessionsPage() {
     <AdminLayout title="Sessions">
       <div className="space-y-4">
         {sessions.length === 0 ? (
-          <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
+          <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500 dark:bg-gray-800 dark:border dark:border-gray-700">
             No sessions found.
           </div>
         ) : (
-          <div className="bg-white shadow rounded-lg overflow-hidden">
+          <div className="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -77,13 +90,23 @@ export default function SessionsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
+              <tbody className="divide-y divide-gray-200 bg-white dark:bg-gray-800 dark:divide-gray-700">
                 {sessions.map((session) => (
                   <tr key={session.id}>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.id}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.user_name}</td>
                     <td className="px-6 py-4 text-sm text-gray-700">{session.form_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{session.status}</td>
+                    <td className="px-6 py-4 text-sm">
+  <span
+    className={
+      session.status === 'in_progress'
+        ? 'inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-800'
+        : 'inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800'
+    }
+  >
+    {formatSessionStatus(session.status)}
+  </span>
+</td>
                     <td className="px-6 py-4 text-sm text-blue-600">
                       <Link to={`/sessions/${session.id}/results`} className={"hover:underline text-xs px-3 py-1 rounded bg-blue-100 text-blue-800 disabled:opacity-50"}>
                         View Results

@@ -58,7 +58,7 @@ export default function SessionResultsPage() {
   if (sections.length === 0) {
     return (
       <AdminLayout title="Session Results">
-        <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
+        <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500 dark:bg-gray-800 dark:border dark:border-gray-700">
           No results available for this session yet. The session may not be submitted, or no questions had factor mappings.
         </div>
         <Link to="/sessions" className="text-blue-600 hover:underline text-sm mt-4 inline-block">← Back to Sessions</Link>
@@ -71,7 +71,7 @@ export default function SessionResultsPage() {
       <div className="max-w-4xl space-y-8">
         <Link to="/sessions" className="text-blue-600 hover:underline text-sm inline-block">← Back to Sessions</Link>
 
-        <div className="bg-white rounded-xl shadow border border-gray-100 p-6">
+        <div className="bg-white rounded-xl shadow border border-gray-100 p-6 dark:bg-gray-800 dark:border-gray-700">
           
           <h1 className="text-2xl font-bold text-gray-900">Behavioural Profile</h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -82,7 +82,7 @@ export default function SessionResultsPage() {
         {sections.map((section) => {
           const top = section.factors[0]
           return (
-            <div key={section.section_id} className="bg-white rounded-xl shadow border border-gray-100 p-6 space-y-5">
+            <div key={section.section_id} className="bg-white rounded-xl shadow border border-gray-100 p-6 space-y-5 dark:bg-gray-800 dark:border-gray-700">
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <h2 className="text-lg font-semibold text-gray-800">
                   {section.section_code} - {section.section_name}

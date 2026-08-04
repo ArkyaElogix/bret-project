@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [name, setName] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [productType, setProductType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
+  const [consentAccepted, setConsentAccepted] = useState(false)
 
   // Password visibility states
   const [showPassword, setShowPassword] = useState(false)
@@ -47,13 +48,17 @@ export default function LoginPage() {
         setError('Passwords do not match.')
         return
       }
+      if (!consentAccepted) {
+        setError('You must accept the privacy notice to create an account.')
+        return
+      }
     }
 
     setLoading(true)
     try {
       const result =
         mode === 'register'
-          ? await registerCandidate(name, email, password, productType)
+          ? await registerCandidate(name, email, password, productType, consentAccepted)
           : await login(email, password)
 
       setToken(result.access_token)
@@ -214,8 +219,31 @@ export default function LoginPage() {
               </div>
             </div>
           </>
-        )}
 
+
+        )}
+        {mode === 'register' && (
+          <div className="flex items-start space-x-3 pt-1">
+            <input
+              id="consent-checkbox"
+              type="checkbox"
+              checked={consentAccepted}
+              onChange={(e) => setConsentAccepted(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+            />
+            <label
+              htmlFor="consent-checkbox"
+              className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed cursor-pointer"
+            >
+              I agree that my name, email address, and assessment responses will be
+              stored and processed for the purpose of generating my behavioural report.
+              I understand I can export or delete my data at any time from my profile.{' '}
+              <span className="text-blue-600 font-medium">
+                This is required to create an account.
+              </span>
+            </label>
+          </div>
+        )}
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <button

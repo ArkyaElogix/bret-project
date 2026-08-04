@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
     if (!token) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-4 text-center">
+                <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-4 text-center dark:bg-gray-800 dark:text-gray-100">
                     <p className="text-red-600 mb-4">{error}</p>
                     <Link to="/forgot-password" className="text-blue-600 hover:underline">Request a new link</Link>
                 </div>
@@ -67,7 +67,7 @@ export default function ResetPasswordPage() {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-4">
+            <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg p-8 w-full max-w-sm space-y-4 dark:bg-gray-800 dark:text-gray-100">
                 <h1 className="text-xl font-semibold text-gray-800">Set New Password</h1>
 
                 <div>

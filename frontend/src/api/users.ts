@@ -71,3 +71,30 @@ export async function deleteMe(password: string): Promise<void> {
     body: { password },
   })
 }
+
+export interface AuditLog {
+  id: number
+  action: string
+  user_id: number | null
+  target_user_id: number | null
+  ip_address: string | null
+  detail: string | null
+  created_at: string
+}
+
+/**
+ * Admin-only: fetch recent audit log entries.
+ * Optionally filter by action type or user_id.
+ */
+export async function getAuditLog(params?: {
+  limit?: number
+  action?: string
+  user_id?: number
+}): Promise<AuditLog[]> {
+  const query = new URLSearchParams()
+  if (params?.limit) query.set('limit', String(params.limit))
+  if (params?.action) query.set('action', params.action)
+  if (params?.user_id) query.set('user_id', String(params.user_id))
+  const qs = query.toString()
+  return apiRequest<AuditLog[]>(`/audit/${qs ? `?${qs}` : ''}`)
+}

@@ -32,11 +32,12 @@ export async function registerCandidate(
   name: string,
   email: string,
   password: string,
-  productType: 'BASIC' | 'EXECUTIVE'
+  productType: 'BASIC' | 'EXECUTIVE',
+  consentAccepted: boolean,
 ): Promise<LoginResponse> {
   return apiRequest<LoginResponse>('/auth/register', {
     method: 'POST',
-    body: { name, email, password, product_type: productType },
+    body: { name, email, password, product_type: productType, consent_accepted: consentAccepted },
   })
 }
 

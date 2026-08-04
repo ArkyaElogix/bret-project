@@ -65,13 +65,13 @@ export default function PortalProfilePage() {
     <PortalLayout title="My Profile">
       <div className="max-w-md space-y-4">
         {loading && (
-          <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg">Loading profile...</p>
+          <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">Loading profile...</p>
         )}
         {error && (
-          <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg">{error}</p>
+          <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">{error}</p>
         )}
         {!loading && !error && user && (
-          <div className="bg-white shadow rounded-lg p-6 space-y-4">
+          <div className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700">
             <p className="text-sm text-gray-500">
               This is the information we have on file for your account.
             </p>
@@ -103,7 +103,7 @@ export default function PortalProfilePage() {
           </div>
         )}
         {!loading && !error && user && (
-          <div className="bg-white shadow rounded-lg p-6 space-y-4 border border-red-100 mt-6">
+          <div className="bg-white shadow rounded-lg p-6 space-y-4 border border-red-100 mt-6 dark:bg-gray-800 dark:border dark:border-gray-700">
             <h3 className="text-lg font-semibold text-gray-900">Privacy & Data Control</h3>
             <p className="text-sm text-gray-500">
               Manage your personal data in accordance with our privacy policy.
@@ -127,7 +127,7 @@ export default function PortalProfilePage() {
               ) : (
                 <div className="bg-red-50 p-4 rounded-md space-y-3 border border-red-200 mt-2">
                   <p className="text-sm font-medium text-red-800">
-                    Warning: This action is irreversible. All of your sessions and reports will be permanently deleted.
+                    Warning: This will deactivate your account immediately and schedule your data for deletion. You will be logged out and will not be able to log back in.
                   </p>
                   <input
                     type="password"

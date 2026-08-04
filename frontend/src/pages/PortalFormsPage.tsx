@@ -114,19 +114,19 @@ export default function PortalFormsPage() {
         )}
 
         {loading && (
-          <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg">Loading forms...</p>
+          <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">Loading forms...</p>
         )}
         {error && (
-          <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg">{error}</p>
+          <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">{error}</p>
         )}
         {!loading && !error && forms.length === 0 && (
-          <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500">
+          <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500 dark:bg-gray-800 dark:border dark:border-gray-700">
             No assessments are available right now. Please check back later.
           </div>
         )}
 
         {!loading && !error && forms.length > 0 && (
-          <div className="bg-white shadow rounded-lg divide-y">
+          <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700 dark:border dark:border-gray-700">
             {forms.map((form) => {
               const session = sessionForForm(form.id)
               ///const attempts = sessionAgainForForm(form.id)
@@ -249,7 +249,7 @@ export default function PortalFormsPage() {
           </div>
         )}
         {!loading && !error && completedSessions.length > 0 && (
-          <div className="bg-white shadow rounded-lg divide-y">
+          <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700 dark:border dark:border-gray-700">
             <div className="p-5">
               <h2 className="text-base font-semibold text-gray-800">
                 Previous Results

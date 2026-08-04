@@ -135,7 +135,7 @@ export default function PortalAssessmentPage() {
   if (session.status === 'submitted') {
     return (
       <PortalLayout title="Assessment">
-        <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
+        <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md dark:bg-gray-800 dark:border dark:border-gray-700">
           <p className="text-sm text-gray-700">This questionnaire has already been submitted.</p>
           <Link
             to={`/portal/sessions/${sessionId}/results`}
@@ -151,7 +151,7 @@ export default function PortalAssessmentPage() {
   if (form && !form.is_active) {
     return (
       <PortalLayout title="Assessment Unavailable">
-        <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md">
+        <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md dark:bg-gray-800 dark:border dark:border-gray-700">
           <p className="text-sm text-gray-700">
             This questionnaire is no longer available.
           </p>
@@ -178,7 +178,7 @@ export default function PortalAssessmentPage() {
     <PortalLayout title={form?.name || 'Assessment'}>
       <div className="space-y-6">
         {/* Progress + submit bar */}
-        <div className="bg-white shadow rounded-lg p-5 flex items-center justify-between gap-4 flex-wrap">
+        <div className="bg-white shadow rounded-lg p-5 flex items-center justify-between gap-4 flex-wrap dark:bg-gray-800 dark:border dark:border-gray-700">
           <div className="max-w-2xl ">
             <p className="text-sm text-blue-900 font-semibold leading-6">
               This Assessment is designed to help you understand your behavioural response to different triggers and situations. It is divided into three sections.
@@ -233,7 +233,7 @@ export default function PortalAssessmentPage() {
           const sectionQuestions = getQuestionsForSection(section.id)
           if (sectionQuestions.length === 0) return null
           return (
-            <div key={section.id} className="bg-white shadow rounded-lg overflow-hidden">
+            <div key={section.id} className="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700">
               <div className="bg-slate-50 border-b border-gray-200 px-6 py-4">
                 <h2 className="text-lg font-semibold text-gray-800">
                   {section.code} - {section.name}

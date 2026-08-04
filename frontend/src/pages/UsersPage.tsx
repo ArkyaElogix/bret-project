@@ -7,6 +7,8 @@ import {
   changePassword,
   User,
   changeUserType,
+  getAuditLog,
+  AuditLog,
 } from '../api/users'
 import { listSessions, Session } from '../api/sessions'
 import { ApiError } from '../api/client'
@@ -58,6 +60,12 @@ export default function UsersPage() {
     message: string
   } | null>(null)
 
+  // Audit log
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
+  const [auditLoading, setAuditLoading] = useState(false)
+  const [auditError, setAuditError] = useState<string | null>(null)
+  const [auditVisible, setAuditVisible] = useState(false)
+
   async function loadData() {
     setLoading(true)
     setError(null)
@@ -74,6 +82,21 @@ export default function UsersPage() {
       setLoading(false)
     }
   }
+
+  async function loadAuditLog() {
+    setAuditLoading(true)
+    setAuditError(null)
+    try {
+      const data = await getAuditLog({ limit: 200 })
+      setAuditLogs(data)
+      setAuditVisible(true)
+    } catch (err) {
+      setAuditError(err instanceof ApiError ? err.message : 'Failed to load audit log.')
+    } finally {
+      setAuditLoading(false)
+    }
+  }
+
 
   useEffect(() => {
     loadData()
@@ -300,178 +323,248 @@ export default function UsersPage() {
     )
   }
 
-        return (
-        <AdminLayout title="Users">
-          <div className="max-w-4xl space-y-8">
+  return (
+    <AdminLayout title="Users">
+      <div className="max-w-4xl space-y-8">
 
-            {/* Create-user form */}
-            <form
-              onSubmit={handleCreate}
-              className="bg-white shadow rounded-lg p-6 space-y-4"
-            >
-              <h2 className="text-sm font-medium text-gray-700">Create a new user</h2>
+        {/* Create-user form */}
+        <form
+          onSubmit={handleCreate}
+          className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700"
+        >
+          <h2 className="text-sm font-medium text-gray-700">Create a new user</h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="Full name"
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="name@example.com"
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Password</label>
-                  <input
-                    type="password"
-                    required
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Initial password"
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Role</label>
-                  <select
-                    value={newRole}
-                    onChange={(e) => setNewRole(e.target.value as Role)}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="USER">User</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Name</label>
+              <input
+                type="text"
+                required
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Full name"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Initial password"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Role</label>
+              <select
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value as Role)}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="USER">User</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+          </div>
+
+          {newRole === 'USER' && (
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">Product Type</label>
+              <select
+                value={newProductType}
+                onChange={(e) => setNewProductType(e.target.value as 'BASIC' | 'EXECUTIVE')}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="BASIC">Basic</option>
+                <option value="EXECUTIVE">Executive</option>
+              </select>
+            </div>
+          )}
+
+          {createError && <p className="text-sm text-red-600">{createError}</p>}
+
+          <button
+            type="submit"
+            disabled={creating}
+            className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {creating ? 'Creating...' : 'Create user'}
+          </button>
+        </form>
+
+        {/* Loading / error for the whole page */}
+        {loading && (
+          <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">
+            Loading users...
+          </p>
+        )}
+        {error && (
+          <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">
+            {error}
+          </p>
+        )}
+
+        {!loading && !error && (
+          <>
+            {/* Admins */}
+            <section className="space-y-2">
+              <h2 className="text-sm font-semibold text-gray-700">
+                Admins ({admins.length})
+              </h2>
+              <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700">
+                {admins.length === 0 ? (
+                  <p className="p-6 text-sm text-gray-500">No admins yet.</p>
+                ) : (
+                  admins.map(renderUserRow)
+                )}
+              </div>
+            </section>
+
+            {/* Regular users */}
+            <section className="space-y-2">
+              <h2 className="text-sm font-semibold text-gray-700">
+                Users ({regularUsers.length})
+              </h2>
+              <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700">
+                {regularUsers.length === 0 ? (
+                  <p className="p-6 text-sm text-gray-500">No users yet.</p>
+                ) : (
+                  regularUsers.map(renderUserRow)
+                )}
+              </div>
+            </section>
+
+            {/* Active assessment sessions */}
+            <section className="space-y-2">
+              <h2 className="text-sm font-semibold text-gray-700">
+                Active assessment sessions ({activeSessions.length})
+              </h2>
+              <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700">
+                {activeSessions.length === 0 ? (
+                  <p className="p-6 text-sm text-gray-500">
+                    No active assessment sessions right now.
+                  </p>
+                ) : (
+                  activeSessions.map((session) => {
+                    const user = userById.get(session.user_id)
+                    return (
+                      <div
+                        key={session.id}
+                        className="p-4 flex items-center justify-between gap-2 flex-wrap"
+                      >
+                        <div>
+                          <p className="text-sm font-medium text-gray-800">
+                            {user ? user.name : `User #${session.user_id}`}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {user ? user.email : '—'} · Form {session.form_id} ·{' '}
+
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                            In Progress
+                          </span>
+                          <Link
+                            to="/sessions"
+                            className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50"
+                          >
+                            View in Sessions
+                          </Link>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </section>
+            {/* Audit Log */}
+            <section className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-gray-700">Privacy Audit Log</h2>
+                <button
+                  onClick={loadAuditLog}
+                  disabled={auditLoading}
+                  className="text-xs border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {auditLoading ? 'Loading...' : auditVisible ? 'Refresh' : 'Load Audit Log'}
+                </button>
               </div>
 
-              {newRole === 'USER' && (
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Product Type</label>
-                  <select
-                    value={newProductType}
-                    onChange={(e) => setNewProductType(e.target.value as 'BASIC' | 'EXECUTIVE')}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="BASIC">Basic</option>
-                    <option value="EXECUTIVE">Executive</option>
-                  </select>
-                </div>
+              {auditError && (
+                <p className="text-sm text-red-600 bg-white shadow rounded-lg p-4 dark:bg-gray-800 dark:border dark:border-gray-700">{auditError}</p>
               )}
 
-              {createError && <p className="text-sm text-red-600">{createError}</p>}
+              {auditVisible && (
+                <div className="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700">
+                  {auditLogs.length === 0 ? (
+                    <p className="p-6 text-sm text-gray-500">No audit events recorded yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 text-xs">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detail</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
+                          {auditLogs.map((log) => (
+                            <tr key={log.id} className="hover:bg-gray-50">
+                              <td className="px-4 py-2 text-gray-500 whitespace-nowrap">
+                                {new Date(log.created_at).toLocaleString()}
+                              </td>
+                              <td className="px-4 py-2 whitespace-nowrap">
+                                <span className={`inline-block px-2 py-0.5 rounded-full font-medium ${log.action.includes('DELETE') || log.action.includes('RESET')
+                                  ? 'bg-red-100 text-red-700'
+                                  : log.action.includes('LOGIN') || log.action.includes('LOGOUT')
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : log.action.includes('CONSENT') || log.action.includes('REGISTER')
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-100 text-gray-600'
+                                  }`}>
+                                  {log.action}
+                                </span>
+                              </td>
+                              <td className="px-4 py-2 text-gray-600">
+                                {log.user_id ?? '—'}
+                              </td>
+                              <td className="px-4 py-2 text-gray-500 font-mono">
+                                {log.ip_address ?? '—'}
+                              </td>
+                              <td className="px-4 py-2 text-gray-500 max-w-xs truncate">
+                                {log.detail ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
 
-              <button
-                type="submit"
-                disabled={creating}
-                className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
-              >
-                {creating ? 'Creating...' : 'Create user'}
-              </button>
-            </form>
-
-            {/* Loading / error for the whole page */}
-            {loading && (
-              <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg">
-                Loading users...
-              </p>
-            )}
-            {error && (
-              <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg">
-                {error}
-              </p>
-            )}
-
-            {!loading && !error && (
-              <>
-                {/* Admins */}
-                <section className="space-y-2">
-                  <h2 className="text-sm font-semibold text-gray-700">
-                    Admins ({admins.length})
-                  </h2>
-                  <div className="bg-white shadow rounded-lg divide-y">
-                    {admins.length === 0 ? (
-                      <p className="p-6 text-sm text-gray-500">No admins yet.</p>
-                    ) : (
-                      admins.map(renderUserRow)
-                    )}
-                  </div>
-                </section>
-
-                {/* Regular users */}
-                <section className="space-y-2">
-                  <h2 className="text-sm font-semibold text-gray-700">
-                    Users ({regularUsers.length})
-                  </h2>
-                  <div className="bg-white shadow rounded-lg divide-y">
-                    {regularUsers.length === 0 ? (
-                      <p className="p-6 text-sm text-gray-500">No users yet.</p>
-                    ) : (
-                      regularUsers.map(renderUserRow)
-                    )}
-                  </div>
-                </section>
-
-                {/* Active assessment sessions */}
-                <section className="space-y-2">
-                  <h2 className="text-sm font-semibold text-gray-700">
-                    Active assessment sessions ({activeSessions.length})
-                  </h2>
-                  <div className="bg-white shadow rounded-lg divide-y">
-                    {activeSessions.length === 0 ? (
-                      <p className="p-6 text-sm text-gray-500">
-                        No active assessment sessions right now.
-                      </p>
-                    ) : (
-                      activeSessions.map((session) => {
-                        const user = userById.get(session.user_id)
-                        return (
-                          <div
-                            key={session.id}
-                            className="p-4 flex items-center justify-between gap-2 flex-wrap"
-                          >
-                            <div>
-                              <p className="text-sm font-medium text-gray-800">
-                                {user ? user.name : `User #${session.user_id}`}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {user ? user.email : '—'} · Form {session.form_id} ·{' '}
-
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
-                                In Progress
-                              </span>
-                              <Link
-                                to="/sessions"
-                                className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50"
-                              >
-                                View in Sessions
-                              </Link>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
-                </section>
-              </>
-            )}
-          </div>
-        </AdminLayout>
-        )
+          </>
+        )}
+      </div>
+    </AdminLayout>
+  )
 }
