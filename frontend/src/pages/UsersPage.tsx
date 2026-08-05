@@ -21,7 +21,7 @@ const ROLE_STYLES: Record<Role, string> = {
   USER: 'bg-blue-100 text-blue-700',
 }
 
-const PRODUCT_TYPE_STYLES: Record<'BASIC' | 'EXECUTIVE', string> = {
+const ACCOUNT_TYPE_STYLES: Record<'BASIC' | 'EXECUTIVE', string> = {
   BASIC: 'bg-green-100 text-green-700',
   EXECUTIVE: 'bg-orange-100 text-orange-700',
 }
@@ -37,7 +37,7 @@ export default function UsersPage() {
   const [newEmail, setNewEmail] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newRole, setNewRole] = useState<Role>('USER')
-  const [newProductType, setNewProductType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
+  const [newAccountType, setNewAccountType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
 
@@ -107,12 +107,12 @@ export default function UsersPage() {
     setCreateError(null)
     setCreating(true)
     try {
-      await createUser(newName, newEmail, newPassword, newRole, newProductType)
+      await createUser(newName, newEmail, newPassword, newRole, newAccountType)
       setNewName('')
       setNewEmail('')
       setNewPassword('')
       setNewRole('USER')
-      setNewProductType('BASIC')
+      setNewAccountType('BASIC')
       await loadData()
     } catch (err) {
       setCreateError(
@@ -212,9 +212,9 @@ export default function UsersPage() {
 
             {user.role === 'USER' && (
               <span
-                className={`text-xs px-2 py-1 rounded-full ${PRODUCT_TYPE_STYLES[user.product_type]} dark:text-gray-900`}
+                className={`text-xs px-2 py-1 rounded-full ${ACCOUNT_TYPE_STYLES[user.account_type]} dark:text-gray-900`}
               >
-                {user.product_type === 'BASIC' ? 'Basic' : 'Executive'}
+                {user.account_type === 'BASIC' ? 'Basic' : 'Executive'}
               </span>
             )}
             {!isChangingPassword && (
@@ -222,11 +222,11 @@ export default function UsersPage() {
                 {/* ADD THIS BUTTON FOR PRODUCT TYPE */}
                 {user.role === 'USER' && (
                   <button
-                    onClick={() => handleChangeType(user.id, user.product_type === 'BASIC' ? 'EXECUTIVE' : 'BASIC')}
+                    onClick={() => handleChangeType(user.id, user.account_type === 'BASIC' ? 'EXECUTIVE' : 'BASIC')}
                     disabled={updatingTypeUserId === user.id}
                     className="text-xs border border-orange-300 text-orange-700 rounded px-3 py-1 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/30 disabled:opacity-50"
                   >
-                    {updatingTypeUserId === user.id ? 'Updating...' : `Set as ${user.product_type === 'BASIC' ? 'Executive' : 'Basic'}`}
+                    {updatingTypeUserId === user.id ? 'Updating...' : `Set as ${user.account_type === 'BASIC' ? 'Executive' : 'Basic'}`}
                   </button>
                 )}
 
@@ -385,8 +385,8 @@ export default function UsersPage() {
             <div>
               <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Product Type</label>
               <select
-                value={newProductType}
-                onChange={(e) => setNewProductType(e.target.value as 'BASIC' | 'EXECUTIVE')}
+                value={newAccountType}
+                onChange={(e) => setNewAccountType(e.target.value as 'BASIC' | 'EXECUTIVE')}
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="BASIC">Basic</option>

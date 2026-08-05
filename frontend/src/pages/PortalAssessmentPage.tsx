@@ -177,8 +177,23 @@ export default function PortalAssessmentPage() {
   return (
     <PortalLayout title={form?.name || 'Assessment'}>
       <div className="space-y-6">
+
+        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg dark:bg-yellow-900/30 dark:border-amber-600 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                Important Disclaimer
+              </h3>
+              <div className="mt-2 text-sm text-amber-700 dark:text-amber-300">
+                <p>
+                  Please answer honestly based on your true inclinations, not what you think is expected. Your results are confidential and used solely for your personal assessment.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
         {/* Progress + submit bar */}
-        <div className="bg-white shadow rounded-lg p-5 flex items-center justify-between gap-4 flex-wrap dark:bg-gray-800 dark:border dark:border-gray-700">
+        <div className="sticky top-4 z-50 bg-white shadow rounded-lg p-5 flex items-center justify-between gap-4 flex-wrap dark:bg-gray-800 dark:border dark:border-gray-700">
           <div className="max-w-2xl ">
             <p className="text-sm text-blue-900 dark:text-blue-300 font-semibold leading-6">
               This Assessment is designed to help you understand your behavioural response to different triggers and situations. It is divided into three sections.
@@ -260,8 +275,8 @@ export default function PortalAssessmentPage() {
                               type="button"
                               onClick={() => handleSelect(question.id, opt)}
                               className={`text-left rounded-lg border p-4 transition ${isSel
-                                  ? 'border-green-700 bg-green-100 ring-2 ring-green-300 dark:border-green-300 dark:bg-green-800 dark:ring-green-900 '
-                                  : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100 dark:border-gray-300 dark:bg-gray-700'
+                                ? 'border-green-700 bg-green-100 ring-2 ring-green-300 dark:border-green-300 dark:bg-green-800 dark:ring-green-900 '
+                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100 dark:border-gray-300 dark:bg-gray-700'
                                 }`}
                             >
                               <span className="text-xs font-bold text-gray-600 dark:text-gray-200 mr-2">

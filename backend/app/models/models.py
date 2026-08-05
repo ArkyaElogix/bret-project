@@ -42,7 +42,7 @@ class SessionStatus(str, enum.Enum):
     submitted = "submitted"
 
 
-class ProductType(str, enum.Enum):
+class AccountType(str, enum.Enum):
     BASIC = "BASIC"
     EXECUTIVE = "EXECUTIVE"
 
@@ -194,7 +194,7 @@ class User(Base):
     email = Column(String(255), nullable=False, unique=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.USER)
-    product_type = Column(Enum(ProductType), nullable=False, default=ProductType.BASIC)
+    account_type = Column(Enum(AccountType), nullable=False, default=AccountType.BASIC)
     token_version = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(
@@ -295,7 +295,7 @@ class ReportStatement(Base):
     __tablename__ = "report_statements"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    product_type = Column(Enum(ProductType), nullable=False)
+    account_type = Column(Enum(AccountType), nullable=False)
     behavioural_type_id = Column(Integer, ForeignKey("behavioural_types.id"), nullable=False)
     factor_id = Column(Integer, ForeignKey("behavioural_factors.id"), nullable=False)
     score = Column(Integer, nullable=False)  # 0-5

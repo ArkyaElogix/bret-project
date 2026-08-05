@@ -15,7 +15,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [name, setName] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [productType, setProductType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
+  const [accountType, setAccountType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
   const [consentAccepted, setConsentAccepted] = useState(false)
 
   // Password visibility states
@@ -58,7 +58,7 @@ export default function LoginPage() {
     try {
       const result =
         mode === 'register'
-          ? await registerCandidate(name, email, password, productType, consentAccepted)
+          ? await registerCandidate(name, email, password, accountType, consentAccepted)
           : await login(email, password)
 
       setToken(result.access_token)
@@ -101,8 +101,8 @@ export default function LoginPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Account Type</label>
               <select
-                value={productType}
-                onChange={(e) => setProductType(e.target.value as 'BASIC' | 'EXECUTIVE')}
+                value={accountType}
+                onChange={(e) => setAccountType(e.target.value as 'BASIC' | 'EXECUTIVE')}
                 className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="BASIC">BASIC</option>

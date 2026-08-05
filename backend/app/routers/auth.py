@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from app.database import get_db
 from app.models.models import (
-    User, UserRole, ProductType, PasswordResetToken, AuditLog, AuditAction
+    User, UserRole, AccountType, PasswordResetToken, AuditLog, AuditAction
 )
 from app.services.email_service import send_reset_email
 from app.schemas import (
@@ -121,15 +121,15 @@ def register_candidate(
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    if payload.product_type not in (ProductType.BASIC.value, ProductType.EXECUTIVE.value):
-        raise HTTPException(status_code=400, detail="product_type must be BASIC or EXECUTIVE")
+    if payload.account_type not in (AccountType.BASIC.value, AccountType.EXECUTIVE.value):
+        raise HTTPException(status_code=400, detail="account_type must be BASIC or EXECUTIVE")
 
     now = datetime.utcnow()
     user = User(
         name=payload.name,
         email=payload.email,
         password_hash=hash_password(payload.password),
-        product_type=payload.product_type,
+        account_type=payload.account_type,
         role=UserRole.USER,
         consent_given_at=now,
         last_accessed_at=now,
@@ -138,7 +138,7 @@ def register_candidate(
     db.flush()  # get user.id before audit writes
 
     _write_audit(db, AuditAction.USER_REGISTER, user_id=user.id, ip=_client_ip(request),
-                 detail={"product_type": payload.product_type})
+                 detail={"account_type": payload.account_type})
     _write_audit(db, AuditAction.CONSENT_GIVEN, user_id=user.id, ip=_client_ip(request))
 
     db.commit()

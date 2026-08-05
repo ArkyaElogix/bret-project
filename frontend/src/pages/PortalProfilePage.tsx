@@ -89,7 +89,7 @@ export default function PortalProfilePage() {
               <div>
                 <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Assessment Tier</p>
                 <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-100 px-2 py-1 rounded-full font-medium">
-                  {user.product_type === 'EXECUTIVE' ? 'Executive' : 'Basic'}
+                  {user.account_type === 'EXECUTIVE' ? 'Executive' : 'Basic'}
                 </span>
               </div>
 

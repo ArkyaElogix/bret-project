@@ -92,7 +92,7 @@ class AnswerSubmit(BaseModel):
     chosen_option: str  # "A" or "B"
 
 class UserTypeUpdate(BaseModel):
-    product_type: str  # "BASIC" or "EXECUTIVE"
+    account_type: str  # "BASIC" or "EXECUTIVE"
 
 
 class ResponseOut(BaseModel):
@@ -124,7 +124,7 @@ class CandidateRegisterRequest(BaseModel):
     name: str
     email: str
     password: str
-    product_type: str
+    account_type: str
     consent_accepted: bool
 
 
@@ -139,14 +139,14 @@ class UserCreate(BaseModel):
     email: str
     password: str
     role: str = "USER"  # "ADMIN" or "USER"
-    product_type: str = "BASIC"  # "BASIC" or "EXECUTIVE"
+    account_type: str = "BASIC"  # "BASIC" or "EXECUTIVE"
 
 class UserOut(BaseModel):
     id: int
     name: str
     email: str
     role: str
-    product_type: str
+    account_type: str
 
     model_config = ConfigDict(from_attributes=True)
 

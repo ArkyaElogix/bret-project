@@ -28,7 +28,7 @@ from app.models.models import (
     BehaviouralFactor,
     BehaviouralType,
     SessionStatus,
-    ProductType,
+    AccountType,
     ReportStatement,
     OptionLetter,
 )
@@ -69,9 +69,9 @@ def _build_basic_report_factor(
 
 def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict[str, Any]:
     user_name = session.user_name or (session.user.name if session.user else "Participant")
-    product_type = (
-        session.user.product_type.value
-        if session.user and session.user.product_type
+    account_type = (
+        session.user.account_type.value
+        if session.user and session.user.account_type
         else "BASIC"
     )
     form_name = session.form_name or (session.form.name if session.form else "Assessment")
@@ -338,7 +338,7 @@ def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict
         "session": session,
         "user": {
             "name": user_name,
-            "product_type": product_type,
+            "account_type": account_type,
         },
         "form": {
             "id": session.form.id if session.form else session.form_id,
@@ -763,7 +763,7 @@ def delete_session(
 #     # Transform AI report to match existing schema
 #     return {
 #         "session": session,
-#         "user": {"name": session.user.name, "product_type": session.user.product_type.value},
+#         "user": {"name": session.user.name, "account_type": session.user.account_type.value},
 #         "form": {"id": session.form.id, "name": session.form.name},
 #         "sections": _format_ai_report_for_response(ai_report, db)
 #     }
