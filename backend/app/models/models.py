@@ -308,7 +308,7 @@ class ReportStatement(Base):
 
     __table_args__ = (
         UniqueConstraint(
-            "product_type", "behavioural_type_id", "factor_id", "score",
+            "account_type", "behavioural_type_id", "factor_id", "score",
             name="uq_report_statement_lookup"
         ),
     )

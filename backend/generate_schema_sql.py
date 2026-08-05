@@ -14,7 +14,7 @@ from pathlib import Path
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects import mysql
 
-import backend.app.models.models as models_module
+import app.models.models as models_module
 
 
 def main():
