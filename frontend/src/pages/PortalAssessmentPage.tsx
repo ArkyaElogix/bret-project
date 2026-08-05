@@ -136,10 +136,10 @@ export default function PortalAssessmentPage() {
     return (
       <PortalLayout title="Assessment">
         <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md dark:bg-gray-800 dark:border dark:border-gray-700">
-          <p className="text-sm text-gray-700">This questionnaire has already been submitted.</p>
+          <p className="text-sm text-gray-700 dark:text-gray-200">This questionnaire has already been submitted.</p>
           <Link
             to={`/portal/sessions/${sessionId}/results`}
-            className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
+            className="inline-block bg-blue-600 dark:bg-blue-300 text-white dark:text-black rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-400"
           >
             View Results
           </Link>
@@ -152,12 +152,12 @@ export default function PortalAssessmentPage() {
     return (
       <PortalLayout title="Assessment Unavailable">
         <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md dark:bg-gray-800 dark:border dark:border-gray-700">
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-gray-700 dark:text-gray-300">
             This questionnaire is no longer available.
           </p>
           <Link
             to="/portal"
-            className="inline-block bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700"
+            className="inline-block bg-blue-600 dark:bg-blue-300 text-white dark:text-black rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-400"
           >
             Back to Questionnaires Page
           </Link>
@@ -180,7 +180,7 @@ export default function PortalAssessmentPage() {
         {/* Progress + submit bar */}
         <div className="bg-white shadow rounded-lg p-5 flex items-center justify-between gap-4 flex-wrap dark:bg-gray-800 dark:border dark:border-gray-700">
           <div className="max-w-2xl ">
-            <p className="text-sm text-blue-900 font-semibold leading-6">
+            <p className="text-sm text-blue-900 dark:text-blue-300 font-semibold leading-6">
               This Assessment is designed to help you understand your behavioural response to different triggers and situations. It is divided into three sections.
               <ul className='list-style-type: square;'><li >Section A identifies your key and pre-dominant drivers and Motivators.</li>
                 <li>Section B identifies your Change and Adaptability quotient through your response to uncertainty.</li>
@@ -191,7 +191,7 @@ export default function PortalAssessmentPage() {
             </p>
           </div>
           <div className="flex-1 min-w-[200px]">
-            <p className="text-sm font-medium text-gray-800">
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-300">
               Progress: {answeredCount} of {totalQuestions} answered
             </p>
 
@@ -234,12 +234,12 @@ export default function PortalAssessmentPage() {
           if (sectionQuestions.length === 0) return null
           return (
             <div key={section.id} className="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700">
-              <div className="bg-slate-50 border-b border-gray-200 px-6 py-4">
-                <h2 className="text-lg font-semibold text-gray-800">
+              <div className="bg-slate-50 dark:bg-slate-700 border-b border-gray-200 dark:border-gray-900 px-6 py-4">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                   {section.code} - {section.name}
                 </h2>
                 {section.instructions && (
-                  <p className="mt-1 text-sm font-bold text-red-500">{section.instructions}</p>
+                  <p className="mt-1 text-sm font-bold text-red-700 dark:text-red-400">{section.instructions}</p>
                 )}
               </div>
 
@@ -260,14 +260,14 @@ export default function PortalAssessmentPage() {
                               type="button"
                               onClick={() => handleSelect(question.id, opt)}
                               className={`text-left rounded-lg border p-4 transition ${isSel
-                                  ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
-                                  : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                                  ? 'border-green-700 bg-green-100 ring-2 ring-green-300 dark:border-green-300 dark:bg-green-800 dark:ring-green-900 '
+                                  : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-100 dark:border-gray-300 dark:bg-gray-700'
                                 }`}
                             >
-                              <span className="text-xs font-bold text-gray-400 mr-2">
+                              <span className="text-xs font-bold text-gray-600 dark:text-gray-200 mr-2">
                                 {question.number} {opt}
                               </span>
-                              <span className="text-sm text-gray-700">{text}</span>
+                              <span className="text-sm text-gray-700 dark:text-gray-200">{text}</span>
                             </button>
                           )
                         })}

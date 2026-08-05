@@ -200,19 +200,19 @@ export default function UsersPage() {
       <div key={user.id} className="p-4 space-y-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div>
-            <p className="text-sm font-medium text-gray-800">{user.name}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">{user.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className={`text-xs px-2 py-1 rounded-full ${ROLE_STYLES[user.role]}`}
+              className={`text-xs px-2 py-1 rounded-full ${ROLE_STYLES[user.role]} dark:text-gray-900`}
             >
               {user.role === 'ADMIN' ? 'Admin' : 'User'}
             </span>
 
             {user.role === 'USER' && (
               <span
-                className={`text-xs px-2 py-1 rounded-full ${PRODUCT_TYPE_STYLES[user.product_type]}`}
+                className={`text-xs px-2 py-1 rounded-full ${PRODUCT_TYPE_STYLES[user.product_type]} dark:text-gray-900`}
               >
                 {user.product_type === 'BASIC' ? 'Basic' : 'Executive'}
               </span>
@@ -224,7 +224,7 @@ export default function UsersPage() {
                   <button
                     onClick={() => handleChangeType(user.id, user.product_type === 'BASIC' ? 'EXECUTIVE' : 'BASIC')}
                     disabled={updatingTypeUserId === user.id}
-                    className="text-xs border border-orange-300 text-orange-700 rounded px-3 py-1 hover:bg-orange-50 disabled:opacity-50"
+                    className="text-xs border border-orange-300 text-orange-700 rounded px-3 py-1 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-300 dark:hover:bg-orange-900/30 disabled:opacity-50"
                   >
                     {updatingTypeUserId === user.id ? 'Updating...' : `Set as ${user.product_type === 'BASIC' ? 'Executive' : 'Basic'}`}
                   </button>
@@ -234,7 +234,7 @@ export default function UsersPage() {
                   <button
                     onClick={() => openPasswordForm(user)}
                     disabled={confirmDeleteId === user.id}
-                    className="text-xs border border-slate-300 text-slate-700 rounded px-3 py-1 hover:bg-slate-50 disabled:opacity-50"
+                    className="text-xs border border-slate-300 text-slate-700 rounded px-3 py-1 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700 disabled:opacity-50"
                   >
                     Change Password
                   </button>
@@ -242,11 +242,11 @@ export default function UsersPage() {
 
                 {confirmDeleteId === user.id ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-red-600 font-medium">Delete?</span>
+                    <span className="text-xs text-red-600 font-medium dark:text-red-300">Delete?</span>
                     <button
                       onClick={() => handleDelete(user.id)}
                       disabled={deleting || user.role === 'ADMIN'}
-                      className="text-xs bg-red-600 text-white rounded px-2.5 py-1 hover:bg-red-700 disabled:opacity-50"
+                      className="text-xs bg-red-600 text-white rounded px-2.5 py-1 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400 disabled:opacity-50"
                     >
                       {deleting ? '...' : 'Confirm'}
                     </button>
@@ -256,7 +256,7 @@ export default function UsersPage() {
                         setDeleteError(null)
                       }}
                       disabled={deleting}
-                      className="text-xs border border-gray-300 rounded px-2.5 py-1 hover:bg-gray-50 disabled:opacity-50"
+                      className="text-xs border border-gray-300 rounded px-2.5 py-1 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -269,7 +269,7 @@ export default function UsersPage() {
                       closePasswordForm()
                     }}
                     disabled={isChangingPassword || user.role === 'ADMIN'}
-                    className="text-xs border border-red-300 text-red-600 rounded px-3 py-1 hover:bg-red-50 disabled:opacity-50"
+                    className="text-xs border border-red-300 text-red-600 rounded px-3 py-1 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30 disabled:opacity-50"
                   >
                     Delete
                   </button>
@@ -291,7 +291,7 @@ export default function UsersPage() {
               value={passwordValue}
               onChange={(e) => setPasswordValue(e.target.value)}
               placeholder="New password"
-              className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
               type="submit"
@@ -304,7 +304,7 @@ export default function UsersPage() {
               type="button"
               onClick={closePasswordForm}
               disabled={savingPassword}
-              className="border border-gray-300 rounded px-3 py-1.5 text-xs hover:bg-gray-50 disabled:opacity-50"
+              className="border border-gray-300 rounded px-3 py-1.5 text-xs hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -332,48 +332,48 @@ export default function UsersPage() {
           onSubmit={handleCreate}
           className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700"
         >
-          <h2 className="text-sm font-medium text-gray-700">Create a new user</h2>
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">Create a new user</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Name</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Name</label>
               <input
                 type="text"
                 required
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Full name"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Email</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Email</label>
               <input
                 type="email"
                 required
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Password</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Password</label>
               <input
                 type="password"
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Initial password"
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Role</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Role</label>
               <select
                 value={newRole}
                 onChange={(e) => setNewRole(e.target.value as Role)}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="USER">User</option>
                 <option value="ADMIN">Admin</option>
@@ -383,11 +383,11 @@ export default function UsersPage() {
 
           {newRole === 'USER' && (
             <div>
-              <label className="block text-sm text-gray-600 mb-1">Product Type</label>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Product Type</label>
               <select
                 value={newProductType}
                 onChange={(e) => setNewProductType(e.target.value as 'BASIC' | 'EXECUTIVE')}
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="BASIC">Basic</option>
                 <option value="EXECUTIVE">Executive</option>
@@ -395,7 +395,7 @@ export default function UsersPage() {
             </div>
           )}
 
-          {createError && <p className="text-sm text-red-600">{createError}</p>}
+          {createError && <p className="text-sm text-red-600 dark:text-red-300">{createError}</p>}
 
           <button
             type="submit"
@@ -422,12 +422,12 @@ export default function UsersPage() {
           <>
             {/* Admins */}
             <section className="space-y-2">
-              <h2 className="text-sm font-semibold text-gray-700">
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 Admins ({admins.length})
               </h2>
               <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700">
                 {admins.length === 0 ? (
-                  <p className="p-6 text-sm text-gray-500">No admins yet.</p>
+                  <p className="p-6 text-sm text-gray-500 dark:text-gray-300">No admins yet.</p>
                 ) : (
                   admins.map(renderUserRow)
                 )}
@@ -436,12 +436,12 @@ export default function UsersPage() {
 
             {/* Regular users */}
             <section className="space-y-2">
-              <h2 className="text-sm font-semibold text-gray-700">
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 Users ({regularUsers.length})
               </h2>
               <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700">
                 {regularUsers.length === 0 ? (
-                  <p className="p-6 text-sm text-gray-500">No users yet.</p>
+                  <p className="p-6 text-sm text-gray-500 dark:text-gray-300">No users yet.</p>
                 ) : (
                   regularUsers.map(renderUserRow)
                 )}
@@ -450,12 +450,12 @@ export default function UsersPage() {
 
             {/* Active assessment sessions */}
             <section className="space-y-2">
-              <h2 className="text-sm font-semibold text-gray-700">
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 Active assessment sessions ({activeSessions.length})
               </h2>
               <div className="bg-white shadow rounded-lg divide-y dark:bg-gray-800 dark:divide-gray-700">
                 {activeSessions.length === 0 ? (
-                  <p className="p-6 text-sm text-gray-500">
+                  <p className="p-6 text-sm text-gray-500 dark:text-gray-300">
                     No active assessment sessions right now.
                   </p>
                 ) : (
@@ -467,21 +467,21 @@ export default function UsersPage() {
                         className="p-4 flex items-center justify-between gap-2 flex-wrap"
                       >
                         <div>
-                          <p className="text-sm font-medium text-gray-800">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                             {user ? user.name : `User #${session.user_id}`}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             {user ? user.email : '—'} · Form {session.form_id} ·{' '}
 
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full dark:bg-yellow-300 dark:text-yellow-900">
                             In Progress
                           </span>
                           <Link
                             to="/sessions"
-                            className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50"
+                            className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30"
                           >
                             View in Sessions
                           </Link>
@@ -495,11 +495,11 @@ export default function UsersPage() {
             {/* Audit Log */}
             <section className="space-y-2">
               <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-700">Privacy Audit Log</h2>
+                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Privacy Audit Log</h2>
                 <button
                   onClick={loadAuditLog}
                   disabled={auditLoading}
-                  className="text-xs border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                  className="text-xs border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
                 >
                   {auditLoading ? 'Loading...' : auditVisible ? 'Refresh' : 'Load Audit Log'}
                 </button>
@@ -512,44 +512,44 @@ export default function UsersPage() {
               {auditVisible && (
                 <div className="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700">
                   {auditLogs.length === 0 ? (
-                    <p className="p-6 text-sm text-gray-500">No audit events recorded yet.</p>
+                    <p className="p-6 text-sm text-gray-500 dark:text-gray-300">No audit events recorded yet.</p>
                   ) : (
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200 text-xs">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-200 text-xs dark:divide-gray-700">
+                        <thead className="bg-gray-50 dark:bg-gray-900/60">
                           <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Detail</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Timestamp</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Action</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">User ID</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">IP Address</th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Detail</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-100">
+                        <tbody className="bg-white divide-y divide-gray-100 dark:bg-gray-800 dark:divide-gray-700">
                           {auditLogs.map((log) => (
-                            <tr key={log.id} className="hover:bg-gray-50">
-                              <td className="px-4 py-2 text-gray-500 whitespace-nowrap">
+                            <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                              <td className="px-4 py-2 text-gray-500 whitespace-nowrap dark:text-gray-300">
                                 {new Date(log.created_at).toLocaleString()}
                               </td>
                               <td className="px-4 py-2 whitespace-nowrap">
                                 <span className={`inline-block px-2 py-0.5 rounded-full font-medium ${log.action.includes('DELETE') || log.action.includes('RESET')
-                                  ? 'bg-red-100 text-red-700'
+                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
                                   : log.action.includes('LOGIN') || log.action.includes('LOGOUT')
-                                    ? 'bg-blue-100 text-blue-700'
+                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
                                     : log.action.includes('CONSENT') || log.action.includes('REGISTER')
-                                      ? 'bg-green-100 text-green-700'
-                                      : 'bg-gray-100 text-gray-600'
+                                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                                   }`}>
                                   {log.action}
                                 </span>
                               </td>
-                              <td className="px-4 py-2 text-gray-600">
+                              <td className="px-4 py-2 text-gray-600 dark:text-gray-300">
                                 {log.user_id ?? '—'}
                               </td>
-                              <td className="px-4 py-2 text-gray-500 font-mono">
+                              <td className="px-4 py-2 text-gray-500 font-mono dark:text-gray-400">
                                 {log.ip_address ?? '—'}
                               </td>
-                              <td className="px-4 py-2 text-gray-500 max-w-xs truncate">
+                              <td className="px-4 py-2 text-gray-500 max-w-xs truncate dark:text-gray-400">
                                 {log.detail ?? '—'}
                               </td>
                             </tr>

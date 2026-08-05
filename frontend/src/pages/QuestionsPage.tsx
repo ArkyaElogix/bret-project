@@ -255,7 +255,7 @@ export default function QuestionsPage() {
   if (loading) {
     return (
       <AdminLayout title="Manage Form">
-        <p className="text-gray-500">Loading form details...</p>
+        <p className="text-gray-600 dark:text-gray-200">Loading form details...</p>
       </AdminLayout>
     )
   }
@@ -263,7 +263,7 @@ export default function QuestionsPage() {
   if (error || !form) {
     return (
       <AdminLayout title="Manage Form">
-        <p className="text-red-600">{error || 'Form not found'}</p>
+        <p className="text-red-600 dark:text-red-200">{error || 'Form not found'}</p>
         <Link to="/forms" className="text-blue-600 hover:underline mt-4 inline-block">
           &larr; Back to Forms
         </Link>
@@ -275,7 +275,7 @@ export default function QuestionsPage() {
     return (
     <aside className="self-start rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:sticky lg:top-6">
         <details open>
-          <summary className="cursor-pointer list-none border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800">
+          <summary className="cursor-pointer list-none border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200">
             Available Factors
           </summary>
 
@@ -285,18 +285,18 @@ export default function QuestionsPage() {
 
               return (
                 <div key={section.id} className="space-y-2">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
                     {section.code} - {section.name}
                   </h3>
 
                   {sectionFactors.length === 0 ? (
-                    <p className="text-xs text-gray-400">No factors configured.</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-200">No factors configured.</p>
                   ) : (
                     <ul className="space-y-1">
                       {sectionFactors.map((factor) => (
                         <li
                           key={factor.id}
-                          className="rounded border border-gray-100 bg-gray-50 px-2 py-1 text-xs text-gray-700"
+                          className="rounded border border-gray-100 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-2 py-1 text-xs text-gray-700 dark:text-gray-200"
                         >
                           {factor.name}
                         </li>
@@ -336,8 +336,8 @@ export default function QuestionsPage() {
   <span
     className={`inline-block rounded-full px-2 py-1 text-xs ${
       form.is_active
-        ? 'bg-green-100 text-green-700'
-        : 'bg-gray-100 text-gray-700'
+        ? 'bg-green-100 text-green-700 dark:bg-green-500 dark:text-black'
+        : 'bg-gray-100 text-gray-700 dark:bg-gray-400 dark:text-black'
     }`}
   >
     {form.is_active ? 'Active Form' : 'Inactive Form'}
@@ -346,8 +346,8 @@ export default function QuestionsPage() {
   <span
     className={`inline-block rounded-full px-2 py-1 text-xs ${
       completionStatus.isComplete
-        ? 'bg-emerald-100 text-emerald-700'
-        : 'bg-amber-100 text-amber-700'
+        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-300 dark:text-emerald-900'
+        : 'bg-amber-100 text-amber-700 dark:bg-amber-300 dark:text-amber-900'
     }`}
   >
     {completionStatus.isComplete ? 'Complete' : 'Incomplete'}
@@ -382,14 +382,14 @@ export default function QuestionsPage() {
             <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div className="flex items-start justify-between gap-4 border-b border-gray-200 bg-slate-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/60">
                   <div>
-                    <h2 className="text-lg font-bold text-gray-800">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-300">
                       {section.code} - {section.name}
                       {(() => {
                         const fullFactors = getFactorsForSection(section.id).filter(
                           (f) => getFactorUsageCount(section.id, f.id) >= 5
                         )
                         return fullFactors.length > 0 ? (
-                          <p className="mt-1 text-xs text-amber-600 font-medium">
+                          <p className="mt-1 text-xs text-amber-700 font-medium dark:text-amber-300">
                             {fullFactors.length} factor{fullFactors.length > 1 ? 's' : ''} at capacity (used 5/5 times):{' '}
                             {fullFactors.map((f) => f.name).join(', ')}
                           </p>
@@ -397,9 +397,9 @@ export default function QuestionsPage() {
                       })()}
 
                     </h2>
-                    <h2 className="mt-1 text-sm font-bold text-red-800">Instruction displayed to candidates who are answering: </h2>
+                    <h2 className="mt-1 text-sm font-bold text-red-800 dark:text-red-400">Instruction displayed to candidates who are answering: </h2>
                     {section.instructions && (
-                      <p className="mt-1 text-sm font-bold text-black">{section.instructions}</p>
+                      <p className="mt-1 text-sm font-bold text-black dark:text-gray-300">{section.instructions}</p>
                     )}
                   </div>
 
@@ -409,18 +409,18 @@ export default function QuestionsPage() {
 
                 <div className="p-6">
                   <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-100">
                       Questions
                     </h3>
                     <button
                       onClick={() => handleStartAdding(section.id)}
-                      className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+                      className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-200 dark:text-blue-700 dark:hover:bg-blue-300"
                     >
                       + Add Question
                     </button>
                   </div>
                   {isSectionAtMaxQuestions(section.id) && (
-                    <p className="text-l font-bold text-red-600 mt-1">
+                    <p className="text-l font-bold text-red-600 dark:text-red-400 mt-1">
                       This section already contains 10 questions.
                     </p>
                   )}
@@ -428,36 +428,36 @@ export default function QuestionsPage() {
                   {addingToSection === section.id && (
                     <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/40 dark:bg-blue-950/30">
                       <form onSubmit={(e) => handleCreateQuestion(e, section.id)} className="space-y-4">
-                        <h3 className="text-sm font-semibold text-blue-900">New Question</h3>
+                        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-300">New Question</h3>
                         <div className="grid gap-4 lg:grid-cols-12">
                           <div className="lg:col-span-2">
-                            <label className="mb-1 block text-xs text-gray-600">Number</label>
+                            <label className="mb-1 block text-xs text-gray-600 dark:text-gray-200">Number</label>
                             <input
                               type="number"
                               required
                               min={1}
                               value={newNumber}
                               onChange={(e) => setNewNumber(parseInt(e.target.value, 10))}
-                              className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                              className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                             />
                           </div>
                           <div className="space-y-3 lg:col-span-5">
                             <div>
-                              <label className="mb-1 block text-xs text-gray-600">Option A Text</label>
+                              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300">Option A Text</label>
                               <textarea
                                 required
                                 rows={2}
                                 value={newOptionA}
                                 onChange={(e) => setNewOptionA(e.target.value)}
-                                className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                               />
                             </div>
                             <div>
-                              <label className="mb-1 block text-xs text-gray-600">Maps to Factor</label>
+                              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300">Maps to Factor</label>
                               <select
                                 value={newFactorA}
                                 onChange={(e) => setNewFactorA(parseInt(e.target.value, 10))}
-                                className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                               >
 
                                 {sectionFactors.map((factor) => {
@@ -475,21 +475,21 @@ export default function QuestionsPage() {
                           </div>
                           <div className="space-y-3 lg:col-span-5">
                             <div>
-                              <label className="mb-1 block text-xs text-gray-600">Option B Text</label>
+                              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300">Option B Text</label>
                               <textarea
                                 required
                                 rows={2}
                                 value={newOptionB}
                                 onChange={(e) => setNewOptionB(e.target.value)}
-                                className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                               />
                             </div>
                             <div>
-                              <label className="mb-1 block text-xs text-gray-600">Maps to Factor</label>
+                              <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300">Maps to Factor</label>
                               <select
                                 value={newFactorB}
                                 onChange={(e) => setNewFactorB(parseInt(e.target.value, 10))}
-                                className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                               >
 
                                 {sectionFactors.map((factor) => {
@@ -506,12 +506,12 @@ export default function QuestionsPage() {
                             </div>
                           </div>
                         </div>
-                        {createError && <p className="text-xs text-red-600">{createError}</p>}
+                        {createError && <p className="text-xs text-red-600 dark:text-red-300">{createError}</p>}
                         <div className="flex gap-2">
                           <button
                             type="submit"
                             disabled={creating}
-                            className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                            className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white dark:bg-blue-300 dark:text-gray-500 hover:bg-blue-700 disabled:opacity-50"
                           >
                             {creating ? 'Saving...' : 'Save Question'}
                           </button>
@@ -519,7 +519,7 @@ export default function QuestionsPage() {
                             type="button"
                             onClick={handleCancelAdding}
                             disabled={creating}
-                            className="rounded border border-gray-300 px-3 py-1.5 text-xs hover:bg-white disabled:opacity-50"
+                            className="rounded border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-50 text-black dark:text-gray-300 dark:hover:bg-gray-600"
                           >
                             Cancel
                           </button>
@@ -530,43 +530,43 @@ export default function QuestionsPage() {
 
                   <div className="divide-y divide-gray-100">
                     {sectionQuestions.length === 0 && addingToSection !== section.id && (
-                      <p className="py-4 text-sm text-gray-500">No questions in this section yet.</p>
+                      <p className="py-4 text-sm text-gray-600 dark:text-gray-300">No questions in this section yet.</p>
                     )}
                     {sectionQuestions.map((question) => (
                       <div key={question.id}>
                         {editingId === question.id ? (
                           <div className="py-4">
                             <form onSubmit={(e) => handleSaveEdit(e, question.id)} className="space-y-4">
-                              <h3 className="text-sm font-semibold text-gray-700">Edit Question {question.number}</h3>
+                              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Edit Question {question.number}</h3>
                               <div className="grid gap-4 lg:grid-cols-12">
                                 <div className="lg:col-span-2">
-                                  <label className="mb-1 block text-xs text-gray-600">Number</label>
+                                  <label className="mb-1 block text-xs text-gray-600 dark:text-gray-200 bg-gray-100 dark:bg-gray-700">Number</label>
                                   <input
                                     type="number"
                                     required
                                     min={1}
                                     value={editNumber}
                                     onChange={(e) => setEditNumber(parseInt(e.target.value, 10))}
-                                    className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                    className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                                   />
                                 </div>
                                 <div className="space-y-3 lg:col-span-5">
                                   <div>
-                                    <label className="mb-1 block text-xs text-gray-600">Option A Text</label>
+                                    <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">Option A Text</label>
                                     <textarea
                                       required
                                       rows={2}
                                       value={editOptionA}
                                       onChange={(e) => setEditOptionA(e.target.value)}
-                                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                      className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                                     />
                                   </div>
                                   <div>
-                                    <label className="mb-1 block text-xs text-gray-600">Maps to Factor</label>
+                                    <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">Maps to Factor</label>
                                     <select
                                       value={editFactorA}
                                       onChange={(e) => setEditFactorA(parseInt(e.target.value, 10))}
-                                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                      className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                                     >
 
                                       {sectionFactors.map((factor) => {
@@ -584,21 +584,21 @@ export default function QuestionsPage() {
                                 </div>
                                 <div className="space-y-3 lg:col-span-5">
                                   <div>
-                                    <label className="mb-1 block text-xs text-gray-600">Option B Text</label>
+                                    <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">Option B Text</label>
                                     <textarea
                                       required
                                       rows={2}
                                       value={editOptionB}
                                       onChange={(e) => setEditOptionB(e.target.value)}
-                                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                      className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                                     />
                                   </div>
                                   <div>
-                                    <label className="mb-1 block text-xs text-gray-600">Maps to Factor</label>
+                                    <label className="mb-1 block text-xs text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700">Maps to Factor</label>
                                     <select
                                       value={editFactorB}
                                       onChange={(e) => setEditFactorB(parseInt(e.target.value, 10))}
-                                      className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm"
+                                      className="w-full rounded border border-gray-300 dark:border-gray-800 px-2 py-1.5 text-sm text-gray-500 dark:text-gray-200 bg-gray-100 dark:bg-gray-700"
                                     >
 
                                       {sectionFactors.map((factor) => {
@@ -615,12 +615,12 @@ export default function QuestionsPage() {
                                   </div>
                                 </div>
                               </div>
-                              {editError && <p className="text-xs text-red-600">{editError}</p>}
+                              {editError && <p className="text-xs text-red-600 dark:text-red-300">{editError}</p>}
                               <div className="flex gap-2">
                                 <button
                                   type="submit"
                                   disabled={saving}
-                                  className="rounded bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                                  className="rounded bg-blue-600 dark:bg-blue-300 px-3 py-1.5 text-xs font-medium text-white dark:text-black hover:bg-blue-700 dark:hover:bg-blue-400 disabled:opacity-50"
                                 >
                                   {saving ? 'Saving...' : 'Save Changes'}
                                 </button>
@@ -628,7 +628,7 @@ export default function QuestionsPage() {
                                   type="button"
                                   onClick={handleCancelEditing}
                                   disabled={saving}
-                                  className="rounded border border-gray-300 px-3 py-1.5 text-xs hover:bg-white disabled:opacity-50"
+                                  className="rounded border border-gray-300 px-3 py-1.5 text-xs disabled:opacity-50 text-black dark:text-gray-300 dark:hover:bg-gray-600"
                                 >
                                   Cancel
                                 </button>
@@ -637,11 +637,11 @@ export default function QuestionsPage() {
                           </div>
                         ) : (
                           <div className="flex flex-col gap-4 py-4 md:flex-row md:items-start">
-                            <div className="w-8 shrink-0 text-sm font-semibold text-gray-400">{question.number}.</div>
+                            <div className="w-8 shrink-0 text-sm font-semibold text-gray-500 dark:text-gray-300">{question.number}.</div>
                             <div className="grid flex-1 gap-4 md:grid-cols-2">
                               <div className="rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/60">
-                                <p className="text-sm font-medium text-gray-700">Option A</p>
-                                <p className="mt-1 text-sm text-gray-600">{question.option_a_text}</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Option A</p>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{question.option_a_text}</p>
                                 {question.option_a_factor_id && (
                                   <p className="mt-2 text-xs text-blue-600">
                                     Maps to: {factors.find((factor) => factor.id === question.option_a_factor_id)?.name || `Factor ${question.option_a_factor_id}`}
@@ -649,8 +649,8 @@ export default function QuestionsPage() {
                                 )}
                               </div>
                               <div className="rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/60">
-                                <p className="text-sm font-medium text-gray-700">Option B</p>
-                                <p className="mt-1 text-sm text-gray-600">{question.option_b_text}</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Option B</p>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{question.option_b_text}</p>
                                 {question.option_b_factor_id && (
                                   <p className="mt-2 text-xs text-blue-600">
                                     Maps to: {factors.find((factor) => factor.id === question.option_b_factor_id)?.name || `Factor ${question.option_b_factor_id}`}
@@ -661,18 +661,18 @@ export default function QuestionsPage() {
                             <div className="flex shrink-0 flex-col gap-2">
                               {confirmDeleteId === question.id ? (
                                 <div className="flex flex-col gap-1">
-                                  <span className="text-center text-[10px] font-medium text-red-600">Delete?</span>
+                                  <span className="text-center text-[10px] font-medium text-red-600 dark:text-red-300">Delete?</span>
                                   <button
                                     onClick={() => handleConfirmDelete(question.id)}
                                     disabled={deleting}
-                                    className="rounded bg-red-600 px-2 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                                    className="rounded bg-red-600 dark:bg-red-300 px-2 py-1 text-xs font-medium text-white dark:text-red-800 hover:bg-red-700 dark:hover:bg-red-400 disabled:opacity-50"
                                   >
                                     Confirm
                                   </button>
                                   <button
                                     onClick={() => setConfirmDeleteId(null)}
                                     disabled={deleting}
-                                    className="rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50 disabled:opacity-50"
+                                    className="rounded border border-gray-300 px-2 py-1 text-xs hover:bg-gray-50 disabled:opacity-50 text-black dark:text-gray-300 dark:hover:bg-gray-600"
                                   >
                                     Cancel
                                   </button>
@@ -696,7 +696,7 @@ export default function QuestionsPage() {
                             </div>
                           </div>
                         )}
-                        {deleteError?.id === question.id && <p className="pb-2 text-xs text-red-600">{deleteError.message}</p>}
+                        {deleteError?.id === question.id && <p className="pb-2 text-xs text-red-600 dark:text-red-300">{deleteError.message}</p>}
                       </div>
                     ))}
                   </div>

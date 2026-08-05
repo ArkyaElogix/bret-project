@@ -43,7 +43,7 @@ export default function PortalResultsPage() {
   if (loading) {
     return (
       <PortalLayout title="Your Results">
-        <p className="text-sm text-gray-500">Loading results...</p>
+        <p className="text-sm text-gray-600 dark:text-gray-300">Loading results...</p>
       </PortalLayout>
     )
   }
@@ -51,7 +51,7 @@ export default function PortalResultsPage() {
   if (error) {
     return (
       <PortalLayout title="Your Results">
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-700 dark:border-red-900 dark:text-red-300 rounded-lg p-4 text-sm mb-4">
           {error}
         </div>
         <Link to="/portal" className="text-blue-600 hover:underline text-sm">← Back to Questionnaire</Link>
@@ -65,7 +65,7 @@ export default function PortalResultsPage() {
         <div className="bg-white shadow rounded-lg p-8 text-center text-sm text-gray-500 dark:bg-gray-800 dark:border dark:border-gray-700">
           No results are available for this session yet.
         </div>
-        <Link to="/portal" className="text-blue-600 hover:underline text-sm mt-4 inline-block">
+        <Link to="/portal" className="text-blue-700 dark:text-blue-300 hover:underline text-sm mt-4 inline-block">
           ← Back to Questionnaire
         </Link>
       </PortalLayout>
@@ -81,14 +81,14 @@ export default function PortalResultsPage() {
 
         <div className="bg-white rounded-xl shadow border border-gray-100 p-10 dark:bg-gray-800 dark:border-gray-700">
 
-          <h1 className="text-2xl font-bold text-gray-900">Your Behavioural Profile</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-300">Your Behavioural Profile</h1>
+          <p className="text-sm text-gray-600 dark:text-gray-200 mt-1">
             Results are grouped by section. Each section has its own set of factors; the dominant factor in each section is highlighted.
           </p>
           <div className='text-right mt-2'>
             <Link
               to={`/sessions/${sessionId}/report`}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm"
+              className="bg-blue-600 text-white dark:bg-blue-300 dark:text-black px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-400 shadow-sm"
             >
               View Full Report
             </Link>
@@ -100,14 +100,14 @@ export default function PortalResultsPage() {
           return (
             <div key={section.section_id} className="bg-white rounded-xl shadow border border-gray-100 p-6 space-y-5 dark:bg-gray-800 dark:border-gray-700">
               <div className="flex items-center justify-between gap-4 flex-wrap">
-                <h2 className="text-lg font-semibold text-gray-800">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                   {section.section_code} - {section.section_name}
                 </h2>
                 {top && (
                   <div className="text-right">
-                    <p className="text-xs text-gray-400 uppercase tracking-wide">Dominant Factor</p>
-                    <p className="text-base font-bold text-slate-800">{top.factor_name}</p>
-                    <p className="text-sm font-extrabold text-blue-600">{top.percentage}%</p>
+                    <p className="text-xs text-gray-300 dark:text-gray-800 uppercase tracking-wide">Dominant Factor</p>
+                    <p className="text-base font-bold text-slate-800 dark:text-white">{top.factor_name}</p>
+                    <p className="text-sm font-extrabold text-blue-700 dark:text-blue-300">{top.percentage}%</p>
                   </div>
                 )}
               </div>
@@ -122,12 +122,12 @@ export default function PortalResultsPage() {
                       </span>
                       <div className="flex items-center gap-3 shrink-0 text-right">
                         <span className="text-xs text-gray-500">{factor.score} pts</span>
-                        <span className="text-sm font-bold text-gray-800 w-12 text-right">
+                        <span className="text-sm font-bold text-gray-800 dark:text-gray-300 w-12 text-right">
                           {factor.percentage}%
                         </span>
                       </div>
                     </div>
-                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-3 w-full bg-gray-100 dark:bg-gray-600 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-700 ${col.bar}`}
                         style={{ width: `${factor.percentage}%` }}

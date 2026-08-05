@@ -68,34 +68,34 @@ export default function PortalProfilePage() {
           <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">Loading profile...</p>
         )}
         {error && (
-          <p className="p-6 text-sm text-red-600 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">{error}</p>
+          <p className="p-6 text-sm text-red-700 dark:text-red-400 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">{error}</p>
         )}
         {!loading && !error && user && (
           <div className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-700 dark:text-gray-200">
               This is the information we have on file for your account.
             </p>
             <div className="space-y-3">
               <div>
-                <p className="text-xs uppercase tracking-wide text-red-600">Email (your username)</p>
-                <p className="text-sm font-medium text-gray-800 break-all">{user.email}</p>
+                <p className="text-xs uppercase tracking-wide text-red-700 dark:text-red-400">Email (your username)</p>
+                <p className="text-sm font-medium text-gray-800 break-all dark:text-gray-300">{user.email}</p>
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-red-600">Account Name</p>
-                <p className="text-sm font-medium text-gray-800">{user.name}</p>
+                <p className="text-xs uppercase tracking-wide text-red-600 dark:text-red-400">Account Name</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-300">{user.name}</p>
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-red-950">Assessment Tier</p>
-                <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Assessment Tier</p>
+                <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-100 px-2 py-1 rounded-full font-medium">
                   {user.product_type === 'EXECUTIVE' ? 'Executive' : 'Basic'}
                 </span>
               </div>
 
               <div>
-                <p className="text-xs uppercase tracking-wide text-red-950">Account type</p>
-                <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Account type</p>
+                <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
                   {user.role === 'ADMIN' ? 'Admin' : 'Candidate'}
                 </span>
               </div>
@@ -104,15 +104,15 @@ export default function PortalProfilePage() {
         )}
         {!loading && !error && user && (
           <div className="bg-white shadow rounded-lg p-6 space-y-4 border border-red-100 mt-6 dark:bg-gray-800 dark:border dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900">Privacy & Data Control</h3>
-            <p className="text-sm text-gray-500">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-300">Privacy & Data Control</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Manage your personal data in accordance with our privacy policy.
             </p>
 
             <div className="pt-4 border-t border-gray-100 flex flex-col space-y-4">
               <button
                 onClick={handleExportData}
-                className="self-start text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium transition-colors"
+                className="self-start text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-900 dark:text-gray-300 px-4 py-2 rounded font-medium transition-colors"
               >
                 Export My Data
               </button>
@@ -120,19 +120,19 @@ export default function PortalProfilePage() {
               {!showDeleteConfirm ? (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="self-start text-sm bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded font-medium transition-colors"
+                  className="self-start text-sm bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-700 dark:hover:bg-red-900 dark:text-red-200 px-4 py-2 rounded font-bold transition-colors"
                 >
                   Delete Account permanently
                 </button>
               ) : (
                 <div className="bg-red-50 p-4 rounded-md space-y-3 border border-red-200 mt-2">
-                  <p className="text-sm font-medium text-red-800">
+                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
                     Warning: This will deactivate your account immediately and schedule your data for deletion. You will be logged out and will not be able to log back in.
                   </p>
                   <input
                     type="password"
                     placeholder="Enter password to confirm"
-                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm px-3 py-2 border"
+                    className="block w-full rounded-md border-gray-300 dark:border-gray-800 shadow-sm focus:border-red-500 dark:focus:border-red-200 focus:ring-red-500 dark:focus:ring-red-200 text-black dark:text-white sm:text-sm px-3 py-2 border"
                     value={deletePassword}
                     onChange={(e) => setDeletePassword(e.target.value)}
                   />
@@ -141,7 +141,7 @@ export default function PortalProfilePage() {
                     <button
                       onClick={handleDeleteAccount}
                       disabled={isDeleting}
-                      className="text-sm bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
+                      className="text-sm bg-red-700 hover:bg-red-800 text-white dark:bg-red-300 dark:hover:bg-red-400 dark:text-black px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
                     >
                       {isDeleting ? 'Deleting...' : 'Confirm Deletion'}
                     </button>
@@ -152,7 +152,7 @@ export default function PortalProfilePage() {
                         setDeletePassword('')
                       }}
                       disabled={isDeleting}
-                      className="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded font-medium transition-colors"
+                      className="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 dark:bg-black dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-300 px-4 py-2 rounded font-medium transition-colors"
                     >
                       Cancel
                     </button>
