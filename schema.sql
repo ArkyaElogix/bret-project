@@ -48,6 +48,13 @@ CREATE TABLE users (
 	token_version INTEGER NOT NULL, 
 	created_at DATETIME NOT NULL, 
 	updated_at DATETIME NOT NULL, 
+	education VARCHAR(255), 
+	address TEXT, 
+	country VARCHAR(100), 
+	age INTEGER, 
+	profession VARCHAR(255), 
+	income_range VARCHAR(100), 
+	phone VARCHAR(50), 
 	consent_given_at DATETIME, 
 	deleted_at DATETIME, 
 	anonymized_at DATETIME, 
@@ -69,6 +76,9 @@ CREATE TABLE assessment_sessions (
 	updated_at DATETIME NOT NULL, 
 	submitted_at DATETIME, 
 	ai_report_data JSON, 
+	expires_at DATETIME, 
+	prior_attempt_claimed BOOL NOT NULL, 
+	prior_attempt_details TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id), 
 	FOREIGN KEY(form_id) REFERENCES forms (id)
@@ -97,6 +107,7 @@ CREATE TABLE behavioural_factors (
 	behavioural_type_id INTEGER NOT NULL, 
 	name VARCHAR(100) NOT NULL, 
 	order_index INTEGER NOT NULL, 
+	color VARCHAR(7), 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(behavioural_type_id) REFERENCES behavioural_types (id)
 )

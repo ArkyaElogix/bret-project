@@ -3,6 +3,10 @@ import { useEffect, useState, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { listForms, createForm, deleteForm, updateForm, Form } from '../api/forms'
 import { listBehaviouralTypes, BehaviouralType } from '../api/behavioralTypes'
+import {
+  listBehaviouralFactors,
+  BehaviouralFactor,
+} from '../api/behavioralFactors'
 import { listQuestions, Question } from '../api/questions'
 import { ApiError } from '../api/client'
 
@@ -12,7 +16,7 @@ export default function FormsPage() {
   const [forms, setForms] = useState<Form[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
+  const [factors, setFactors] = useState<BehaviouralFactor[]>([])
   const [newName, setNewName] = useState('')
   const [newIsActive, setNewIsActive] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -25,7 +29,21 @@ export default function FormsPage() {
   const [completionState, setCompletionState] = useState<Record<number, { isComplete: boolean; message: string }>>({})
   const [popupError, setPopupError] = useState<string | null>(null)
 
-  function getCompletionState(sections: BehaviouralType[], questions: Question[]) {
+  function getFactorUsageCount(
+    sectionId: number,
+    factorId: number,
+    questions: Question[]
+  ): number {
+    return questions.reduce((total, question) => {
+      if (question.behavioural_type_id !== sectionId) return total
+      if (question.option_a_factor_id === factorId) total++
+      if (question.option_b_factor_id === factorId) total++
+      return total
+    }, 0)
+  }
+
+  function getCompletionState(sections: BehaviouralType[], questions: Question[], factors: BehaviouralFactor[]) 
+  {
     if (sections.length !== 3) {
       return {
         isComplete: false,
@@ -33,16 +51,45 @@ export default function FormsPage() {
       }
     }
 
-    const sectionStatus = sections.map((section) => ({
-      section,
-      count: questions.filter((question) => question.behavioural_type_id === section.id).length,
-    }))
+    for (const section of sections) {
+      const count = questions.filter(
+        (question) => question.behavioural_type_id === section.id
+      ).length
 
-    const incompleteSection = sectionStatus.find((item) => item.count !== 10)
-    if (incompleteSection) {
-      return {
-        isComplete: false,
-        message: `${incompleteSection.section.code} needs ${incompleteSection.count}/10 questions before activation.`,
+      if (count < 10) {
+        return {
+          isComplete: false,
+          message: `${section.code} needs at least 10 questions before activation.`,
+        }
+      }
+
+      if (count % 2 !== 0) {
+        return {
+          isComplete: false,
+          message: `${section.code} needs an even number of questions before activation.`,
+        }
+      }
+
+      const sectionFactors = factors.filter(
+        (factor) => factor.behavioural_type_id === section.id
+      )
+      if (sectionFactors.length !== 4) {
+        return {
+          isComplete: false,
+          message: `${section.code} must have exactly 4 behavioural factors configured.`,
+        }
+      }
+
+      const requiredCount = (count * 2) / 4
+      for (const factor of sectionFactors) {
+        const actual = getFactorUsageCount(section.id, factor.id, questions)
+
+        if (actual !== requiredCount) {
+          return {
+            isComplete: false,
+            message: `${count} questions requires each factor to appear ${requiredCount} times — ${factor.name} currently appears ${actual} times.`,
+          }
+        }
       }
     }
 
@@ -54,7 +101,7 @@ export default function FormsPage() {
 
   async function handleToggleActive(form: Form) {
     if (!form.is_active && !form.is_complete) {
-      setPopupError(`Cannot activate "${form.name}" until it has all 30 questions filled up.`)
+      setPopupError(`Cannot activate "${form.name}" until every section has at least 10 questions, uses an even number of questions, and balances all 4 factors evenly.`)
       return
     }
 
@@ -74,26 +121,28 @@ export default function FormsPage() {
     setLoading(true)
     setError(null)
     setPopupError(null)
+    
     try {
-      const [formsData, sectionsData] = await Promise.all([
+      const [formsData, sectionsData, factorsData] = await Promise.all([
         listForms(),
         listBehaviouralTypes(),
+        listBehaviouralFactors(),
       ])
-
+    
       const questionResults = await Promise.all(
         formsData.map((form) => listQuestions({ form_id: form.id }))
       )
 
       const nextCompletionState: Record<number, { isComplete: boolean; message: string }> = {}
       const nextForms = formsData.map((form, index) => {
-        const state = getCompletionState(sectionsData, questionResults[index])
+        const state = getCompletionState(sectionsData, questionResults[index], factorsData)
         nextCompletionState[form.id] = state
         return {
           ...form,
           is_complete: state.isComplete,
         }
       })
-
+      setFactors(factorsData)
       setForms(nextForms)
       setCompletionState(nextCompletionState)
     } catch (err) {

@@ -48,7 +48,7 @@ export default function FormDetailsPage() {
   function getQuestionsForSection(sectionId: number) {
     return questions.filter((q) => q.behavioural_type_id === sectionId)
   }
-
+  
   if (loading) {
     return (
       <AdminLayout title="Questionnaires Details">

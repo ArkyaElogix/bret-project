@@ -71,7 +71,10 @@ def update_form(
         if not is_form_complete(db, form.id):
             raise HTTPException(
                 status_code=400,
-                detail="Cannot activate form: each section must contain exactly 10 questions.",
+                detail=(
+                    "Cannot activate form: each section must contain at least 10 questions, "
+                    "use an even number of questions, and balance exactly 4 factors evenly across that section."
+                ),
             )
     elif updates.get("is_active") is False:
         active_session_count = (

@@ -95,35 +95,25 @@ export default function QuestionsPage() {
     return questions.filter((question) => question.behavioural_type_id === sectionId)
   }
 
-  function getCompletionStatus() {
-  if (sections.length !== 3) {
-    return {
-      isComplete: false,
-      message: 'This Questionnaire needs 3 sections before it can be activated.',
-    }
+    function handleStartAdding(sectionId: number) {
+    setAddingToSection(sectionId)
+    const existing = getQuestionsForSection(sectionId)
+    const nextNumber =
+      existing.length > 0
+        ? Math.max(...existing.map((question) => question.number)) + 1
+        : 1
+    setNewNumber(nextNumber)
+    setNewOptionA('')
+    setNewOptionB('')
+    const factors = getFactorsForSection(sectionId)
+    const defaultFactor = factors.length > 0 ? factors[0].id : 0
+    setNewFactorA(defaultFactor)
+    setNewFactorB(defaultFactor)
+    setCreateError(null)
   }
 
-  const sectionStatus = sections.map((section) => ({
-    section,
-    count: getQuestionsForSection(section.id).length,
-  }))
 
-  const incompleteSection = sectionStatus.find((item) => item.count !== 10)
-
-  if (incompleteSection) {
-    return {
-      isComplete: false,
-      message: `${incompleteSection.section.code} needs ${incompleteSection.count}/10 questions before activation.`,
-    }
-  }
-
-  return {
-    isComplete: true,
-    message: 'Complete and ready to activate.',
-  }
-}
-
-  function getFactorUsageCount(
+    function getFactorUsageCount(
     sectionId: number,
     factorId: number,
     excludeQuestionId?: number
@@ -138,27 +128,73 @@ export default function QuestionsPage() {
     }
     return count
   }
-  function handleStartAdding(sectionId: number) {
-  const existing = getQuestionsForSection(sectionId)
-  if (existing.length >= 10) {
-    setCreateError('This section already has the maximum of 10 questions.')
-    return
+
+  function getSectionFactorCounts(sectionId: number) {
+    return getQuestionsForSection(sectionId).reduce<Record<number, number>>(
+      (counts, question) => {
+        counts[question.option_a_factor_id ?? 0] =
+          (counts[question.option_a_factor_id ?? 0] ?? 0) + 1
+        counts[question.option_b_factor_id ?? 0] =
+          (counts[question.option_b_factor_id ?? 0] ?? 0) + 1
+        return counts
+      },
+      {}
+    )
   }
 
-  setAddingToSection(sectionId)
-  const nextNumber =
-    existing.length > 0
-      ? Math.max(...existing.map((question) => question.number)) + 1
-      : 1
-  setNewNumber(nextNumber)
-  setNewOptionA('')
-  setNewOptionB('')
-  const factors = getFactorsForSection(sectionId)
-  const defaultFactor = factors.length > 0 ? factors[0].id : 0
-  setNewFactorA(defaultFactor)
-  setNewFactorB(defaultFactor)
-  setCreateError(null)
-}
+  function getCompletionStatus() {
+    if (sections.length !== 3) {
+      return {
+        isComplete: false,
+        message: 'This Questionnaire needs 3 sections before it can be activated.',
+      }
+    }
+
+    for (const section of sections) {
+      const sectionQuestions = getQuestionsForSection(section.id)
+      const count = sectionQuestions.length
+
+      if (count < 10) {
+        return {
+          isComplete: false,
+          message: `${section.code} needs at least 10 questions before activation.`,
+        }
+      }
+
+      if (count % 2 !== 0) {
+        return {
+          isComplete: false,
+          message: `${section.code} needs an even number of questions before activation.`,
+        }
+      }
+
+      const sectionFactors = getFactorsForSection(section.id)
+      if (sectionFactors.length !== 4) {
+        return {
+          isComplete: false,
+          message: `${section.code} must have exactly 4 behavioural factors configured before activation.`,
+        }
+      }
+
+      const requiredCount = (count * 2) / 4
+      const factorCounts = getSectionFactorCounts(section.id)
+
+      for (const factor of sectionFactors) {
+        const actual = factorCounts[factor.id] ?? 0
+        if (actual !== requiredCount) {
+          return {
+            isComplete: false,
+            message: `${count} questions requires each factor to appear ${requiredCount} times — ${factor.name} currently appears ${actual} times.`,
+          }
+        }
+      }
+    }
+
+    return {
+      isComplete: true,
+      message: 'Complete and ready to activate.',
+    }
+  }
 
   function handleCancelAdding() {
     setAddingToSection(null)
@@ -168,11 +204,7 @@ export default function QuestionsPage() {
   e.preventDefault()
   setCreateError(null)
 
-  const existing = getQuestionsForSection(sectionId)
-  if (existing.length >= 10) {
-    setCreateError('This section already has the maximum of 10 questions.')
-    return
-  }
+  
 
   setCreating(true)
   try {
@@ -355,22 +387,25 @@ export default function QuestionsPage() {
 </div>
 
 {!completionStatus.isComplete && (
-  <p className="mt-2 text-sm text-amber-700">
+  <p className="mt-2 text-sm text-red-700 dark:text-red-200">
     {completionStatus.message}
   </p>
 )}
 
-<p className="mt-2 text-sm text-gray-500 dark:text-gray-100">
+<p className="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">
   Manage sections and questions for this Questionnaire from one place.
 </p>
+<p className="text-xs font-semibold text-yellow-700 dark:text-yellow-200">
+                      The below Behavioural Types (sections) have no maximum size. Activation requires at least 10 questions, an even total number of questions, and balanced use of all 4 factors.
+                  </p>
           </div>
           <Link to={`/forms/${form.id}`} className="rounded bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
-            View Details
+            View Only Mode
 
           </Link>
         </div>
       </div>
-      <div className="mt-8 flex flex-col gap-6 rg:flex-row">
+      <div className="self-start mt-8 flex flex-col gap-6 rg:flex-row">
 
       </div>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -385,33 +420,62 @@ export default function QuestionsPage() {
                     <h2 className="text-lg font-bold text-gray-800 dark:text-gray-300">
                       {section.code} - {section.name}
                       {(() => {
-                        const fullFactors = getFactorsForSection(section.id).filter(
-                          (f) => getFactorUsageCount(section.id, f.id) >= 5
-                        )
-                        return fullFactors.length > 0 ? (
-                          <p className="mt-1 text-xs text-amber-700 font-medium dark:text-amber-300">
-                            {fullFactors.length} factor{fullFactors.length > 1 ? 's' : ''} at capacity (used 5/5 times):{' '}
-                            {fullFactors.map((f) => f.name).join(', ')}
-                          </p>
-                        ) : null
-                      })()}
+  const counts = getSectionFactorCounts(section.id)
+  const requiredCount = sectionQuestions.length > 0 ? (sectionQuestions.length * 2) / 4 : 0
+  const factorLabels = sectionFactors.map((factor) => (
+    `${factor.name}: ${counts[factor.id] ?? 0}`
+  ))
+  const isReadyForBalance =
+    sectionFactors.length === 4 &&
+    sectionQuestions.length >= 10 &&
+    sectionQuestions.length % 2 === 0
+  const unbalancedFactors =
+    isReadyForBalance
+      ? sectionFactors.filter(
+          (factor) => (counts[factor.id] ?? 0) !== requiredCount
+        )
+      : []
+
+  return (
+    <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400">
+      <div>Factor counts: {factorLabels.join(' · ')}</div>
+      {isReadyForBalance ? (
+        unbalancedFactors.length === 0 ? (
+          <div className="text-emerald-700 dark:text-emerald-300">
+            This section is balanced: each factor appears {requiredCount} times.
+          </div>
+        ) : (
+          <div className="text-amber-700 dark:text-amber-300">
+            This section is not balanced yet. Each factor should appear {requiredCount} times.
+          </div>
+        )
+      ) : (
+        <div>
+          Activation requires 10+ questions, an even total, and balanced use of all 4 factors.
+        </div>
+      )}
+    </div>
+  )
+})()}
 
                     </h2>
                     <h2 className="mt-1 text-sm font-bold text-red-800 dark:text-red-400">Instruction displayed to candidates who are answering: </h2>
                     {section.instructions && (
                       <p className="mt-1 text-sm font-bold text-black dark:text-gray-300">{section.instructions}</p>
                     )}
+                     
                   </div>
-
+                  
                 </div>
 
 
 
                 <div className="p-6">
                   <div className="mb-4 flex items-center justify-between">
-                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-100">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-100">
                       Questions
                     </h3>
+                    
                     <button
                       onClick={() => handleStartAdding(section.id)}
                       className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-200 dark:text-blue-700 dark:hover:bg-blue-300"
@@ -419,11 +483,7 @@ export default function QuestionsPage() {
                       + Add Question
                     </button>
                   </div>
-                  {isSectionAtMaxQuestions(section.id) && (
-                    <p className="text-l font-bold text-red-600 dark:text-red-400 mt-1">
-                      This section already contains 10 questions.
-                    </p>
-                  )}
+                 
 
                   {addingToSection === section.id && (
                     <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/40 dark:bg-blue-950/30">
@@ -462,10 +522,10 @@ export default function QuestionsPage() {
 
                                 {sectionFactors.map((factor) => {
                                   const used = getFactorUsageCount(section.id, factor.id)
-                                  const full = used >= 5
+                                  
                                   return (
-                                    <option key={factor.id} value={factor.id} disabled={full}>
-                                      {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                    <option key={factor.id} value={factor.id}>
+                                      {factor.name} ({used} used)
                                     </option>
                                   )
                                 })}
@@ -494,10 +554,10 @@ export default function QuestionsPage() {
 
                                 {sectionFactors.map((factor) => {
                                   const used = getFactorUsageCount(section.id, factor.id)
-                                  const full = used >= 5
+                                  
                                   return (
-                                    <option key={factor.id} value={factor.id} disabled={full}>
-                                      {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                    <option key={factor.id} value={factor.id}>
+                                      {factor.name} ({used} used)
                                     </option>
                                   )
                                 })}
@@ -571,10 +631,10 @@ export default function QuestionsPage() {
 
                                       {sectionFactors.map((factor) => {
                                         const used = getFactorUsageCount(section.id, factor.id)
-                                        const full = used >= 5
+                                        
                                         return (
-                                          <option key={factor.id} value={factor.id} disabled={full}>
-                                            {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                          <option key={factor.id} value={factor.id}>
+                                            {factor.name} ({used} used)
                                           </option>
                                         )
                                       })}
@@ -603,10 +663,10 @@ export default function QuestionsPage() {
 
                                       {sectionFactors.map((factor) => {
                                         const used = getFactorUsageCount(section.id, factor.id, question.id)
-                                        const full = used >= 5
+                                        
                                         return (
-                                          <option key={factor.id} value={factor.id} disabled={full}>
-                                            {factor.name} ({used}/5 used){full ? ' — FULL' : ''}
+                                          <option key={factor.id} value={factor.id}>
+                                            {factor.name} ({used} used)
                                           </option>
                                         )
                                       })}

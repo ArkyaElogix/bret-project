@@ -14,34 +14,6 @@ from app.services.form_completion import is_form_complete
 
 router = APIRouter(prefix="/questions", tags=["Questions"])
 
-def count_factor_usage(
-    db: Session,
-    form_id: int,
-    behavioural_type_id: int,
-    factor_id: int,
-    exclude_question_id: int | None = None,
-) -> int:
-    query = db.query(Question).filter(
-        Question.form_id == form_id,
-        Question.behavioural_type_id == behavioural_type_id,
-        (
-            (Question.option_a_factor_id == factor_id)
-            | (Question.option_b_factor_id == factor_id)
-        ),
-    )
-
-    if exclude_question_id is not None:
-        query = query.filter(Question.id != exclude_question_id)
-
-    total = 0
-    for question in query.all():
-        if question.option_a_factor_id == factor_id:
-            total += 1
-        if question.option_b_factor_id == factor_id:
-            total += 1
-
-    return total
-
 def count_questions_in_section(
     db: Session,
     form_id: int,
@@ -56,29 +28,115 @@ def count_questions_in_section(
         query = query.filter(Question.id != exclude_question_id)
     return query.count()
 
-def validate_section_question_limit(
+
+def validate_section_distribution(
     db: Session,
     form_id: int,
     behavioural_type_id: int,
     exclude_question_id: int | None = None,
 ):
-    if count_questions_in_section(
+    question_count = count_questions_in_section(
         db,
         form_id=form_id,
         behavioural_type_id=behavioural_type_id,
         exclude_question_id=exclude_question_id,
-    ) >= 10:
+    )
+
+    if question_count < 10:
         raise HTTPException(
             status_code=400,
-            detail="Each section can contain at most 10 questions.",
+            detail="Each section must contain at least 10 questions.",
         )
 
-def deactivate_form_for_edit(db: Session, form) -> None:
-    if form.is_active:
-        form.is_active = False
-        db.add(form)
+    if question_count % 2 != 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Each section must contain an even number of questions.",
+        )
 
-def validate_factor_usage_limit(
+    factors = db.query(BehaviouralFactor).filter(
+        BehaviouralFactor.behavioural_type_id == behavioural_type_id
+    ).all()
+    if len(factors) != 4:
+        raise HTTPException(
+            status_code=400,
+            detail="Each section must define exactly 4 behavioural factors.",
+        )
+
+    required_count = (question_count * 2) // 4
+    actual_counts: dict[int, int] = {factor.id: 0 for factor in factors}
+
+    query = db.query(Question).filter(
+        Question.form_id == form_id,
+        Question.behavioural_type_id == behavioural_type_id,
+    )
+    if exclude_question_id is not None:
+        query = query.filter(Question.id != exclude_question_id)
+
+    for question in query.all():
+        actual_counts[question.option_a_factor_id] += 1
+        actual_counts[question.option_b_factor_id] += 1
+
+    for factor in factors:
+        actual = actual_counts[factor.id]
+        if actual != required_count:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"{question_count} questions requires each factor to appear "
+                    f"{required_count} times — {factor.name} currently appears "
+                    f"{actual} times"
+                ),
+            )
+
+
+def normalize_section_question_numbers(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+) -> None:
+    questions = (
+        db.query(Question)
+        .filter(
+            Question.form_id == form_id,
+            Question.behavioural_type_id == behavioural_type_id,
+        )
+        .order_by(Question.number)
+        .all()
+    )
+
+    for index, question in enumerate(questions, start=1):
+        if question.number != index:
+            question.number = index
+            db.add(question)
+
+
+def get_section_factor_counts(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    exclude_question_id: int | None = None,
+) -> tuple[dict[int, int], list[BehaviouralFactor]]:
+    factors = db.query(BehaviouralFactor).filter(
+        BehaviouralFactor.behavioural_type_id == behavioural_type_id
+    ).all()
+    counts: dict[int, int] = {f.id: 0 for f in factors}
+
+    q = db.query(Question).filter(
+        Question.form_id == form_id,
+        Question.behavioural_type_id == behavioural_type_id,
+    )
+    if exclude_question_id is not None:
+        q = q.filter(Question.id != exclude_question_id)
+
+    for question in q.all():
+        counts[question.option_a_factor_id] = counts.get(question.option_a_factor_id, 0) + 1
+        counts[question.option_b_factor_id] = counts.get(question.option_b_factor_id, 0) + 1
+
+    return counts, factors
+
+
+def validate_factor_progressive_limit(
     db: Session,
     form_id: int,
     behavioural_type_id: int,
@@ -86,25 +144,82 @@ def validate_factor_usage_limit(
     option_b_factor_id: int,
     exclude_question_id: int | None = None,
 ):
-    new_counts: dict[int, int] = {}
+    counts, factors = get_section_factor_counts(
+        db, form_id, behavioural_type_id, exclude_question_id=exclude_question_id
+    )
 
-    for factor_id in (option_a_factor_id, option_b_factor_id):
-        new_counts[factor_id] = new_counts.get(factor_id, 0) + 1
-
-    for factor_id, added_count in new_counts.items():
-        existing_count = count_factor_usage(
-            db,
-            form_id=form_id,
-            behavioural_type_id=behavioural_type_id,
-            factor_id=factor_id,
-            exclude_question_id=exclude_question_id,
+    if len(factors) != 4:
+        raise HTTPException(
+            status_code=400,
+            detail="Each section must define exactly 4 behavioural factors.",
         )
 
-        if existing_count + added_count > 5:
+    new_counts = counts.copy()
+    for fid in (option_a_factor_id, option_b_factor_id):
+        new_counts[fid] = new_counts.get(fid, 0) + 1
+
+    question_count = count_questions_in_section(
+        db,
+        form_id=form_id,
+        behavioural_type_id=behavioural_type_id,
+        exclude_question_id=exclude_question_id,
+    )
+
+    if question_count < 10:
+        for fid in (option_a_factor_id, option_b_factor_id):
+            existing = counts.get(fid, 0)
+            if new_counts[fid] > 5:
+                factor = next((f for f in factors if f.id == fid), None)
+                name = factor.name if factor else str(fid)
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"Before a section has 10 questions, each factor can be used at most 5 times — "
+                        f"{name} currently appears {existing} times"
+                    ),
+                )
+        return
+
+    current_min = min(counts.values())
+    current_max = max(counts.values())
+    current_balance = current_max - current_min
+
+    proposed_min = min(new_counts.values())
+    proposed_max = max(new_counts.values())
+    proposed_balance = proposed_max - proposed_min
+
+    if current_balance <= 1:
+        if proposed_balance > 1:
             raise HTTPException(
                 status_code=400,
-                detail="Each behavioural factor can only be applied 5 times per section.",
+                detail=(
+                    f"Proposed factor usage would become unbalanced: "
+                    f"{proposed_max}-{proposed_min} = {proposed_balance}. "
+                    f"Keep all factor counts within one of each other."
+                ),
             )
+    else:
+        if proposed_balance > current_balance:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Proposed change would increase imbalance from {current_balance} to {proposed_balance}. "
+                    f"Use lower-count factors until the section is balanced."
+                ),
+            )
+        if proposed_max > current_max + 1:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Cannot increase a factor above {current_max + 1} when the current highest count is {current_max}. "
+                    f"Slow down the leading factor and let the others catch up."
+                ),
+            )
+
+def deactivate_form_for_edit(db: Session, form) -> None:
+    if form.is_active:
+        form.is_active = False
+        db.add(form)
 
 def validate_factor_for_section(
     db: Session,
@@ -144,14 +259,23 @@ def create_question(
             detail="The two selected factors must be different.",
         )
 
-    validate_factor_for_section(db, payload.option_a_factor_id, payload.behavioural_type_id)
-    validate_factor_for_section(db, payload.option_b_factor_id, payload.behavioural_type_id)
-    validate_section_question_limit(
+    validate_factor_progressive_limit(
         db,
         form_id=payload.form_id,
         behavioural_type_id=payload.behavioural_type_id,
+        option_a_factor_id=payload.option_a_factor_id,
+        option_b_factor_id=payload.option_b_factor_id,
     )
-    validate_factor_usage_limit(db, form_id=payload.form_id, behavioural_type_id=payload.behavioural_type_id, option_a_factor_id=payload.option_a_factor_id, option_b_factor_id=payload.option_b_factor_id)
+
+    # Make room for the requested question number by shifting existing numbers >= payload.number
+    if payload.number is not None:
+        db.query(Question).filter(
+            Question.form_id == payload.form_id,
+            Question.behavioural_type_id == payload.behavioural_type_id,
+            Question.number >= payload.number,
+        ).update({Question.number: Question.number + 1}, synchronize_session="fetch")
+
+    
     question = Question(**payload.model_dump())
     db.add(question)
     db.commit()
@@ -221,13 +345,9 @@ def update_question(
 
     validate_factor_for_section(db, payload.option_a_factor_id, target_section_id)
     validate_factor_for_section(db, payload.option_b_factor_id, target_section_id)
-    validate_section_question_limit(
-        db,
-        form_id=question.form_id,
-        behavioural_type_id=target_section_id,
-        exclude_question_id=question.id,
-    )
-    validate_factor_usage_limit(
+
+    # Validate progressive factor limits (exclude this question so we measure current state)
+    validate_factor_progressive_limit(
         db,
         form_id=question.form_id,
         behavioural_type_id=target_section_id,
@@ -235,6 +355,30 @@ def update_question(
         option_b_factor_id=payload.option_b_factor_id,
         exclude_question_id=question.id,
     )
+
+    # If the question's number is being changed, adjust the surrounding numbers to keep a dense sequence.
+    new_number = updates.get("number")
+    if new_number is not None and new_number != question.number:
+        old_number = question.number
+        if new_number > old_number:
+            # move intervening questions up by -1
+            db.query(Question).filter(
+                Question.form_id == question.form_id,
+                Question.behavioural_type_id == target_section_id,
+                Question.id != question.id,
+                Question.number > old_number,
+                Question.number <= new_number,
+            ).update({Question.number: Question.number - 1}, synchronize_session="fetch")
+        else:
+            # new_number < old_number: shift down intervening questions by +1
+            db.query(Question).filter(
+                Question.form_id == question.form_id,
+                Question.behavioural_type_id == target_section_id,
+                Question.id != question.id,
+                Question.number >= new_number,
+                Question.number < old_number,
+            ).update({Question.number: Question.number + 1}, synchronize_session="fetch")
+    
     for field, value in updates.items():
         setattr(question, field, value)
 
@@ -258,6 +402,11 @@ def delete_question(
         raise HTTPException(status_code=404, detail="Form not found")
 
     deactivate_form_for_edit(db, form)
-
+    deleted_number = question.number
     db.delete(question)
+    db.query(Question).filter(
+        Question.form_id == form.id,
+        Question.behavioural_type_id == question.behavioural_type_id,
+        Question.number > deleted_number,
+    ).update({Question.number: Question.number - 1}, synchronize_session="fetch")
     db.commit()
