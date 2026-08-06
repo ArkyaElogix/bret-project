@@ -12,7 +12,7 @@ import json
 import os
 import time
 from typing import Any, Dict, List
-from datetime import datetime
+from datetime import datetime, timedelta
 from app.services.ai_report_service import AIReportService
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -496,6 +496,9 @@ def start_or_resume_session(
         user_id=current_user.id,
         form_id=payload.form_id,
         status=SessionStatus.in_progress,
+        prior_attempt_claimed=payload.prior_attempt_claimed,
+        prior_attempt_details=payload.prior_attempt_details,
+        expires_at=datetime.utcnow() + timedelta(hours=24)
     )
     db.add(session)
     db.commit()
@@ -527,6 +530,9 @@ def submit_answer(
     session = _get_owned_session(session_id, db, current_user)
     if session.status != SessionStatus.in_progress:
         raise HTTPException(status_code=400, detail="Session is already submitted")
+    
+    if session.expires_at and session.expires_at < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="This session has expired (24 hour limit reached).")
 
     question = db.get(Question, payload.question_id)
     if not question:

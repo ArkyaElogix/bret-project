@@ -34,10 +34,17 @@ export async function registerCandidate(
   password: string,
   productType: 'BASIC' | 'EXECUTIVE',
   consentAccepted: boolean,
+  education: string,
+  age: number,
+  address: string,
+  country: string,
+  profession: string,
+  income_range: string,
+  phone: string,
 ): Promise<LoginResponse> {
   return apiRequest<LoginResponse>('/auth/register', {
     method: 'POST',
-    body: { name, email, password, product_type: productType, consent_accepted: consentAccepted },
+    body: { name, email, password, account_type: productType, consent_accepted: consentAccepted, education, age, address, country, profession, income_range, phone },
   })
 }
 

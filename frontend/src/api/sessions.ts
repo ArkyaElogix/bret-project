@@ -16,10 +16,16 @@ export interface Session {
  */
 export async function startSession(
   formId: number,
+  priorAttemptClaimed: boolean = false,
+  priorAttemptDetails: string | null = null
 ): Promise<Session> {
   return apiRequest<Session>('/sessions/start', {
     method: 'POST',
-    body: { form_id: formId },
+    body: {
+      form_id: formId,
+      prior_attempt_claimed: priorAttemptClaimed,
+      prior_attempt_details: priorAttemptDetails
+    },
   })
 }
 

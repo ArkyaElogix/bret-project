@@ -17,7 +17,13 @@ export default function LoginPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [accountType, setAccountType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
   const [consentAccepted, setConsentAccepted] = useState(false)
-
+  const [education, setEducation] = useState('')
+  const [age, setAge] = useState<number>(0)
+  const [address, setAddress] = useState('')
+  const [country, setCountry] = useState('')
+  const [profession, setProfession] = useState('')
+  const [income_range, setIncomeRange] = useState('')
+  const [phone, setPhone] = useState('')
   // Password visibility states
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
@@ -58,7 +64,7 @@ export default function LoginPage() {
     try {
       const result =
         mode === 'register'
-          ? await registerCandidate(name, email, password, accountType, consentAccepted)
+          ? await registerCandidate(name, email, password, accountType, consentAccepted, education, age, address, country, profession, income_range, phone)
           : await login(email, password)
 
       setToken(result.access_token)
@@ -108,6 +114,88 @@ export default function LoginPage() {
                 <option value="BASIC">BASIC</option>
                 <option value="EXECUTIVE">EXECUTIVE</option>
               </select>
+            </div>
+          </>
+        )}
+        {mode === 'register' && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Age *</label>
+                <input
+                  type="number"
+                  required
+                  value={age || ''}
+                  onChange={(e) => setAge(parseInt(e.target.value) || 0)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address *</label>
+              <input
+                type="text"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country *</label>
+                <input
+                  type="text"
+                  required
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Education *</label>
+                <input
+                  type="text"
+                  required
+                  value={education}
+                  onChange={(e) => setEducation(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profession *</label>
+                <input
+                  type="text"
+                  required
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Income Range</label>
+                <input
+                  type="text"
+                  placeholder="Optional"
+                  value={income_range}
+                  onChange={(e) => setIncomeRange(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded px-3 py-2 text-sm"
+                />
+              </div>
             </div>
           </>
         )}

@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
 from datetime import datetime
 
 # class BehaviouralTypeCreate(BaseModel):
@@ -41,16 +41,23 @@ class BehaviouralTypeUpdate(BaseModel):
 
 #     model_config = ConfigDict(from_attributes=True)
 
+class BehaviouralFactorBase(BaseModel):
+    name: str
+    order_index: int = 0
+    color: str | None = None  # Add this line
+
 
 class BehaviouralFactorCreate(BaseModel):
     behavioural_type_id: int
     name: str
     order_index: int = 0
+    color: str | None = None  # Add this line
 
 
 class BehaviouralFactorUpdate(BaseModel):
     name: Optional[str] = None
     order_index: Optional[int] = None
+    color: str | None = None
 
 
 class BehaviouralFactorOut(BaseModel):
@@ -74,6 +81,8 @@ class SectionScoreOut(BaseModel):
 
 class SessionStartRequest(BaseModel):
     form_id: int
+    prior_attempt_claimed: bool = False
+    prior_attempt_details: str | None = None
 
 
 class SessionOut(BaseModel):
@@ -126,7 +135,24 @@ class CandidateRegisterRequest(BaseModel):
     password: str
     account_type: str
     consent_accepted: bool
-
+    education: str
+    address: str
+    country: str
+    age: int
+    profession: str
+    income_range: str | None = None
+    phone: str | None = None
+    @field_validator("address", "country", "phone", mode="before")
+    @classmethod
+    def normalize_strings(cls, v: str | None, info: ValidationInfo) -> str | None:
+        if not v:
+            return v
+        v = v.strip()
+        if info.field_name == "country":
+            return v.upper()  
+        if info.field_name == "phone":
+            return v.replace(" ", "").replace("-", "") 
+        return v
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -140,6 +166,27 @@ class UserCreate(BaseModel):
     password: str
     role: str = "USER"  # "ADMIN" or "USER"
     account_type: str = "BASIC"  # "BASIC" or "EXECUTIVE"
+    consent_accepted: bool
+    
+    # New fields
+    education: str
+    address: str
+    country: str
+    age: int
+    profession: str
+    income_range: str | None = None
+    phone: str | None = None
+    @field_validator("address", "country", "phone", mode="before")
+    @classmethod
+    def normalize_strings(cls, v: str | None, info: ValidationInfo) -> str | None:
+        if not v:
+            return v
+        v = v.strip()
+        if info.field_name == "country":
+            return v.upper()  # Normalize country for easier matching
+        if info.field_name == "phone":
+            return v.replace(" ", "").replace("-", "") # Strip spaces and dashes
+        return v
 
 class UserOut(BaseModel):
     id: int

@@ -133,6 +133,13 @@ def register_candidate(
         role=UserRole.USER,
         consent_given_at=now,
         last_accessed_at=now,
+        education=payload.education,
+        address=payload.address,
+        country=payload.country,
+        age=payload.age,
+        profession=payload.profession,
+        income_range=payload.income_range,
+        phone=payload.phone,
     )
     db.add(user)
     db.flush()  # get user.id before audit writes

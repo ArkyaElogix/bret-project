@@ -146,6 +146,7 @@ class BehaviouralFactor(Base):
     )
     name = Column(String(100), nullable=False)
     order_index = Column(Integer, nullable=False, default=0)
+    color = Column(String(7), nullable=True, default="#808080")
 
     behavioural_type = relationship(
         "BehaviouralType", back_populates="behavioural_factors"
@@ -200,6 +201,14 @@ class User(Base):
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
+    education = Column(String(255), nullable=True)
+    address = Column(Text, nullable=True)
+    country = Column(String(100), nullable=True)
+    age = Column(Integer, nullable=True)
+    profession = Column(String(255), nullable=True)
+    income_range = Column(String(100), nullable=True)
+    phone = Column(String(50), nullable=True)
+
 
     # --- Privacy lifecycle metadata ---
     consent_given_at     = Column(DateTime, nullable=True)  # when user accepted the privacy notice
@@ -235,6 +244,10 @@ class AssessmentSession(Base):
     section_scores = relationship(
         "SectionScore", back_populates="session", cascade="all, delete-orphan"
     )
+    expires_at = Column(DateTime, nullable=True)
+    prior_attempt_claimed = Column(Boolean, nullable=False, default=False)
+    prior_attempt_details = Column(Text, nullable=True)
+     
     @property
     def user_name(self) -> str:
         return self.user.name if self.user else "Unknown User"

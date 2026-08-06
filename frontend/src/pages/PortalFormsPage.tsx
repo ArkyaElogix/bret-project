@@ -13,7 +13,9 @@ export default function PortalFormsPage() {
   const [mySessions, setMySessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
+  const [showAttemptModal, setShowAttemptModal] = useState<Form | null>(null)
+  const [priorAttemptClaimed, setPriorAttemptClaimed] = useState(false)
+  const [priorAttemptDetails, setPriorAttemptDetails] = useState('')
 
   const [starting, setStarting] = useState(false)
   const [startError, setStartError] = useState<{ id: number; message: string } | null>(null)
@@ -61,17 +63,19 @@ export default function PortalFormsPage() {
   }
 
 
-  async function handleStart(form: Form) {
+  async function handleStart(
+    form: Form,
+    priorClaimed: boolean = false,
+    priorDetails: string = ''
+  ) {
     setStarting(true)
     setStartError(null)
     try {
-      const session = await startSession(form.id)
+      // Pass the extra arguments to the API function
+      const session = await startSession(form.id, priorClaimed, priorDetails)
       await loadData() // refresh so the new in-progress state shows
       navigate(`/portal/sessions/${session.id}`)
     } catch (err) {
-      // 409 happens if the backend gate blocks: user has an in-progress
-      // session on a different form. Show the message; the disabled Start
-      // buttons also reflect this.
       setStartError({
         id: form.id,
         message: err instanceof ApiError ? err.message : 'Failed to start assessment.',
@@ -80,6 +84,7 @@ export default function PortalFormsPage() {
       setStarting(false)
     }
   }
+
 
   async function handleStartAgain(form: Form) {
     setStarting(true)
@@ -187,7 +192,7 @@ export default function PortalFormsPage() {
 
                     {!session && (
                       <button
-                        onClick={() => handleStart(form)}
+                        onClick={() => setShowAttemptModal(form)}
                         disabled={anyInProgress || starting}
                         className="bg-blue-600 text-white rounded px-4 py-1.5 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                         title={anyInProgress ? 'Finish your in-progress assessment first' : 'Start assessment'}
@@ -284,6 +289,57 @@ export default function PortalFormsPage() {
           </div>
         )}
       </div>
+      {showAttemptModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
+              Prior Attempt Check
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Have you attempted this assessment before under a different email address or at a different time?
+            </p>
+
+            <label className="flex items-center space-x-2 mb-4">
+              <input
+                type="checkbox"
+                checked={priorAttemptClaimed}
+                onChange={(e) => setPriorAttemptClaimed(e.target.checked)}
+                className="rounded border-gray-300"
+              />
+              <span className="text-sm dark:text-white">Yes, I have attempted this before</span>
+            </label>
+
+            {priorAttemptClaimed && (
+              <textarea
+                placeholder="Please provide details (e.g. previous email used, approximate date)..."
+                value={priorAttemptDetails}
+                onChange={(e) => setPriorAttemptDetails(e.target.value)}
+                className="w-full border rounded p-2 text-sm mb-4 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                rows={3}
+              />
+            )}
+
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setShowAttemptModal(null)}
+                className="px-4 py-2 text-sm border rounded text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleStart(showAttemptModal, priorAttemptClaimed, priorAttemptDetails)
+                  setShowAttemptModal(null)
+                }}
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Continue to Assessment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </PortalLayout>
   )
 }

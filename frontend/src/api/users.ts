@@ -24,6 +24,7 @@ export async function createUser(
   password: string,
   role: 'ADMIN' | 'USER',
   account_type: 'BASIC' | 'EXECUTIVE',
+
 ): Promise<User> {
   return apiRequest<User>('/users/', {
     method: 'POST',

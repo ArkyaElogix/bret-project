@@ -6,7 +6,7 @@ piece to build later.
 import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.database import get_db
 from app.models.models import User, UserRole, AccountType, AuditLog, AuditAction
@@ -64,6 +64,13 @@ def create_user(
         password_hash=hash_password(payload.password),
         role=payload.role,
         account_type=payload.account_type,
+        education=payload.education,
+        address=payload.address,
+        country=payload.country,
+        age=payload.age,
+        profession=payload.profession,
+        income_range=payload.income_range,
+        phone=payload.phone,
     )
     db.add(user)
     db.commit()
