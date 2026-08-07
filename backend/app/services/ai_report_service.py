@@ -76,7 +76,7 @@ class AIReportService:
             "candidate": {
                 "name": user.name,
                 "email": user.email,
-                "product_type": user.product_type.value
+                "product_type": user.account_type.value
             },
             "form": {
                 "id": form.id,

@@ -2,6 +2,8 @@ import { useEffect, useState, FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { getForm, Form } from '../api/forms'
+import AssessmentStepper from '../components/AssessmentStepper'
+
 import {
   listBehaviouralTypes,
   BehaviouralType,
@@ -57,6 +59,13 @@ export default function QuestionsPage() {
   const [newSectionName, setNewSectionName] = useState('')
   const [newSectionInstructions, setNewSectionInstructions] = useState('')
   const [newSectionOrder, setNewSectionOrder] = useState(0)
+  const [showPreview, setShowPreview] = useState(false)
+  const [previewAnswers, setPreviewAnswers] = useState<Record<number, 'A' | 'B'>>({})
+
+  function handlePreviewSelect(questionId: number, option: 'A' | 'B') {
+    setPreviewAnswers((prev) => ({ ...prev, [questionId]: option }))
+  }
+
 
   async function loadData() {
     setLoading(true)
@@ -89,13 +98,13 @@ export default function QuestionsPage() {
     return factors.filter((factor) => factor.behavioural_type_id === sectionId)
   }
   function isSectionAtMaxQuestions(sectionId: number) {
-  return getQuestionsForSection(sectionId).length >= 10
-}
+    return getQuestionsForSection(sectionId).length >= 10
+  }
   function getQuestionsForSection(sectionId: number) {
     return questions.filter((question) => question.behavioural_type_id === sectionId)
   }
 
-    function handleStartAdding(sectionId: number) {
+  function handleStartAdding(sectionId: number) {
     setAddingToSection(sectionId)
     const existing = getQuestionsForSection(sectionId)
     const nextNumber =
@@ -113,7 +122,7 @@ export default function QuestionsPage() {
   }
 
 
-    function getFactorUsageCount(
+  function getFactorUsageCount(
     sectionId: number,
     factorId: number,
     excludeQuestionId?: number
@@ -201,30 +210,30 @@ export default function QuestionsPage() {
   }
 
   async function handleCreateQuestion(e: FormEvent, sectionId: number) {
-  e.preventDefault()
-  setCreateError(null)
+    e.preventDefault()
+    setCreateError(null)
 
-  
 
-  setCreating(true)
-  try {
-    await createQuestion(
-      formId,
-      sectionId,
-      newNumber,
-      newOptionA.trim(),
-      newOptionB.trim(),
-      newFactorA,
-      newFactorB
-    )
-    setAddingToSection(null)
-    await loadData()
-  } catch (err) {
-    setCreateError(err instanceof ApiError ? err.message : 'Failed to create question.')
-  } finally {
-    setCreating(false)
+
+    setCreating(true)
+    try {
+      await createQuestion(
+        formId,
+        sectionId,
+        newNumber,
+        newOptionA.trim(),
+        newOptionB.trim(),
+        newFactorA,
+        newFactorB
+      )
+      setAddingToSection(null)
+      await loadData()
+    } catch (err) {
+      setCreateError(err instanceof ApiError ? err.message : 'Failed to create question.')
+    } finally {
+      setCreating(false)
+    }
   }
-}
 
   function handleStartEditing(question: Question) {
     setEditingId(question.id)
@@ -305,7 +314,7 @@ export default function QuestionsPage() {
 
   function FactorReference() {
     return (
-    <aside className="self-start rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:sticky lg:top-6">
+      <aside className="self-start rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:sticky lg:top-6">
         <details open>
           <summary className="cursor-pointer list-none border-b border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200">
             Available Factors
@@ -360,49 +369,57 @@ export default function QuestionsPage() {
             </p> */}
 
             <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
-  {form.name}
-  <span className="ml-2 text-lg font-normal text-gray-400">ID: {form.id}</span>
-</h1>
+              {form.name}
+              <span className="ml-2 text-lg font-normal text-gray-400">ID: {form.id}</span>
+            </h1>
 
-<div className="mt-2 flex flex-wrap items-center gap-2">
-  <span
-    className={`inline-block rounded-full px-2 py-1 text-xs ${
-      form.is_active
-        ? 'bg-green-100 text-green-700 dark:bg-green-500 dark:text-black'
-        : 'bg-gray-100 text-gray-700 dark:bg-gray-400 dark:text-black'
-    }`}
-  >
-    {form.is_active ? 'Active Form' : 'Inactive Form'}
-  </span>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span
+                className={`inline-block rounded-full px-2 py-1 text-xs ${form.is_active
+                  ? 'bg-green-100 text-green-700 dark:bg-green-500 dark:text-black'
+                  : 'bg-gray-100 text-gray-700 dark:bg-gray-400 dark:text-black'
+                  }`}
+              >
+                {form.is_active ? 'Active Form' : 'Inactive Form'}
+              </span>
 
-  <span
-    className={`inline-block rounded-full px-2 py-1 text-xs ${
-      completionStatus.isComplete
-        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-300 dark:text-emerald-900'
-        : 'bg-amber-100 text-amber-700 dark:bg-amber-300 dark:text-amber-900'
-    }`}
-  >
-    {completionStatus.isComplete ? 'Complete' : 'Incomplete'}
-  </span>
-</div>
+              <span
+                className={`inline-block rounded-full px-2 py-1 text-xs ${completionStatus.isComplete
+                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-300 dark:text-emerald-900'
+                  : 'bg-amber-100 text-amber-700 dark:bg-amber-300 dark:text-amber-900'
+                  }`}
+              >
+                {completionStatus.isComplete ? 'Complete' : 'Incomplete'}
+              </span>
+            </div>
 
-{!completionStatus.isComplete && (
-  <p className="mt-2 text-sm text-red-700 dark:text-red-200">
-    {completionStatus.message}
-  </p>
-)}
+            {!completionStatus.isComplete && (
+              <p className="mt-2 text-sm text-red-700 dark:text-red-200">
+                {completionStatus.message}
+              </p>
+            )}
 
-<p className="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">
-  Manage sections and questions for this Questionnaire from one place.
-</p>
-<p className="text-xs font-semibold text-yellow-700 dark:text-yellow-200">
-                      The below Behavioural Types (sections) have no maximum size. Activation requires at least 10 questions, an even total number of questions, and balanced use of all 4 factors.
-                  </p>
+            <p className="mt-2 text-sm font-bold text-gray-900 dark:text-gray-100">
+              Manage sections and questions for this Questionnaire from one place.
+            </p>
+            <p className="text-xs font-semibold text-yellow-700 dark:text-yellow-200">
+              The below Behavioural Types (sections) have no maximum size. Activation requires at least 10 questions, an even total number of questions, and balanced use of all 4 factors.
+            </p>
           </div>
-          <Link to={`/forms/${form.id}`} className="rounded bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
-            View Only Mode
-
-          </Link>
+          <div className="flex gap-2 shrink-0">
+            <button
+              onClick={() => {
+                setPreviewAnswers({})
+                setShowPreview(true)
+              }}
+              className="rounded bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Show Candidate View
+            </button>
+            <Link to={`/forms/${form.id}`} className="rounded bg-slate-700 px-3 py-2 text-sm font-medium text-white hover:bg-slate-800">
+              View Only Mode
+            </Link>
+          </div>
         </div>
       </div>
       <div className="self-start mt-8 flex flex-col gap-6 rg:flex-row">
@@ -414,58 +431,58 @@ export default function QuestionsPage() {
             const sectionQuestions = getQuestionsForSection(section.id)
             const sectionFactors = getFactorsForSection(section.id)
             return (
-            <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+              <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div className="flex items-start justify-between gap-4 border-b border-gray-200 bg-slate-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/60">
                   <div>
                     <h2 className="text-lg font-bold text-gray-800 dark:text-gray-300">
                       {section.code} - {section.name}
                       {(() => {
-  const counts = getSectionFactorCounts(section.id)
-  const requiredCount = sectionQuestions.length > 0 ? (sectionQuestions.length * 2) / 4 : 0
-  const factorLabels = sectionFactors.map((factor) => (
-    `${factor.name}: ${counts[factor.id] ?? 0}`
-  ))
-  const isReadyForBalance =
-    sectionFactors.length === 4 &&
-    sectionQuestions.length >= 10 &&
-    sectionQuestions.length % 2 === 0
-  const unbalancedFactors =
-    isReadyForBalance
-      ? sectionFactors.filter(
-          (factor) => (counts[factor.id] ?? 0) !== requiredCount
-        )
-      : []
+                        const counts = getSectionFactorCounts(section.id)
+                        const requiredCount = sectionQuestions.length > 0 ? (sectionQuestions.length * 2) / 4 : 0
+                        const factorLabels = sectionFactors.map((factor) => (
+                          `${factor.name}: ${counts[factor.id] ?? 0}`
+                        ))
+                        const isReadyForBalance =
+                          sectionFactors.length === 4 &&
+                          sectionQuestions.length >= 10 &&
+                          sectionQuestions.length % 2 === 0
+                        const unbalancedFactors =
+                          isReadyForBalance
+                            ? sectionFactors.filter(
+                              (factor) => (counts[factor.id] ?? 0) !== requiredCount
+                            )
+                            : []
 
-  return (
-    <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400">
-      <div>Factor counts: {factorLabels.join(' · ')}</div>
-      {isReadyForBalance ? (
-        unbalancedFactors.length === 0 ? (
-          <div className="text-emerald-700 dark:text-emerald-300">
-            This section is balanced: each factor appears {requiredCount} times.
-          </div>
-        ) : (
-          <div className="text-amber-700 dark:text-amber-300">
-            This section is not balanced yet. Each factor should appear {requiredCount} times.
-          </div>
-        )
-      ) : (
-        <div>
-          Activation requires 10+ questions, an even total, and balanced use of all 4 factors.
-        </div>
-      )}
-    </div>
-  )
-})()}
+                        return (
+                          <div className="mt-2 space-y-1 text-xs text-slate-500 dark:text-slate-400">
+                            <div>Factor counts: {factorLabels.join(' · ')}</div>
+                            {isReadyForBalance ? (
+                              unbalancedFactors.length === 0 ? (
+                                <div className="text-emerald-700 dark:text-emerald-300">
+                                  This section is balanced: each factor appears {requiredCount} times.
+                                </div>
+                              ) : (
+                                <div className="text-amber-700 dark:text-amber-300">
+                                  This section is not balanced yet. Each factor should appear {requiredCount} times.
+                                </div>
+                              )
+                            ) : (
+                              <div>
+                                Activation requires 10+ questions, an even total, and balanced use of all 4 factors.
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
 
                     </h2>
                     <h2 className="mt-1 text-sm font-bold text-red-800 dark:text-red-400">Instruction displayed to candidates who are answering: </h2>
                     {section.instructions && (
                       <p className="mt-1 text-sm font-bold text-black dark:text-gray-300">{section.instructions}</p>
                     )}
-                     
+
                   </div>
-                  
+
                 </div>
 
 
@@ -475,7 +492,7 @@ export default function QuestionsPage() {
                     <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-100">
                       Questions
                     </h3>
-                    
+
                     <button
                       onClick={() => handleStartAdding(section.id)}
                       className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-200 dark:text-blue-700 dark:hover:bg-blue-300"
@@ -483,7 +500,7 @@ export default function QuestionsPage() {
                       + Add Question
                     </button>
                   </div>
-                 
+
 
                   {addingToSection === section.id && (
                     <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/40 dark:bg-blue-950/30">
@@ -522,7 +539,7 @@ export default function QuestionsPage() {
 
                                 {sectionFactors.map((factor) => {
                                   const used = getFactorUsageCount(section.id, factor.id)
-                                  
+
                                   return (
                                     <option key={factor.id} value={factor.id}>
                                       {factor.name} ({used} used)
@@ -554,7 +571,7 @@ export default function QuestionsPage() {
 
                                 {sectionFactors.map((factor) => {
                                   const used = getFactorUsageCount(section.id, factor.id)
-                                  
+
                                   return (
                                     <option key={factor.id} value={factor.id}>
                                       {factor.name} ({used} used)
@@ -631,7 +648,7 @@ export default function QuestionsPage() {
 
                                       {sectionFactors.map((factor) => {
                                         const used = getFactorUsageCount(section.id, factor.id)
-                                        
+
                                         return (
                                           <option key={factor.id} value={factor.id}>
                                             {factor.name} ({used} used)
@@ -663,7 +680,7 @@ export default function QuestionsPage() {
 
                                       {sectionFactors.map((factor) => {
                                         const used = getFactorUsageCount(section.id, factor.id, question.id)
-                                        
+
                                         return (
                                           <option key={factor.id} value={factor.id}>
                                             {factor.name} ({used} used)
@@ -768,6 +785,34 @@ export default function QuestionsPage() {
         </div>
         <FactorReference />
       </div>
+      {showPreview && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4">
+          <div className="relative w-full max-w-4xl max-h-[90vh] bg-gray-100 dark:bg-[#5e5a5a] rounded-xl shadow-2xl overflow-y-auto">
+            <button
+              onClick={() => setShowPreview(false)}
+              className="absolute top-4 right-4 z-10 rounded-full bg-gray-200 dark:bg-gray-700 p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div className="p-8">
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100">{form.name}</h1>
+              </div>
+              <AssessmentStepper
+                sections={sections}
+                questions={questions}
+                answers={previewAnswers}
+                savingIds={new Set()}
+                saveErrors={{}}
+                onSelect={handlePreviewSelect}
+                isPreview={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </AdminLayout>
+
+
   )
 }

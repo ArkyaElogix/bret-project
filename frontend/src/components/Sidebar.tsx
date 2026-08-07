@@ -9,7 +9,7 @@ export default function Sidebar() {
   const links = [
     { to: '/users', label: 'Users', icon: '👥' },
     { to: '/forms', label: 'Questionnaires', icon: '📋' },
-    { to: '/sessions', label: 'Sessions', icon: '📊' },
+    { to: '/sessions', label: 'Sessions & Activity', icon: '📊' },
   ]
 
   function handleLogout() {
@@ -34,8 +34,7 @@ export default function Sidebar() {
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `block rounded-md px-3 py-2 mb-2 transition ${
-                isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800'
+              `block rounded-md px-3 py-2 mb-2 transition ${isActive ? 'bg-slate-700 text-white' : 'text-slate-300 hover:bg-slate-800'
               }`
             }
             title={isCollapsed ? link.label : ''}

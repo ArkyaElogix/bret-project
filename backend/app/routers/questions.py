@@ -236,6 +236,46 @@ def validate_factor_for_section(
             detail="Selected factor does not belong to this section",
         )
 
+def shift_questions_up(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    start_number: int,
+):
+    questions = (
+        db.query(Question)
+        .filter(
+            Question.form_id == form_id,
+            Question.behavioural_type_id == behavioural_type_id,
+            Question.number >= start_number,
+        )
+        .order_by(Question.number.desc())
+        .all()
+    )
+    for question in questions:
+        question.number += 1
+        db.add(question)
+
+
+def shift_questions_down(
+    db: Session,
+    form_id: int,
+    behavioural_type_id: int,
+    start_number: int,
+):
+    questions = (
+        db.query(Question)
+        .filter(
+            Question.form_id == form_id,
+            Question.behavioural_type_id == behavioural_type_id,
+            Question.number >= start_number,
+        )
+        .order_by(Question.number.asc())
+        .all()
+    )
+    for question in questions:
+        question.number -= 1
+        db.add(question)
 
 @router.post("/", response_model=QuestionOut, status_code=201)
 def create_question(
@@ -268,12 +308,19 @@ def create_question(
     )
 
     # Make room for the requested question number by shifting existing numbers >= payload.number
+    normalize_section_question_numbers(
+        db,
+        payload.form_id,
+        payload.behavioural_type_id,
+    )
+
     if payload.number is not None:
-        db.query(Question).filter(
-            Question.form_id == payload.form_id,
-            Question.behavioural_type_id == payload.behavioural_type_id,
-            Question.number >= payload.number,
-        ).update({Question.number: Question.number + 1}, synchronize_session="fetch")
+        shift_questions_up(
+            db,
+            payload.form_id,
+            payload.behavioural_type_id,
+            payload.number,
+        )
 
     
     question = Question(**payload.model_dump())
@@ -358,26 +405,44 @@ def update_question(
 
     # If the question's number is being changed, adjust the surrounding numbers to keep a dense sequence.
     new_number = updates.get("number")
+    normalize_section_question_numbers(
+        db, question.form_id, target_section_id
+    )
+
     if new_number is not None and new_number != question.number:
         old_number = question.number
         if new_number > old_number:
-            # move intervening questions up by -1
-            db.query(Question).filter(
-                Question.form_id == question.form_id,
-                Question.behavioural_type_id == target_section_id,
-                Question.id != question.id,
-                Question.number > old_number,
-                Question.number <= new_number,
-            ).update({Question.number: Question.number - 1}, synchronize_session="fetch")
+            questions = (
+                db.query(Question)
+                .filter(
+                    Question.form_id == question.form_id,
+                    Question.behavioural_type_id == target_section_id,
+                    Question.id != question.id,
+                    Question.number > old_number,
+                    Question.number <= new_number,
+                )
+                .order_by(Question.number.asc())
+                .all()
+            )
+            for existing in questions:
+                existing.number -= 1
+                db.add(existing)
         else:
-            # new_number < old_number: shift down intervening questions by +1
-            db.query(Question).filter(
-                Question.form_id == question.form_id,
-                Question.behavioural_type_id == target_section_id,
-                Question.id != question.id,
-                Question.number >= new_number,
-                Question.number < old_number,
-            ).update({Question.number: Question.number + 1}, synchronize_session="fetch")
+            questions = (
+                db.query(Question)
+                .filter(
+                    Question.form_id == question.form_id,
+                    Question.behavioural_type_id == target_section_id,
+                    Question.id != question.id,
+                    Question.number >= new_number,
+                    Question.number < old_number,
+                )
+                .order_by(Question.number.desc())
+                .all()
+            )
+            for existing in questions:
+                existing.number += 1
+                db.add(existing)
     
     for field, value in updates.items():
         setattr(question, field, value)
@@ -404,9 +469,7 @@ def delete_question(
     deactivate_form_for_edit(db, form)
     deleted_number = question.number
     db.delete(question)
-    db.query(Question).filter(
-        Question.form_id == form.id,
-        Question.behavioural_type_id == question.behavioural_type_id,
-        Question.number > deleted_number,
-    ).update({Question.number: Question.number - 1}, synchronize_session="fetch")
+    db.flush()
+
+    normalize_section_question_numbers(db, form.id, question.behavioural_type_id)
     db.commit()

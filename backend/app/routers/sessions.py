@@ -31,6 +31,8 @@ from app.models.models import (
     AccountType,
     ReportStatement,
     OptionLetter,
+    SessionActivityAction,
+    SessionActivityLog,
 )
 from app.schemas import (
     SessionStartRequest,
@@ -43,11 +45,24 @@ from app.schemas import (
     FactorResultOut,
     SectionResultOut,
     SessionReportOut,
+    SessionActivityOut,
+    PageNavigateRequest,
 )
 from app.scoring import calculate_and_store_scores
 from app.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
+
+def _log_activity(db: Session, session_id: int, action: SessionActivityAction, detail: dict = None):
+    try:
+        log = SessionActivityLog(
+            session_id=session_id,
+            action=action,
+            detail=json.dumps(detail) if detail else None
+        )
+        db.add(log)
+    except Exception as e:
+        print(f"Failed to log activity: {e}")
 
 def _build_basic_report_factor(
     factor_id: int,
@@ -338,7 +353,7 @@ def _build_basic_report_payload(session: AssessmentSession, db: Session) -> dict
         "session": session,
         "user": {
             "name": user_name,
-            "account_type": account_type,
+            "product_type": account_type,
         },
         "form": {
             "id": session.form.id if session.form else session.form_id,
@@ -472,6 +487,8 @@ def start_or_resume_session(
         .first()
     )
     if existing_for_form:
+        _log_activity(db, existing_for_form.id, SessionActivityAction.SESSION_RESUME) # <--- ADD THIS
+        db.commit()
         return existing_for_form
 
     blocking = (
@@ -503,6 +520,8 @@ def start_or_resume_session(
     db.add(session)
     db.commit()
     db.refresh(session)
+    _log_activity(db, session.id, SessionActivityAction.SESSION_START)
+    db.commit()
     return session
 
 @router.get("/me", response_model=list[SessionOut])
@@ -555,6 +574,7 @@ def submit_answer(
     )
     if existing:
         existing.chosen_option = payload.chosen_option
+        _log_activity(db, session_id, SessionActivityAction.ANSWER_CHANGE, {"question_id": payload.question_id, "to": payload.chosen_option})
         db.commit()
         db.refresh(existing)
         return existing
@@ -565,6 +585,7 @@ def submit_answer(
         chosen_option=payload.chosen_option,
     )
     db.add(response)
+    _log_activity(db, session_id, SessionActivityAction.ANSWER_SUBMIT, {"question_id": payload.question_id, "option": payload.chosen_option})
     db.commit()
     db.refresh(response)
     return response
@@ -612,6 +633,7 @@ def submit_session(
 
     session.status = SessionStatus.submitted
     session.submitted_at = datetime.utcnow()
+    _log_activity(db, session_id, SessionActivityAction.SESSION_SUBMIT)
     db.commit()
     db.refresh(session)
 
@@ -992,3 +1014,100 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
         sections.append(agenda_section)
     return sections
 
+@router.post("/{session_id}/activity/navigate", status_code=204)
+def log_navigation(
+    session_id: int,
+    payload: PageNavigateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Log a stepper navigation event (candidate or admin preview)."""
+    session = _get_owned_session(session_id, db, current_user)
+    _log_activity(db, session.id, SessionActivityAction.PAGE_NAVIGATE, {
+        "from_step": payload.from_step,
+        "to_step": payload.to_step
+    })
+    db.commit()
+@router.get("/{session_id}/activity", response_model=SessionActivityOut)
+def get_session_activity(
+    session_id: int,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Admin-only: Get full activity log and behavioral analysis for a session."""
+    events = db.query(SessionActivityLog).filter(
+        SessionActivityLog.session_id == session_id
+    ).order_by(SessionActivityLog.created_at.asc()).all()
+    if not events:
+        return {
+            "events": [],
+            "summary": {
+                "total_events": 0, "first_event_at": None, "last_event_at": None,
+                "total_active_minutes": 0, "answer_count": 0, "answer_change_count": 0,
+                "avg_seconds_per_answer": 0, "fastest_answer_seconds": 0, "slowest_answer_seconds": 0,
+                "idle_gaps": [], "flags": []
+            }
+        }
+    # Compute Summary & Flags
+    total_events = len(events)
+    first_event = events[0].created_at
+    last_event = events[-1].created_at
+    total_active_minutes = (last_event - first_event).total_seconds() / 60.0
+    answer_count = sum(1 for e in events if e.action == SessionActivityAction.ANSWER_SUBMIT)
+    answer_change_count = sum(1 for e in events if e.action == SessionActivityAction.ANSWER_CHANGE)
+    resumes = sum(1 for e in events if e.action == SessionActivityAction.SESSION_RESUME)
+    idle_gaps = []
+    answer_durations = []
+    
+    for i in range(1, len(events)):
+        prev = events[i-1]
+        curr = events[i]
+        diff_seconds = (curr.created_at - prev.created_at).total_seconds()
+        
+        # Idle Gaps > 10 minutes (600 seconds)
+        if diff_seconds > 600:
+            idle_gaps.append({"after_event_id": prev.id, "gap_minutes": round(diff_seconds / 60.0, 1)})
+            
+        # Answer Speeds
+        if curr.action in (SessionActivityAction.ANSWER_SUBMIT, SessionActivityAction.ANSWER_CHANGE):
+            # Ignore durations > 5 minutes for average speed (likely stepped away)
+            if diff_seconds < 300:
+                answer_durations.append(diff_seconds)
+    avg_speed = sum(answer_durations) / len(answer_durations) if answer_durations else 0
+    fastest = min(answer_durations) if answer_durations else 0
+    slowest = max(answer_durations) if answer_durations else 0
+    net_active_minutes = total_active_minutes - sum(g["gap_minutes"] for g in idle_gaps)
+
+    flags = []
+    if answer_count >= 20 and net_active_minutes > 0 and net_active_minutes < 5:
+        flags.append({"type": "FAST_COMPLETION", "message": f"Completed assessment in {round(net_active_minutes, 1)} minutes active time."})
+    
+    if fastest > 0 and fastest < 2.0:
+        flags.append({"type": "VERY_FAST_ANSWER", "message": f"At least one answer was submitted in {fastest:.1f}s."})
+        
+    for gap in idle_gaps:
+        if gap["gap_minutes"] > 30:
+            flags.append({"type": "LONG_IDLE", "message": f"Extended idle gap of {gap['gap_minutes']} minutes detected."})
+
+    if answer_count > 0 and (answer_change_count / answer_count) > 0.2:
+        flags.append({"type": "HIGH_CHANGE_RATE", "message": f"Changed {answer_change_count} answers (high indecision rate)."})
+        
+    if resumes >= 3:
+        flags.append({"type": "FREQUENT_RESTARTS", "message": f"Session was resumed {resumes} times."})
+
+    summary = {
+        "total_events": total_events,
+        "first_event_at": first_event,
+        "last_event_at": last_event,
+        "total_active_minutes": round(net_active_minutes, 1), # <-- Now uses net active time!
+        "answer_count": answer_count,
+        "answer_change_count": answer_change_count,
+        "session_resumes": resumes,
+        "avg_seconds_per_answer": round(avg_speed, 1),
+        "fastest_answer_seconds": round(fastest, 1),
+        "slowest_answer_seconds": round(slowest, 1),
+        "idle_gaps": idle_gaps,
+        "flags": flags
+    }
+
+    return {"events": events, "summary": summary}

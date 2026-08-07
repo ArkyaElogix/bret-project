@@ -255,6 +255,29 @@ class AssessmentSession(Base):
     def form_name(self) -> str:
         return self.form.name if self.form else "Unknown Assessment"
 
+# Add enum to the top imports if not present
+# import enum
+
+class SessionActivityAction(str, enum.Enum):
+    SESSION_START    = "SESSION_START"
+    SESSION_RESUME   = "SESSION_RESUME"
+    ANSWER_SUBMIT    = "ANSWER_SUBMIT"
+    ANSWER_CHANGE    = "ANSWER_CHANGE"
+    SESSION_SUBMIT   = "SESSION_SUBMIT"
+    PAGE_NAVIGATE    = "PAGE_NAVIGATE"
+
+class SessionActivityLog(Base):
+    __tablename__ = "session_activity_logs"
+
+    id         = Column(Integer, primary_key=True, autoincrement=True)
+    session_id = Column(Integer, ForeignKey("assessment_sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    action     = Column(Enum(SessionActivityAction), nullable=False)
+    detail     = Column(Text, nullable=True)  # JSON blob
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    session = relationship("AssessmentSession", backref="activity_logs")
+
+
 class Response(Base):
     __tablename__ = "responses"
 

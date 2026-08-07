@@ -15,6 +15,7 @@ class BehaviouralTypeCreate(BaseModel):
     order_index: int = 0
 
 
+
 class BehaviouralTypeOut(BaseModel):
     id: int
     code: str
@@ -124,6 +125,34 @@ class SessionFullOut(BaseModel):
     responses: list[ResponseOut]
     scores: list[SectionScoreOut]
 
+class SessionActivityEventOut(BaseModel):
+    id: int
+    session_id: int
+    action: str
+    detail: str | None
+    created_at: datetime
+class BehaviouralFlag(BaseModel):
+    type: str
+    message: str
+class ActivitySummary(BaseModel):
+    total_events: int
+    first_event_at: datetime | None
+    last_event_at: datetime | None
+    total_active_minutes: float
+    answer_count: int
+    answer_change_count: int
+    session_resumes: int
+    avg_seconds_per_answer: float
+    fastest_answer_seconds: float
+    slowest_answer_seconds: float
+    idle_gaps: list[dict[str, Any]]
+    flags: list[BehaviouralFlag]
+class SessionActivityOut(BaseModel):
+    events: list[SessionActivityEventOut]
+    summary: ActivitySummary
+class PageNavigateRequest(BaseModel):
+    from_step: int
+    to_step: int
 
 class LoginRequest(BaseModel):
     email: str

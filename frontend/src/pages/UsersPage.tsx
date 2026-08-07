@@ -493,74 +493,7 @@ export default function UsersPage() {
               </div>
             </section>
             {/* Audit Log */}
-            <section className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-200">Privacy Audit Log</h2>
-                <button
-                  onClick={loadAuditLog}
-                  disabled={auditLoading}
-                  className="text-xs border border-gray-300 rounded px-3 py-1.5 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 disabled:opacity-50"
-                >
-                  {auditLoading ? 'Loading...' : auditVisible ? 'Refresh' : 'Load Audit Log'}
-                </button>
-              </div>
-
-              {auditError && (
-                <p className="text-sm text-red-600 bg-white shadow rounded-lg p-4 dark:bg-gray-800 dark:border dark:border-gray-700">{auditError}</p>
-              )}
-
-              {auditVisible && (
-                <div className="bg-white shadow rounded-lg overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700">
-                  {auditLogs.length === 0 ? (
-                    <p className="p-6 text-sm text-gray-500 dark:text-gray-300">No audit events recorded yet.</p>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200 text-xs dark:divide-gray-700">
-                        <thead className="bg-gray-50 dark:bg-gray-900/60">
-                          <tr>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Timestamp</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Action</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">User ID</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">IP Address</th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-300">Detail</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-100 dark:bg-gray-800 dark:divide-gray-700">
-                          {auditLogs.map((log) => (
-                            <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                              <td className="px-4 py-2 text-gray-500 whitespace-nowrap dark:text-gray-300">
-                                {new Date(log.created_at).toLocaleString()}
-                              </td>
-                              <td className="px-4 py-2 whitespace-nowrap">
-                                <span className={`inline-block px-2 py-0.5 rounded-full font-medium ${log.action.includes('DELETE') || log.action.includes('RESET')
-                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                                  : log.action.includes('LOGIN') || log.action.includes('LOGOUT')
-                                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
-                                    : log.action.includes('CONSENT') || log.action.includes('REGISTER')
-                                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                                      : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                                  }`}>
-                                  {log.action}
-                                </span>
-                              </td>
-                              <td className="px-4 py-2 text-gray-600 dark:text-gray-300">
-                                {log.user_id ?? '—'}
-                              </td>
-                              <td className="px-4 py-2 text-gray-500 font-mono dark:text-gray-400">
-                                {log.ip_address ?? '—'}
-                              </td>
-                              <td className="px-4 py-2 text-gray-500 max-w-xs truncate dark:text-gray-400">
-                                {log.detail ?? '—'}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
+            
 
           </>
         )}
