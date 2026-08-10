@@ -36,6 +36,20 @@ class OptionLetter(str, enum.Enum):
     A = "A"
     B = "B"
 
+class MatchType(str, enum.Enum):
+    EMAIL = "EMAIL"
+    PHONE = "PHONE"
+    NAME_ADDRESS = "NAME_ADDRESS"
+
+class MatchConfidence(str, enum.Enum):
+    EXACT = "EXACT"
+    FUZZY = "FUZZY"
+
+class DuplicateFlagStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
 
 class SessionStatus(str, enum.Enum):
     in_progress = "in_progress"
@@ -63,6 +77,8 @@ class AuditAction(str, enum.Enum):
     ADMIN_VIEW_USER          = "ADMIN_VIEW_USER"
     ADMIN_VIEW_SESSION       = "ADMIN_VIEW_SESSION"
     CONSENT_GIVEN            = "CONSENT_GIVEN"
+    DUPLICATE_FLAGGED = "DUPLICATE_FLAGGED"
+    DUPLICATE_REVIEWED = "DUPLICATE_REVIEWED"
 
 # class Form(Base):
 #     """A specific version/set of questions, e.g. 'BRET v1', 'BRET Executive 2027'.
@@ -244,6 +260,7 @@ class AssessmentSession(Base):
     section_scores = relationship(
         "SectionScore", back_populates="session", cascade="all, delete-orphan"
     )
+    duplicate_flag_id = Column(Integer, ForeignKey("duplicate_flags.id"), nullable=True)
     expires_at = Column(DateTime, nullable=True)
     prior_attempt_claimed = Column(Boolean, nullable=False, default=False)
     prior_attempt_details = Column(Text, nullable=True)
@@ -387,3 +404,43 @@ class AuditLog(Base):
     created_at     = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     user = relationship("User", foreign_keys=[user_id], back_populates="audit_logs")
+
+class ApplicantRegistry(Base):
+    __tablename__ = "applicant_registry"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(255), nullable=False)
+    email_hash = Column(String(64), nullable=False, index=True)
+    phone = Column(String(50), nullable=True)
+    phone_hash = Column(String(64), nullable=True, index=True)
+    name_normalized = Column(String(255), nullable=False)
+    address_normalized = Column(Text, nullable=True)
+    
+    # Original user ID is kept even after the user is anonymized (no ForeignKey)
+    original_user_id = Column(Integer, nullable=False)
+    
+    session_id = Column(Integer, ForeignKey("assessment_sessions.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    session = relationship("AssessmentSession", foreign_keys=[session_id])
+
+class DuplicateFlag(Base):
+    __tablename__ = "duplicate_flags"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    new_session_id = Column(Integer, ForeignKey("assessment_sessions.id"), nullable=False)
+    new_user_id = Column(Integer, nullable=False)
+    prior_registry_id = Column(Integer, ForeignKey("applicant_registry.id"), nullable=False)
+    prior_session_id = Column(Integer, nullable=False)
+    
+    match_type = Column(Enum(MatchType), nullable=False)
+    match_confidence = Column(Enum(MatchConfidence), nullable=False)
+    status = Column(Enum(DuplicateFlagStatus), nullable=False, default=DuplicateFlagStatus.PENDING)
+    
+    reviewed_by = Column(Integer, nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    review_note = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    new_session = relationship("AssessmentSession", foreign_keys=[new_session_id])
+    prior_registry = relationship("ApplicantRegistry", foreign_keys=[prior_registry_id])

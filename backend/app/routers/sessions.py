@@ -612,6 +612,7 @@ def get_session_progress(
 @router.post("/{session_id}/submit", response_model=SessionOut)
 def submit_session(
     session_id: int,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -639,7 +640,32 @@ def submit_session(
 
     calculate_and_store_scores(session_id, db)
 
+    # --- Phase 2: Duplicates & Email ---
+    from app.services.duplicate_service import check_and_flag_duplicates, register_applicant
+    from app.services.email_service import send_report_email
+    import json
+
+    # 1. Check for duplicates
+    flags = check_and_flag_duplicates(session, current_user, db)
+    if flags:
+        from app.models.models import AuditAction, AuditLog
+        audit = AuditLog(
+            action=AuditAction.DUPLICATE_FLAGGED,
+            user_id=current_user.id,
+            target_user_id=current_user.id,
+            detail=json.dumps({"flag_count": len(flags)})
+        )
+        db.add(audit)
+        db.commit()
+
+    # 2. Register permanent applicant record
+    register_applicant(session, current_user, db)
+    
+    # 3. Queue the report email background task
+    background_tasks.add_task(send_report_email, current_user.email, current_user.name, session.id)
+
     return session
+
 
 
 @router.get("/{session_id}/scores", response_model=list[SectionScoreOut])
