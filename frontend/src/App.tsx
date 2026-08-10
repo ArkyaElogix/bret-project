@@ -17,6 +17,10 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 
 
+try {
+  localStorage.removeItem('bret_token')
+  sessionStorage.removeItem('bret_token')
+} catch {}
 export default function App() {
   return (
     <Routes>

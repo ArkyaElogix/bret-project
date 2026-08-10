@@ -10,9 +10,49 @@ const API_BASE_URL =
     ? LOCAL_API_BASE_URL
     : NETWORK_API_BASE_URL)
 
-const TOKEN_KEY = 'bret_token'
+const USER_TOKEN_KEY = 'bret_user_token'
+const ADMIN_TOKEN_KEY = 'bret_admin_token'
+const LEGACY_TOKEN_KEYS = ['bret_token']
 
 const AUTH_CHANGE_EVENT = 'bret-auth-change'
+
+function parseTokenRole(token: string | null): 'ADMIN' | 'USER' | null {
+  if (!token) return null
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    const payload = JSON.parse(json)
+    if (payload?.role === 'ADMIN') return 'ADMIN'
+    if (payload?.role === 'USER') return 'USER'
+    return null
+  } catch {
+    return null
+  }
+}
+
+export function getAdminToken(): string | null {
+  return sessionStorage.getItem(ADMIN_TOKEN_KEY)
+}
+
+export function getUserToken(): string | null {
+  // prefer sessionStorage (current session) over localStorage (remember-me)
+  const s = sessionStorage.getItem(USER_TOKEN_KEY)
+  if (s) {
+    return s
+  }
+  const l = localStorage.getItem(USER_TOKEN_KEY)
+  if (l) {
+    return l
+  }
+  return null
+}
 
 export function notifyAuthChange() {
   window.dispatchEvent(new Event(AUTH_CHANGE_EVENT))
@@ -57,16 +97,44 @@ export async function logout() {
 }
 
 export function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY)
+  return getAdminToken() ?? getUserToken()
 }
 
-export function setToken(token: string) {
-  localStorage.setItem(TOKEN_KEY, token)
+export function setToken(token: string, remember = false) {
+  sessionStorage.removeItem(USER_TOKEN_KEY)
+  localStorage.removeItem(USER_TOKEN_KEY)
+  
+  // Prevent admin tokens from ever being saved to localStorage
+  // even if "Remember Me" is checked, to prevent lingering admin access.
+  const isTokenAdmin = parseTokenRole(token) === 'ADMIN'
+  
+  if (remember && !isTokenAdmin) {
+    localStorage.setItem(USER_TOKEN_KEY, token)
+  } else {
+    sessionStorage.setItem(USER_TOKEN_KEY, token)
+  }
+  notifyAuthChange()
+}
+
+export function setAdminToken(token: string) {
+  // Always session-only and isolated
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY)
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token)
+  // Ensure no leftover persisted user token can masquerade as admin
+  localStorage.removeItem(USER_TOKEN_KEY)
   notifyAuthChange()
 }
 
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY)
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY)
+  sessionStorage.removeItem(USER_TOKEN_KEY)
+  localStorage.removeItem(USER_TOKEN_KEY)
+  for (const k of LEGACY_TOKEN_KEYS) {
+    try {
+      sessionStorage.removeItem(k)
+      localStorage.removeItem(k)
+    } catch {}
+  }
   notifyAuthChange()
 }
 

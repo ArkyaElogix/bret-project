@@ -1,7 +1,7 @@
 import { useState, FormEvent, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { adminLogin } from '../api/auth'
-import { setToken, clearToken } from '../api/client'
+import { setAdminToken, clearToken } from '../api/client'
 import { ApiError } from '../api/client'
 
 export default function AdminLoginPage() {
@@ -16,23 +16,19 @@ export default function AdminLoginPage() {
   }, [])
 
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault()
-    setError(null)
-    setLoading(true)
-    try {
-      const result = await adminLogin(email, password)
-      // The backend endpoint only returns success for ADMIN users (403 otherwise),
-      // so if we get here the role is guaranteed ADMIN.
-      setToken(result.access_token)
-      navigate('/forms', { replace: true })
-    } catch (err) {
-      // 401 = wrong credentials; 403 = valid creds but not an admin.
-      // Both surface cleanly as ApiError.message.
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  e.preventDefault()
+  setError(null)
+  setLoading(true)
+  try {
+    const result = await adminLogin(email, password)
+    setAdminToken(result.access_token)
+    navigate('/forms', { replace: true })
+  } catch (err) {
+    setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

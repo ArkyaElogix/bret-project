@@ -1,5 +1,6 @@
 -- Generated schema.sql from SQLAlchemy models
 DROP TABLE IF EXISTS `responses`;
+DROP TABLE IF EXISTS `session_activity_logs`;
 DROP TABLE IF EXISTS `section_scores`;
 DROP TABLE IF EXISTS `report_statements`;
 DROP TABLE IF EXISTS `questions`;
@@ -179,6 +180,19 @@ CREATE TABLE section_scores (
 	FOREIGN KEY(session_id) REFERENCES assessment_sessions (id), 
 	FOREIGN KEY(section_id) REFERENCES behavioural_types (id), 
 	FOREIGN KEY(factor_id) REFERENCES behavioural_factors (id)
+)
+
+;
+
+
+CREATE TABLE session_activity_logs (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	session_id INTEGER NOT NULL, 
+	action ENUM('SESSION_START','SESSION_RESUME','ANSWER_SUBMIT','ANSWER_CHANGE','SESSION_SUBMIT','PAGE_NAVIGATE') NOT NULL, 
+	detail TEXT, 
+	created_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(session_id) REFERENCES assessment_sessions (id) ON DELETE CASCADE
 )
 
 ;

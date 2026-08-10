@@ -89,9 +89,26 @@ function useAuthGuard(requiredRole?: 'ADMIN' | 'USER') {
       window.removeEventListener(getAuthChangeEventName(), handleAuthChange)
     }
   }, [requiredRole])
+  useEffect(() => {
+  function onPageShow(e: PageTransitionEvent) {
+    // If restored from bfcache, re-run auth checks by forcing a revalidation reload.
+    if ((e as any).persisted) {
+      // re-run auth guard logic — simplest: reload to get a fresh runtime state
+      // but avoid infinite loops by only reloading once
+      if (!sessionStorage.getItem('__bfcache_reloaded')) {
+        sessionStorage.setItem('__bfcache_reloaded', '1')
+        window.location.reload()
+      }
+    }
+  }
+  window.addEventListener('pageshow', onPageShow)
+  return () => window.removeEventListener('pageshow', onPageShow)
+}, [])
 
   return allowed
 }
+
+
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const allowed = useAuthGuard('ADMIN')

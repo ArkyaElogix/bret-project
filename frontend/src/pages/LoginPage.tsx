@@ -35,6 +35,7 @@ export default function LoginPage() {
   const hasDigit = /[0-9]/.test(password)
   const hasSpecialChar = /[^A-Za-z0-9]/.test(password)
   const isPasswordStrong = hasMinLength && hasLowercase && hasUppercase && hasDigit && hasSpecialChar
+  const [rememberMe, setRememberMe] = useState(false)
 
   useEffect(() => {
     clearToken()
@@ -67,7 +68,7 @@ export default function LoginPage() {
           ? await registerCandidate(name, email, password, accountType, consentAccepted, education, age, address, country, profession, income_range, phone)
           : await login(email, password)
 
-      setToken(result.access_token)
+      setToken(result.access_token, rememberMe)
       navigate('/portal', { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
@@ -242,10 +243,17 @@ export default function LoginPage() {
         </div>
 
         {mode === 'login' && (
-          <div className="mt-1 text-right">
-            <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline">
-              Forgot password?
-            </Link>
+          <div className="flex items-center gap-2">
+            <input
+              id="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="remember-me" className="text-sm text-gray-700 dark:text-gray-300">
+              Remember me on this device
+            </label>
           </div>
         )}
 
