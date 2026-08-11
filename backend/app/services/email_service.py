@@ -6,6 +6,9 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from datetime import datetime, timedelta
+from app.auth import JWT_SECRET_KEY, JWT_ALGORITHM  # reuse values
+import jwt as pyjwt
 
 SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
@@ -14,6 +17,7 @@ SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 MAIL_FROM = os.getenv("MAIL_FROM", "noreply@bret.app")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+REPORT_TOKEN_EXPIRE_MINUTES = int(os.getenv("REPORT_TOKEN_EXPIRE_MINUTES", "720"))
 
 def send_reset_email(to_email: str, raw_token: str) -> None:
     """
@@ -63,7 +67,14 @@ def send_report_email(to_email: str, user_name: str, session_id: int) -> None:
     Send the completed assessment report link to the candidate.
     In dev mode (SMTP_HOST empty), logs to stdout.
     """
-    report_url = f"{FRONTEND_URL}/sessions/{session_id}/report"
+    payload = {
+        "session_id": session_id,
+        "exp": datetime.utcnow() + timedelta(minutes=REPORT_TOKEN_EXPIRE_MINUTES),
+        "purpose": "report_access",
+    }
+    report_token = pyjwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    report_url = f"{FRONTEND_URL}/sessions/{session_id}/report?report_token={report_token}"
+    
     
     if not SMTP_HOST:
         print(f"\n[DEV] Report link for {to_email} ({user_name}):\n  {report_url}\n")
@@ -104,3 +115,4 @@ def send_report_email(to_email: str, user_name: str, session_id: int) -> None:
         smtp.starttls()
         smtp.login(SMTP_USER, SMTP_PASSWORD)
         smtp.sendmail(MAIL_FROM, to_email, msg.as_string())
+    

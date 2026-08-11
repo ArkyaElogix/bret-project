@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.models import Question, BehaviouralType, BehaviouralFactor, Form, User
+from app.models.models import Question, BehaviouralType, BehaviouralFactor, Form, User, AssessmentSession, SessionStatus
 from app.schemas import QuestionCreate, QuestionOut, QuestionUpdate
 from app.auth import require_admin, get_current_user
 from app.services.form_completion import is_form_complete
@@ -217,9 +217,34 @@ def validate_factor_progressive_limit(
             )
 
 def deactivate_form_for_edit(db: Session, form) -> None:
-    if form.is_active:
-        form.is_active = False
-        db.add(form)
+    """
+    Deactivates a form when its questions are being edited.
+    Blocks the edit entirely if any sessions are currently in progress,
+    since changing questions mid-assessment would corrupt ongoing responses.
+    """
+    if not form.is_active:
+        return  # Already inactive, nothing to do
+
+    active_session_count = (
+        db.query(AssessmentSession)
+        .filter(
+            AssessmentSession.form_id == form.id,
+            AssessmentSession.status == SessionStatus.in_progress
+        )
+        .count()
+    )
+    if active_session_count > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Cannot edit this form: {active_session_count} candidate session(s) are currently "
+                f"in progress. Wait for all active sessions to be submitted before making changes."
+            ),
+        )
+
+    form.is_active = False
+    db.add(form)
+
 
 def validate_factor_for_section(
     db: Session,

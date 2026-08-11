@@ -11,10 +11,11 @@ reviewing responses later).
 import json
 import os
 import time
+import jwt as pyjwt
 from typing import Any, Dict, List
 from datetime import datetime, timedelta
 from app.services.ai_report_service import AIReportService
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from app.database import get_db, SessionLocal
 from app.models.models import (
@@ -398,14 +399,34 @@ def delayed_cache_report(session_id: int, ai_report: dict, is_test_bypass: bool)
 @router.get("/{session_id}/report", response_model=SessionReportOut)
 def get_session_report(
     session_id: int,
-    background_tasks: BackgroundTasks,  # <--- Add this parameter
+    background_tasks: BackgroundTasks,
+    report_token: str | None = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User | None = Depends(get_current_user),  # keep current_user for normal flow
 ):
-    session = _get_owned_session(session_id, db, current_user)
-
-    if session.status != SessionStatus.submitted:
-        raise HTTPException(status_code=400, detail="Session is not submitted yet")
+    # If a report_token is provided, validate it and bypass owner check
+    if report_token:
+        try:
+            payload = pyjwt.decode(report_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            if payload.get("purpose") != "report_access":
+                raise Exception("Invalid token purpose")
+            if int(payload.get("session_id")) != int(session_id):
+                raise Exception("Token session mismatch")
+        except Exception as e:
+            raise HTTPException(status_code=401, detail="Invalid or expired report token")
+        # Fetch session without owner enforcement
+        session = db.get(AssessmentSession, session_id)
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        if session.status != SessionStatus.submitted:
+            raise HTTPException(status_code=400, detail="Session is not submitted yet")
+        # Build payload as before (AI or static)
+        # ... (reuse the existing function body that builds report from session)
+    else:
+        # existing behavior: require authenticated user and ownership
+        session = _get_owned_session(session_id, db, current_user)
+        if session.status != SessionStatus.submitted:
+            raise HTTPException(status_code=400, detail="Session is not submitted yet")
 
     use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
 
@@ -1137,3 +1158,28 @@ def get_session_activity(
     }
 
     return {"events": events, "summary": summary}
+
+
+@router.post("/{session_id}/resend-report")
+def resend_report_email(
+    session_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin)
+):
+    """Admin-only: re-trigger the email delivery for a candidate."""
+    session = db.get(AssessmentSession, session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    if session.status != SessionStatus.submitted:
+        raise HTTPException(status_code=400, detail="Cannot send report for unsubmitted session")
+        
+    user = session.user
+    if not user:
+        raise HTTPException(status_code=404, detail="Associated user not found")
+
+    from app.services.email_service import send_report_email
+    background_tasks.add_task(send_report_email, user.email, user.name, session.id)
+    
+    return {"message": "Report email queued for delivery."}

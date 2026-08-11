@@ -260,7 +260,6 @@ class AssessmentSession(Base):
     section_scores = relationship(
         "SectionScore", back_populates="session", cascade="all, delete-orphan"
     )
-    duplicate_flag_id = Column(Integer, ForeignKey("duplicate_flags.id"), nullable=True)
     expires_at = Column(DateTime, nullable=True)
     prior_attempt_claimed = Column(Boolean, nullable=False, default=False)
     prior_attempt_details = Column(Text, nullable=True)
