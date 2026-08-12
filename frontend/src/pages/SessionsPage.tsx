@@ -6,7 +6,7 @@ import { getAuditLog, AuditLog } from '../api/users'
 import { ApiError } from '../api/client'
 import AdminLayout from '../components/AdminLayout'
 import { Link } from 'react-router-dom'
-
+import { SessionReportView } from './SessionReportPage'
 
 function formatSessionStatus(status: Session['status']) {
   switch (status) {
@@ -30,7 +30,7 @@ function formatActiveTime(decimalMinutes: number | undefined) {
 
 export default function SessionsPage() {
   const [activeTab, setActiveTab] = useState<'sessions' | 'audit'>('sessions')
-
+  const [selectedReportSessionId, setSelectedReportSessionId] = useState<number | null>(null)
   // Sessions State
   const [sessions, setSessions] = useState<Session[]>([])
   const [loadingSessions, setLoadingSessions] = useState(true)
@@ -243,13 +243,16 @@ export default function SessionsPage() {
                                 <div>
                                   <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Results Snapshot</h3>
                                   <div className="flex space-x-3 mb-6">
-                                    <Link
-                                      to={`/sessions/${session.id}/report`}
-                                      target="_blank"
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setSelectedReportSessionId(session.id)
+                                      }}
                                       className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
                                     >
                                       View Report
-                                    </Link>
+                                    </button>
                                     <button
                                       onClick={() => handleResendReport(session.id)}
                                       className="border border-blue-600 text-blue-600 px-3 py-1.5 rounded text-sm hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-400"
@@ -347,8 +350,30 @@ export default function SessionsPage() {
                   </tbody>
                 </table>
               </div>
+              
             </div>
           )}
+        </div>
+      )}
+      {selectedReportSessionId !== null && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4">
+          <div className="relative w-full max-w-7xl max-h-[calc(100vh-2rem)] overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                Session Report
+              </h2>
+              <button
+                type="button"
+                onClick={() => setSelectedReportSessionId(null)}
+                className="rounded bg-slate-100 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                Close
+              </button>
+            </div>
+            <div className="h-[calc(100vh-8rem)] overflow-y-auto bg-slate-50 dark:bg-slate-950 p-4">
+              <SessionReportView sessionId={selectedReportSessionId} />
+            </div>
+          </div>
         </div>
       )}
     </AdminLayout>

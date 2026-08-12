@@ -561,24 +561,26 @@ function buildSlides(report: SessionReport): Slide[] {
   return slides;
 }
 
-export function SessionReportPage() {
-  const { id } = useParams<{ id: string }>();
+interface SessionReportViewProps {
+  sessionId: number;
+  reportToken?: string;
+}
+
+export function SessionReportView({
+  sessionId,
+  reportToken,
+}: SessionReportViewProps) {
   const [report, setReport] = useState<SessionReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'slides' | 'full'>('slides');
-  const params = new URLSearchParams(window.location.search)
-  const reportToken = params.get('report_token') || undefined
-
 
   useEffect(() => {
-    if (!id) return;
-
     setLoading(true);
     setError(null);
 
-    getSessionReport(Number(id), reportToken)
+    getSessionReport(sessionId, reportToken)
       .then((data) => {
         setReport(data);
         setSlideIndex(0);
@@ -588,7 +590,7 @@ export function SessionReportPage() {
         setError('Failed to load report. Please try again.');
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [sessionId, reportToken]);
 
   const slides = useMemo(() => (report ? buildSlides(report) : []), [report]);
 
@@ -638,7 +640,7 @@ export function SessionReportPage() {
       <div className="bret-report-shell">
         <div className="bret-topbar no-print">
           <div className="bret-topbar-links">
-            <Link to={`/portal/sessions/${id}/results`} className="bret-topbar-button">
+            <Link to={`/portal/sessions/${sessionId}/results`} className="bret-topbar-button">
               ← Back to Results
             </Link>
             <Link to="/portal" className="bret-topbar-button">
@@ -647,109 +649,108 @@ export function SessionReportPage() {
             <button
               type="button"
               className="bret-topbar-button"
-              onClick={() =>
-                setViewMode(viewMode === 'slides' ? 'full' : 'slides')
-                }
-              >
+              onClick={() => setViewMode(viewMode === 'slides' ? 'full' : 'slides')}
+            >
               {viewMode === 'slides' ? 'Full Page' : 'Slide View'}
             </button>
           </div>
-          {/*
-            Print/Save PDF only produces a correct export from the Full
-            Page view — the print stylesheet targets .bret-slide-stage /
-            .bret-slide-hidden overrides tuned for that flow, and slide
-            mode's fixed-height "stage" viewport (see .bret-slide-stage)
-            doesn't reflow the same way in a print pass. Rather than let
-            people export a broken/partial PDF from Slide View, the
-            button is disabled there with a tooltip nudging them to
-            switch first.
-          */}
-          {/* <button
-            onClick={() => window.print()}
+          <button
+            type="button"
+            onClick={() => handleDownloadPdf(report)}
             className="bret-topbar-primary"
-            disabled={viewMode === 'slides'}
-            title={viewMode === 'slides' ? 'Switch to Full Page to print or save as PDF' : undefined}
           >
             Print / Save PDF
-          </button> */}
-          <button
-            type='button'
-              onClick={() => handleDownloadPdf(report)}
-              className="bret-topbar-primary"
-            >
-            Print / Save PDF
           </button>
-
-
         </div>
 
         <div className="bret-report-body">
           {viewMode === 'slides' ? (
             <>
-          <div className="bret-slide-nav no-print">
-            <button
-              onClick={goPrev}
-              disabled={slideIndex === 0}
-              className="bret-slide-nav-button"
-              aria-label="Previous slide"
-            >
-              ← Prev
-            </button>
-
-            <div className="bret-slide-dots">
-              {slides.map((slide, i) => (
+              <div className="bret-slide-nav no-print">
                 <button
-                  key={slide.id}
-                  onClick={() => setSlideIndex(i)}
-                  className={`bret-slide-dot ${i === slideIndex ? 'bret-slide-dot--active' : ''}`}
-                  aria-label={`Go to ${slide.label}`}
-                  title={slide.label}
-                />
-              ))}
-            </div>
+                  onClick={goPrev}
+                  disabled={slideIndex === 0}
+                  className="bret-slide-nav-button"
+                  aria-label="Previous slide"
+                >
+                  ← Prev
+                </button>
 
-            <span className="bret-slide-counter">
-              {slideIndex + 1} / {slides.length}
-              {currentSlide ? ` · ${currentSlide.label}` : ''}
-            </span>
+                <div className="bret-slide-dots">
+                  {slides.map((slide, i) => (
+                    <button
+                      key={slide.id}
+                      onClick={() => setSlideIndex(i)}
+                      className={`bret-slide-dot ${i === slideIndex ? 'bret-slide-dot--active' : ''}`}
+                      aria-label={`Go to ${slide.label}`}
+                      title={slide.label}
+                    />
+                  ))}
+                </div>
 
-            <button
-              onClick={goNext}
-              disabled={slideIndex === slides.length - 1}
-              className="bret-slide-nav-button"
-              aria-label="Next slide"
-            >
-              Next →
-            </button>
-          </div>
+                <span className="bret-slide-counter">
+                  {slideIndex + 1} / {slides.length}
+                  {currentSlide ? ` · ${currentSlide.label}` : ''}
+                </span>
 
-          {/*
-            Every slide stays mounted in the DOM at all times. On screen,
-            CSS shows only the active one (see .bret-slide / .bret-slide--active
-            in report-template.css) so switching slides is instant with no
-            re-fetching or remounting. When printing, the print stylesheet
-            forces every slide back to visible and paginates them one per
-            landscape page, so "Print / Save PDF" still exports the full
-            report regardless of which slide is on screen.
-          */}
-          <div className="bret-slide-stage">
-            {slides.map((slide, i) => (
-              <div
-                key={slide.id}
-                className={`bret-slide ${i === slideIndex ? 'bret-slide--active' : 'bret-slide--hidden'}`}
-              >
-                {slide.node}
+                <button
+                  onClick={goNext}
+                  disabled={slideIndex === slides.length - 1}
+                  className="bret-slide-nav-button"
+                  aria-label="Next slide"
+                >
+                  Next →
+                </button>
               </div>
-            ))}
-          </div>
 
-          <p className="bret-slide-hint no-print">Use the ← → arrow keys to move between slides.</p>
-          </>
-          ):(
-            <div className='bret-full-report'>{renderFullReport(report)}</div>
+              <div className="bret-slide-stage">
+                {slides.map((slide, i) => (
+                  <div
+                    key={slide.id}
+                    className={`bret-slide ${i === slideIndex ? 'bret-slide--active' : 'bret-slide--hidden'}`}
+                  >
+                    {slide.node}
+                  </div>
+                ))}
+              </div>
+              <p className="bret-slide-hint no-print">Use the ← → arrow keys to move between slides.</p>
+            </>
+          ) : (
+            <div className="bret-full-report">{renderFullReport(report)}</div>
           )}
         </div>
       </div>
     </div>
   );
+}
+
+export function SessionReportPage() {
+  const { id } = useParams<{ id: string }>();
+  const params = new URLSearchParams(window.location.search);
+  const reportToken = params.get('report_token') || undefined;
+
+  if (!id) {
+    return (
+      <div className="bret-page-shell bret-page-loading">
+        <div className="bret-error-card">
+          <p>Invalid session ID.</p>
+          <Link to="/portal">Return to dashboard</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const sessionId = Number(id);
+  if (Number.isNaN(sessionId)) {
+    return (
+      <div className="bret-page-shell bret-page-loading">
+        <div className="bret-error-card">
+          <p>Invalid session ID.</p>
+          <Link to="/portal">Return to dashboard</Link>
+        </div>
+      </div>
+    );
+  }
+
+  return <SessionReportView sessionId={sessionId} reportToken={reportToken} />;
 }

@@ -473,6 +473,64 @@ def get_session_report(
     return _build_basic_report_payload(session, db)
 
 
+import asyncio
+from app.services.email_service import send_report_email_with_pdf
+
+from app.services.pdf_service import generate_pdf_from_report_data
+
+async def generate_and_email_pdf_task(session_id: int, user_email: str, user_name: str):
+    """
+    Waits 60 seconds (so AI can finish), builds the report JSON, generates a PDF, and emails it.
+    """
+    await asyncio.sleep(240)  # Wait 4 minute for AI report to be cached
+    
+    db = SessionLocal()
+    try:
+        session = db.query(AssessmentSession).filter(AssessmentSession.id == session_id).first()
+        if not session or session.status != SessionStatus.submitted:
+            return
+
+        use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
+        report_payload = None
+
+        if use_ai and session.ai_report_data:
+            # We have cached AI data
+            ai_sections = _format_ai_report_for_response(session.ai_report_data, db)
+            basic_payload = _build_basic_report_payload(session, db)
+            static_sections = [
+                s for s in basic_payload["sections"]
+                if s["section_code"] in ("LETTER", "DEF")
+            ]
+            report_payload = {
+                "session": session, # Note: SQLAlchemy object won't serialize easily without Pydantic.
+                                    # But we can just use the schema dump below.
+                "user": basic_payload["user"],
+                "form": basic_payload["form"],
+                "sections": static_sections + ai_sections,
+            }
+        else:
+            report_payload = _build_basic_report_payload(session, db)
+        
+        # Serialize the payload properly using our Pydantic schema so it's clean JSON
+        # for the Node.js script.
+        report_out = SessionReportOut(**report_payload)
+        report_json = report_out.model_dump(mode="json")
+        
+        try:
+            pdf_bytes = generate_pdf_from_report_data(report_json)
+        except Exception as e:
+            print(f"Failed to generate PDF: {e}")
+            pdf_bytes = b"" # Fallback: send email without PDF if generation fails
+            
+        send_report_email_with_pdf(user_email, user_name, session_id, pdf_bytes)
+
+    except Exception as e:
+        print(f"generate_and_email_pdf_task failed: {e}")
+    finally:
+        db.close()
+
+
+
 def _ensure_form_available_for_new_session(form: Form) -> None:
     if not form.is_active:
         raise HTTPException(
@@ -480,8 +538,15 @@ def _ensure_form_available_for_new_session(form: Form) -> None:
             detail="This assessment is no longer available.",
         )
 
-def _get_owned_session(session_id: int, db: Session, current_user: User) -> AssessmentSession:
+def _get_owned_session(
+    session_id: int,
+    db: Session,
+    current_user: User | None
+) -> AssessmentSession:
     """Fetch a session and enforce that only its owner or an admin can access it."""
+    if current_user is None:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     session = db.get(AssessmentSession, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -667,7 +732,6 @@ def submit_session(
 
     # --- Phase 2: Duplicates & Email ---
     from app.services.duplicate_service import check_and_flag_duplicates, register_applicant
-    from app.services.email_service import send_report_email
     import json
 
     # 1. Check for duplicates
@@ -686,8 +750,8 @@ def submit_session(
     # 2. Register permanent applicant record
     register_applicant(session, current_user, db)
     
-    # 3. Queue the report email background task
-    background_tasks.add_task(send_report_email, current_user.email, current_user.name, session.id)
+    # 3. Queue the report email background task (with PDF generation)
+    background_tasks.add_task(generate_and_email_pdf_task, session.id, current_user.email, current_user.name)
 
     return session
 
@@ -1183,7 +1247,7 @@ def resend_report_email(
     if not user:
         raise HTTPException(status_code=404, detail="Associated user not found")
 
-    from app.services.email_service import send_report_email
-    background_tasks.add_task(send_report_email, user.email, user.name, session.id)
+    from app.services.email_service import send_report_email_with_pdf
+    background_tasks.add_task(send_report_email_with_pdf, user.email, user.name, session.id, b'')
     
     return {"message": "Report email queued for delivery."}

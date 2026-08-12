@@ -62,9 +62,11 @@ def send_reset_email(to_email: str, raw_token: str) -> None:
         smtp.login(SMTP_USER, SMTP_PASSWORD)
         smtp.sendmail(MAIL_FROM, to_email, msg.as_string())
 
-def send_report_email(to_email: str, user_name: str, session_id: int) -> None:
+from email.mime.application import MIMEApplication
+
+def send_report_email_with_pdf(to_email: str, user_name: str, session_id: int, pdf_bytes: bytes) -> None:
     """
-    Send the completed assessment report link to the candidate.
+    Send the completed assessment report link to the candidate, along with the PDF attached.
     In dev mode (SMTP_HOST empty), logs to stdout.
     """
     payload = {
@@ -77,13 +79,16 @@ def send_report_email(to_email: str, user_name: str, session_id: int) -> None:
     
     
     if not SMTP_HOST:
-        print(f"\n[DEV] Report link for {to_email} ({user_name}):\n  {report_url}\n")
+        print(f"\n[DEV] Report link for {to_email} ({user_name}):\n  {report_url}\n  (PDF attachment generated, size: {len(pdf_bytes)} bytes)\n")
         return
         
-    msg = MIMEMultipart("alternative")
+    msg = MIMEMultipart("mixed")
     msg["Subject"] = "Your BRET Assessment Report"
     msg["From"] = MAIL_FROM
     msg["To"] = to_email
+
+    # We create an 'alternative' part for the text/html content
+    body_part = MIMEMultipart("alternative")
 
     text_body = (
         f"Hello {user_name},\n\n"
@@ -107,12 +112,17 @@ def send_report_email(to_email: str, user_name: str, session_id: int) -> None:
     </body></html>
     """
 
-    msg.attach(MIMEText(text_body, "plain"))
-    msg.attach(MIMEText(html_body, "html"))
+    body_part.attach(MIMEText(text_body, "plain"))
+    body_part.attach(MIMEText(html_body, "html"))
+    msg.attach(body_part)
+
+    if pdf_bytes:
+        pdf_attachment = MIMEApplication(pdf_bytes, _subtype="pdf")
+        pdf_attachment.add_header('Content-Disposition', 'attachment', filename='BRET-Report.pdf')
+        msg.attach(pdf_attachment)
 
     with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as smtp:
         smtp.ehlo()
         smtp.starttls()
         smtp.login(SMTP_USER, SMTP_PASSWORD)
-        smtp.sendmail(MAIL_FROM, to_email, msg.as_string())
-    
+        smtp.sendmail(MAIL_FROM, to_email, msg.as_string())
