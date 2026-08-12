@@ -4,6 +4,7 @@ Login endpoint. Verifies email+password, issues a JWT on success.
 
 import json
 from fastapi import APIRouter, Depends, HTTPException, Request
+
 from sqlalchemy.orm import Session
 import secrets
 from datetime import datetime, timedelta

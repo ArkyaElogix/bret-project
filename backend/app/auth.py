@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from typing import Optional
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from app.schemas import LoginRequest, TokenResponse, CandidateRegisterRequest, UserOut
@@ -27,6 +28,8 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM","HS256")
 JWT_EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRE_MINUTES", "120"))
 
 bearer_scheme = HTTPBearer()
+optional_bearer_scheme = HTTPBearer(auto_error=False)
+
 
 
 def create_access_token(user: User) -> str:
@@ -69,6 +72,37 @@ def get_current_user(
     if user.token_version != token_version:
         raise credentials_error
     return user
+
+def get_optional_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_bearer_scheme),
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    """Like get_current_user but returns None instead of raising 401 when
+    no Authorization header is present. Used by endpoints that accept either
+    a bearer token OR a signed report_token query param."""
+    if credentials is None:
+        return None
+    credentials_error = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("sub")
+        token_version = payload.get("token_version")
+        if user_id is None:
+            raise credentials_error
+    except JWTError:
+        raise credentials_error
+    user = db.get(User, int(user_id))
+    if user is None:
+        raise credentials_error
+    if user.token_version != token_version:
+        raise credentials_error
+    return user
+
 
 
 def require_admin(user: User = Depends(get_current_user)) -> User:

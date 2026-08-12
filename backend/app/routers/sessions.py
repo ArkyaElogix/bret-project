@@ -11,7 +11,7 @@ reviewing responses later).
 import json
 import os
 import time
-import jwt as pyjwt
+from jose import jwt as jose_jwt
 from typing import Any, Dict, List
 from datetime import datetime, timedelta
 from app.services.ai_report_service import AIReportService
@@ -50,7 +50,7 @@ from app.schemas import (
     PageNavigateRequest,
 )
 from app.scoring import calculate_and_store_scores
-from app.auth import get_current_user, require_admin
+from app.auth import get_current_user, require_admin, get_optional_user,JWT_SECRET_KEY,JWT_ALGORITHM
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
@@ -402,12 +402,12 @@ def get_session_report(
     background_tasks: BackgroundTasks,
     report_token: str | None = Query(None),
     db: Session = Depends(get_db),
-    current_user: User | None = Depends(get_current_user),  # keep current_user for normal flow
+    current_user: User | None = Depends(get_optional_user),  # keep current_user for normal flow
 ):
     # If a report_token is provided, validate it and bypass owner check
     if report_token:
         try:
-            payload = pyjwt.decode(report_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            payload = jose_jwt.decode(report_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
             if payload.get("purpose") != "report_access":
                 raise Exception("Invalid token purpose")
             if int(payload.get("session_id")) != int(session_id):
@@ -432,7 +432,11 @@ def get_session_report(
 
     if use_ai:
         try:
-            is_test_bypass = (current_user.role == UserRole.ADMIN and session.user_id == current_user.id)
+            is_test_bypass = bool(
+                current_user is not None
+                and current_user.role == UserRole.ADMIN
+                and session.user_id == current_user.id
+            )
             
             ai_report = None
             

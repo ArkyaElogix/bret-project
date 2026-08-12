@@ -8,7 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from app.auth import JWT_SECRET_KEY, JWT_ALGORITHM  # reuse values
-import jwt as pyjwt
+from jose import jwt as jose_jwt
 
 SMTP_HOST = os.getenv("SMTP_HOST", "")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
@@ -72,7 +72,7 @@ def send_report_email(to_email: str, user_name: str, session_id: int) -> None:
         "exp": datetime.utcnow() + timedelta(minutes=REPORT_TOKEN_EXPIRE_MINUTES),
         "purpose": "report_access",
     }
-    report_token = pyjwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+    report_token = jose_jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
     report_url = f"{FRONTEND_URL}/sessions/{session_id}/report?report_token={report_token}"
     
     
