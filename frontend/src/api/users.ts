@@ -1,11 +1,20 @@
 import { apiRequest } from './client'
 
 export interface User {
-  id: number
-  name: string
-  email: string
-  role: 'ADMIN' | 'USER'
-  account_type: 'BASIC' | 'EXECUTIVE'
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  account_type: string;
+  education?: string;
+  address?: string;
+  country?: string;
+  age?: number;
+  profession?: string;
+  income_range?: string;
+  phone?: string;
+  consent_given_at?: string;
+  created_at?: string;
 }
 
 /**
@@ -98,4 +107,12 @@ export async function getAuditLog(params?: {
   if (params?.user_id) query.set('user_id', String(params.user_id))
   const qs = query.toString()
   return apiRequest<AuditLog[]>(`/audit/${qs ? `?${qs}` : ''}`)
+}
+
+
+export async function updateMyProfile(updates: Partial<Omit<User, 'id' | 'role' | 'account_type'>>) {
+  return apiRequest<User>('/users/me', {
+    method: 'PATCH',
+    body: updates,
+  })
 }

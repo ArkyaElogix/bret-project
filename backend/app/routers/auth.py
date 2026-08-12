@@ -16,10 +16,12 @@ from app.models.models import (
 from app.services.email_service import send_reset_email
 from app.schemas import (
     LoginRequest, TokenResponse, UserOut,
-    CandidateRegisterRequest, ResetPasswordRequest, ForgotPasswordRequest,
+    CandidateRegisterRequest, ResetPasswordRequest, ForgotPasswordRequest, CompleteRegistrationRequest
 )
 from app.security import verify_password, hash_password
 from app.auth import create_access_token, get_current_user
+from app.services.duplicate_service import check_and_flag_duplicates
+from app.services.duplicate_service import register_applicant
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -63,7 +65,49 @@ def _client_ip(request: Request) -> str | None:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
-
+@router.post("/login")
+async def login(
+    credentials: LoginRequest,
+    db: Session = Depends(get_db)
+):
+    """Candidate login (non-admin)."""
+    user = db.query(User).filter(User.email == credentials.email).first()
+    
+    if not user or not verify_password(credentials.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # NEW: Single-use account gate
+    if user.is_single_use:
+        if user.single_use_status == "locked":
+            raise HTTPException(
+                status_code=403,
+                detail="ACCOUNT_LOCKED"
+            )
+        
+        # Track JWT flags
+        jwt_flags = {}
+        if user.single_use_status == "pending_registration":
+            jwt_flags["requires_profile_completion"] = True
+        elif user.single_use_status == "admin_unlocked":
+            jwt_flags["admin_unlock_active"] = True
+    else:
+        jwt_flags = {}
+    
+    # Generate JWT with flags
+    access_token = create_access_token(
+        data={
+            "sub": str(user.id),
+            "email": user.email,
+            **jwt_flags  # Include flags in JWT
+        }
+    )
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user
+    }
+    
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
@@ -155,6 +199,66 @@ def register_candidate(
     token = create_access_token(user)
     return TokenResponse(access_token=token, role=user.role.value)
 
+@router.post("/complete-registration")
+async def complete_registration(
+    request: CompleteRegistrationRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Complete single-use account registration.
+    Runs early duplicate detection.
+    """
+    # Verify is single-use pending
+    if not current_user.is_single_use or current_user.single_use_status != "pending_registration":
+        raise HTTPException(status_code=400, detail="Not a pending registration account")
+    
+    if not request.consent_accepted:
+        raise HTTPException(status_code=400, detail="Consent is required")
+    
+    # Update user profile
+    current_user.phone = request.phone
+    current_user.address = request.address
+    current_user.country = request.country
+    current_user.age = request.age
+    current_user.profession = request.profession
+    current_user.income_range = request.income_range
+    current_user.consent_given_at = datetime.utcnow()
+    
+    # NEW: Run early duplicate detection
+    duplicate_check = check_and_flag_duplicates(current_user)
+    
+    if duplicate_check.get("is_duplicate"):
+        # Don't set status to active, keep pending/reject
+        db.commit()
+        raise HTTPException(
+            status_code=409,
+            detail="DUPLICATE_DETECTED",
+            # Return flag details so frontend can show them
+            # (adjust based on your check_and_flag_duplicates return structure)
+        )
+    
+    # If clean, write pre-registration to applicant_registry
+    register_applicant(current_user, db)
+    
+    # Set status to active
+    current_user.single_use_status = "active"
+    
+    db.commit()
+    db.refresh(current_user)
+    
+    # Audit log
+    audit_log = AuditLog(
+        user_id=current_user.id,
+        action=AuditAction.SINGLE_USE_CREATED,  # Or a new action if desired
+        resource_type="USER",
+        resource_id=current_user.id,
+        details={"event": "registration_completed"}
+    )
+    db.add(audit_log)
+    db.commit()
+    
+    return current_user
 
 @router.get("/me", response_model=UserOut)
 def get_me(current_user: User = Depends(get_current_user)):
@@ -166,7 +270,17 @@ def get_me(current_user: User = Depends(get_current_user)):
 def forgot_password(
     payload: ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == payload.email).first()
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user:
+        # Don't reveal if email exists
+        return {"message": "If email exists, reset link has been sent"}
+    
+    # Reject single-use accounts
+    if user.is_single_use:
+        raise HTTPException(
+            status_code=400,
+            detail="Password reset is not available for this account type"
+        )
 
     if user and user.deleted_at is None:
         # Invalidate any existing unused tokens
@@ -244,3 +358,30 @@ def logout(
                  user_id=current_user.id, ip=_client_ip(request))
     current_user.token_version += 1
     db.commit()
+
+@router.post("/logout")
+async def logout(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Logout user.
+    For admin-unlocked single-use accounts, consumes the unlock.
+    """
+    # If admin-unlocked single-use, lock them
+    if current_user.is_single_use and current_user.single_use_status == "admin_unlocked":
+        current_user.single_use_status = "locked"
+        
+        # Audit log
+        audit_log = AuditLog(
+            user_id=current_user.id,
+            action=AuditAction.SINGLE_USE_LOCKED,
+            resource_type="USER",
+            resource_id=current_user.id,
+            details={"event": "logout_consumed_admin_unlock"}
+        )
+        db.add(audit_log)
+    
+    db.commit()
+    
+    return {"message": "Logged out"}

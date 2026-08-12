@@ -3,6 +3,7 @@ import { getMe } from '../api/auth'
 import { ApiError } from '../api/client'
 import { User, exportMyData, deleteMe } from '../api/users'
 import PortalLayout from '../components/PortalLayout'
+import EditProfileModal from '../components/EditProfileModal'
 import { useNavigate } from 'react-router-dom'
 
 export default function PortalProfilePage() {
@@ -13,6 +14,8 @@ export default function PortalProfilePage() {
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -60,6 +63,9 @@ export default function PortalProfilePage() {
     }
   }
 
+  const handleProfileUpdateSuccess = (updatedUser: User) => {
+    setUser(updatedUser)
+  }
 
   return (
     <PortalLayout title="My Profile">
@@ -71,96 +77,186 @@ export default function PortalProfilePage() {
           <p className="p-6 text-sm text-red-700 dark:text-red-400 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">{error}</p>
         )}
         {!loading && !error && user && (
-          <div className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700">
-            <p className="text-sm text-gray-700 dark:text-gray-200">
-              This is the information we have on file for your account.
-            </p>
-            <div className="space-y-3">
-              <div>
-                <p className="text-xs uppercase tracking-wide text-red-700 dark:text-red-400">Email (your username)</p>
-                <p className="text-sm font-medium text-gray-800 break-all dark:text-gray-300">{user.email}</p>
+          <>
+            {/* Core Profile Info */}
+            <div className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
+                    This is the information we have on file for your account.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-medium transition-colors"
+                >
+                  Edit
+                </button>
               </div>
 
-              <div>
-                <p className="text-xs uppercase tracking-wide text-red-600 dark:text-red-400">Account Name</p>
-                <p className="text-sm font-medium text-gray-800 dark:text-gray-300">{user.name}</p>
-              </div>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-red-700 dark:text-red-400">Email (your username)</p>
+                  <p className="text-sm font-medium text-gray-800 break-all dark:text-gray-300">{user.email}</p>
+                </div>
 
-              <div>
-                <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Assessment Tier</p>
-                <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-100 px-2 py-1 rounded-full font-medium">
-                  {user.account_type === 'EXECUTIVE' ? 'Executive' : 'Basic'}
-                </span>
-              </div>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-red-600 dark:text-red-400">Account Name</p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-300">{user.name}</p>
+                </div>
 
-              <div>
-                <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Account type</p>
-                <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
-                  {user.role === 'ADMIN' ? 'Admin' : 'Candidate'}
-                </span>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Assessment Tier</p>
+                  <span className="inline-block mt-1 text-xs bg-purple-100 text-purple-700 dark:bg-purple-800 dark:text-purple-100 px-2 py-1 rounded-full font-medium">
+                    {user.account_type === 'EXECUTIVE' ? 'Executive' : 'Basic'}
+                  </span>
+                </div>
+
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-red-950 dark:text-red-400">Account type</p>
+                  <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
+                    {user.role === 'ADMIN' ? 'Admin' : 'Candidate'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-        {!loading && !error && user && (
-          <div className="bg-white shadow rounded-lg p-6 space-y-4 border border-red-100 mt-6 dark:bg-gray-800 dark:border dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-300">Privacy & Data Control</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Manage your personal data in accordance with our privacy policy.
-            </p>
 
-            <div className="pt-4 border-t border-gray-100 flex flex-col space-y-4">
+            {/* Additional Details (Collapsible) */}
+            <div className="bg-white shadow rounded-lg p-6 dark:bg-gray-800 dark:border dark:border-gray-700">
               <button
-                onClick={handleExportData}
-                className="self-start text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-900 dark:text-gray-300 px-4 py-2 rounded font-medium transition-colors"
+                onClick={() => setShowDetails(!showDetails)}
+                className="w-full flex justify-between items-center text-left"
               >
-                Export My Data
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-300">
+                  Additional Details
+                </h3>
+                <span className={`text-gray-500 dark:text-gray-400 transition-transform ${showDetails ? 'rotate-180' : ''}`}>
+                  ▼
+                </span>
               </button>
 
-              {!showDeleteConfirm ? (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="self-start text-sm bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-700 dark:hover:bg-red-900 dark:text-red-200 px-4 py-2 rounded font-bold transition-colors"
-                >
-                  Delete Account permanently
-                </button>
-              ) : (
-                <div className="bg-red-50 p-4 rounded-md space-y-3 border border-red-200 mt-2">
-                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                    Warning: This will deactivate your account immediately and schedule your data for deletion. You will be logged out and will not be able to log back in.
-                  </p>
-                  <input
-                    type="password"
-                    placeholder="Enter password to confirm"
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-800 shadow-sm focus:border-red-500 dark:focus:border-red-200 focus:ring-red-500 dark:focus:ring-red-200 text-black dark:text-white sm:text-sm px-3 py-2 border"
-                    value={deletePassword}
-                    onChange={(e) => setDeletePassword(e.target.value)}
-                  />
-                  {deleteError && <p className="text-sm text-red-600 font-semibold">{deleteError}</p>}
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={handleDeleteAccount}
-                      disabled={isDeleting}
-                      className="text-sm bg-red-700 hover:bg-red-800 text-white dark:bg-red-300 dark:hover:bg-red-400 dark:text-black px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
-                    >
-                      {isDeleting ? 'Deleting...' : 'Confirm Deletion'}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowDeleteConfirm(false)
-                        setDeleteError(null)
-                        setDeletePassword('')
-                      }}
-                      disabled={isDeleting}
-                      className="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 dark:bg-black dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-300 px-4 py-2 rounded font-medium transition-colors"
-                    >
-                      Cancel
-                    </button>
+              {showDetails && (
+                <div className="mt-4 space-y-3 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Phone</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.phone || 'Not provided'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Education</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.education || 'Not provided'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Profession</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.profession || 'Not provided'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Income Range</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.income_range || 'Not provided'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Age</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.age || 'Not provided'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Address</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.address || 'Not provided'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">Country</p>
+                    <p className="text-sm text-gray-800 dark:text-gray-300">
+                      {user.country || 'Not provided'}
+                    </p>
                   </div>
                 </div>
               )}
             </div>
-          </div>
+
+            {/* Privacy & Data Control */}
+            <div className="bg-white shadow rounded-lg p-6 space-y-4 border border-red-100 dark:bg-gray-800 dark:border dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-300">Privacy & Data Control</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Manage your personal data in accordance with our privacy policy.
+              </p>
+
+              <div className="pt-4 border-t border-gray-100 dark:border-gray-600 flex flex-col space-y-4">
+                <button
+                  onClick={handleExportData}
+                  className="self-start text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-900 dark:text-gray-300 px-4 py-2 rounded font-medium transition-colors"
+                >
+                  Export My Data
+                </button>
+
+                {!showDeleteConfirm ? (
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="self-start text-sm bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-700 dark:hover:bg-red-900 dark:text-red-200 px-4 py-2 rounded font-bold transition-colors"
+                  >
+                    Delete Account permanently
+                  </button>
+                ) : (
+                  <div className="bg-red-50 p-4 rounded-md space-y-3 border border-red-200 dark:bg-red-900 dark:border-red-700 mt-2">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                      Warning: This will deactivate your account immediately and schedule your data for deletion. You will be logged out and will not be able to log back in.
+                    </p>
+                    <input
+                      type="password"
+                      placeholder="Enter password to confirm"
+                      className="block w-full rounded-md border-gray-300 dark:border-gray-800 shadow-sm focus:border-red-500 dark:focus:border-red-200 focus:ring-red-500 dark:focus:ring-red-200 text-black dark:text-white sm:text-sm px-3 py-2 border"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                    />
+                    {deleteError && <p className="text-sm text-red-600 dark:text-red-400 font-semibold">{deleteError}</p>}
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={handleDeleteAccount}
+                        disabled={isDeleting}
+                        className="text-sm bg-red-700 hover:bg-red-800 text-white dark:bg-red-300 dark:hover:bg-red-400 dark:text-black px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
+                      >
+                        {isDeleting ? 'Deleting...' : 'Confirm Deletion'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDeleteConfirm(false)
+                          setDeleteError(null)
+                          setDeletePassword('')
+                        }}
+                        disabled={isDeleting}
+                        className="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 dark:bg-black dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-300 px-4 py-2 rounded font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Edit Modal */}
+            <EditProfileModal
+              user={user}
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              onSuccess={handleProfileUpdateSuccess}
+            />
+          </>
         )}
       </div>
     </PortalLayout>

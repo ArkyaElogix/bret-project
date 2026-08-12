@@ -223,8 +223,50 @@ class UserOut(BaseModel):
     email: str
     role: str
     account_type: str
+    education: Optional[str] = None
+    address: Optional[str] = None
+    country: Optional[str] = None
+    age: Optional[int] = None
+    profession: Optional[str] = None
+    income_range: Optional[str] = None
+    phone: Optional[str] = None
+    consent_given_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+    is_single_use: bool = False
+    single_use_status: Optional[str] = None  # 'pending_registration', 'active', 'locked', 'admin_unlocked'
+    deletion_scheduled_at: Optional[datetime] = None
+    assessment_started_at: Optional[datetime] = None
+    
+
+    class Config:
+        from_attributes = True
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserProfileUpdate(BaseModel):
+    """Schema for PATCH /users/me — all fields optional (partial updates)."""
+    name: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    education: Optional[str] = None
+    profession: Optional[str] = None
+    income_range: Optional[str] = None
+    age: Optional[int] = None
+    address: Optional[str] = None
+    country: Optional[str] = None
+
+    @field_validator("address", "country", "phone", mode="before")
+    @classmethod
+    def normalize_strings(cls, v: str | None, info: ValidationInfo) -> str | None:
+        if not v:
+            return v
+        v = v.strip()
+        if info.field_name == "country":
+            return v.upper()
+        if info.field_name == "phone":
+            return v.replace(" ", "").replace("-", "")
+        return v
 
 
 class PasswordChange(BaseModel):
@@ -371,3 +413,22 @@ class DuplicateFlagOut(BaseModel):
 class DuplicateReviewRequest(BaseModel):
     decision: str  # "APPROVED" or "REJECTED"
     note: str | None = None
+
+
+class SingleUseUserCreate(BaseModel):
+    email: EmailStr
+    account_type: str  # BASIC or EXECUTIVE
+    name: Optional[str] = None
+
+class CompleteRegistrationRequest(BaseModel):
+    phone: str
+    address: str
+    country: str
+    age: int
+    profession: str
+    income_range: str
+    consent_accepted: bool
+
+class DuplicateDetectionResponse(BaseModel):
+    is_duplicate: bool
+    flags: Optional[dict] = None  # Details of duplicate flags

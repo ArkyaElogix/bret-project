@@ -125,4 +125,26 @@ def send_report_email_with_pdf(to_email: str, user_name: str, session_id: int, p
         smtp.ehlo()
         smtp.starttls()
         smtp.login(SMTP_USER, SMTP_PASSWORD)
-        smtp.sendmail(MAIL_FROM, to_email, msg.as_string())
+        smtp.sendmail(MAIL_FROM, to_email, msg.as_string())
+
+
+async def send_single_use_invitation_email(email: str, password: str, name: str):
+    """Send single-use account invitation with auto-generated password."""
+    subject = "Your Assessment Invitation"
+    
+    html_content = f"""
+    <html>
+        <body>
+            <h2>Welcome to your assessment</h2>
+            <p>Hi {name},</p>
+            <p>Your account has been created for a one-time assessment.</p>
+            <h3>Login Details:</h3>
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Password:</strong> {password}</p>
+            <p><a href="http://your-domain/login">Click here to login</a></p>
+            <p><strong>Important:</strong> This password is shown only this one time. After you complete your assessment, this account will be automatically deleted.</p>
+        </body>
+    </html>
+    """
+    
+    await send_email(email=email, subject=subject, html_content=html_content)

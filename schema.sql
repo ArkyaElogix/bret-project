@@ -62,7 +62,12 @@ CREATE TABLE users (
 	deleted_at DATETIME, 
 	anonymized_at DATETIME, 
 	retention_expires_at DATETIME, 
-	last_accessed_at DATETIME, 
+	last_accessed_at DATETIME,
+	`is_single_use` BOOLEAN DEFAULT FALSE,
+	`single_use_status` ENUM('pending_registration', 'active', 'locked', 'admin_unlocked') NULL,
+	`deletion_scheduled_at` DATETIME NULL,
+	`assessment_started_at` DATETIME NULL,
+	  
 	PRIMARY KEY (id), 
 	UNIQUE (email)
 )

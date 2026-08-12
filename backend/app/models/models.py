@@ -79,6 +79,11 @@ class AuditAction(str, enum.Enum):
     CONSENT_GIVEN            = "CONSENT_GIVEN"
     DUPLICATE_FLAGGED = "DUPLICATE_FLAGGED"
     DUPLICATE_REVIEWED = "DUPLICATE_REVIEWED"
+    USER_PROFILE_UPDATE      = "USER_PROFILE_UPDATE"
+    SINGLE_USE_CREATED = "SINGLE_USE_CREATED"
+    SINGLE_USE_LOCKED = "SINGLE_USE_LOCKED"
+    SINGLE_USE_ADMIN_UNLOCK = "SINGLE_USE_ADMIN_UNLOCK"
+    SINGLE_USE_DELETED = "SINGLE_USE_DELETED"
 
 # class Form(Base):
 #     """A specific version/set of questions, e.g. 'BRET v1', 'BRET Executive 2027'.
@@ -235,7 +240,13 @@ class User(Base):
 
     sessions = relationship("AssessmentSession", back_populates="user", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", foreign_keys="AuditLog.user_id", back_populates="user")
-
+    is_single_use: Mapped[bool] = mapped_column(Boolean, default=False)
+    single_use_status: Mapped[Optional[str]] = mapped_column(
+        Enum('pending_registration', 'active', 'locked', 'admin_unlocked'),
+        nullable=True
+    )
+    deletion_scheduled_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    assessment_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
 class AssessmentSession(Base):
     __tablename__ = "assessment_sessions"

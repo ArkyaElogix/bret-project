@@ -10,9 +10,11 @@ from datetime import datetime, timedelta
 
 from app.database import get_db
 from app.models.models import User, UserRole, AccountType, AuditLog, AuditAction
-from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate, UserDeleteRequest, AuditLogOut
+from app.schemas import UserCreate, UserOut, PasswordChange, UserTypeUpdate, UserDeleteRequest, AuditLogOut, UserProfileUpdate
 from app.security import hash_password, verify_password
 from app.auth import require_admin, get_current_user
+import secrets
+from app.schemas import SingleUseUserCreate
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -157,6 +159,39 @@ def delete_me(
                  user_id=current_user.id, ip=_client_ip(request))
     db.commit()
 
+@router.patch("/me", response_model=UserOut)
+def update_my_profile(
+    payload: UserProfileUpdate,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Update current user's profile. All fields are optional (partial updates).
+    Email uniqueness is checked if email is being changed (excludes current user)."""
+    
+    # Check email uniqueness if email is being changed
+    if payload.email is not None and payload.email != current_user.email:
+        existing = db.query(User).filter(User.email == payload.email).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Apply only non-None fields
+    update_data = payload.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+    
+    # Write audit log
+    _write_audit(
+        db, 
+        AuditAction.USER_PROFILE_UPDATE,
+        user_id=current_user.id,
+        ip=_client_ip(request),
+        detail={"fields_updated": list(update_data.keys())}
+    )
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
 
 @router.get("/{user_id}", response_model=UserOut)
 def get_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user),):
@@ -240,3 +275,60 @@ def get_audit_log(
         .all()
     )
 
+@router.post("/single-use", response_model=UserOut)
+async def create_single_use_user(
+    user_data: SingleUseUserCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Create a single-use candidate account (admin only).
+    Auto-generates password, sends invitation email.
+    """
+    # Verify current user is admin
+    if current_user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    # Check email not already in use
+    existing = db.query(User).filter(User.email == user_data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Generate secure password
+    auto_password = secrets.token_urlsafe(9)  # ~12 alphanumeric chars
+    
+    # Create user
+    new_user = User(
+        email=user_data.email,
+        name=user_data.name or user_data.email.split('@')[0],
+        hashed_password=hash_password(auto_password),
+        role="USER",
+        is_single_use=True,
+        single_use_status="pending_registration",
+        token_version=0,
+        account_type=user_data.account_type
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    # Send invitation email
+    await send_single_use_invitation_email(
+        email=new_user.email,
+        password=auto_password,
+        name=new_user.name
+    )
+    
+    # Audit log
+    audit_log = AuditLog(
+        user_id=current_user.id,
+        action=AuditAction.SINGLE_USE_CREATED,
+        resource_type="USER",
+        resource_id=new_user.id,
+        details={"email": new_user.email, "account_type": new_user.account_type}
+    )
+    db.add(audit_log)
+    db.commit()
+    
+    # Return user (NOT password)
+    return new_user
