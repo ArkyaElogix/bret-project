@@ -1,10 +1,12 @@
 // This page is for the admin's pov, combining Session tracking and the Privacy Audit Log.
 import React, { useEffect, useState } from 'react'
-import { listSessions, deleteSession, Session, getSessionResults, SectionResult } from '../api/sessions'
+import { listSessions, deleteSession, Session, getSessionResults, SectionResult, resendReportEmail } from '../api/sessions'
 import { getSessionActivity, SessionActivity } from '../api/activityLog'
 import { getAuditLog, AuditLog } from '../api/users'
 import { ApiError } from '../api/client'
 import AdminLayout from '../components/AdminLayout'
+import { Link } from 'react-router-dom'
+
 
 function formatSessionStatus(status: Session['status']) {
   switch (status) {
@@ -62,6 +64,16 @@ export default function SessionsPage() {
       setLoadingSessions(false)
     }
   }
+
+  async function handleResendReport(id: number) {
+    try {
+      await resendReportEmail(id)
+      alert('Report email queued successfully.')
+    } catch (err: any) {
+      alert(err.message || 'Failed to queue email.')
+    }
+  }
+
 
   async function loadAuditData() {
     setLoadingAudit(true)
@@ -230,6 +242,22 @@ export default function SessionsPage() {
                                 {/* Right Column: Results Snapshot */}
                                 <div>
                                   <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-4">Results Snapshot</h3>
+                                  <div className="flex space-x-3 mb-6">
+                                    <Link
+                                      to={`/sessions/${session.id}/report`}
+                                      target="_blank"
+                                      className="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700"
+                                    >
+                                      View Report
+                                    </Link>
+                                    <button
+                                      onClick={() => handleResendReport(session.id)}
+                                      className="border border-blue-600 text-blue-600 px-3 py-1.5 rounded text-sm hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:text-blue-400 dark:border-blue-400"
+                                    >
+                                      Resend Email
+                                    </button>
+                                  </div>
+
                                   {session.status !== 'submitted' ? (
                                     <div className="p-4 border border-dashed border-gray-300 rounded text-sm text-gray-500 dark:border-gray-600">Scores are calculated upon final submission.</div>
                                   ) : sessionResults && sessionResults.length > 0 ? (

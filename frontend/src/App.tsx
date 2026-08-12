@@ -15,12 +15,13 @@ import PortalResultsPage from './pages/PortalResultsPage'
 import { SessionReportPage } from './pages/SessionReportPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
+import DuplicatesQueuePage from './pages/DuplicatesQueuePage'
 
 
 try {
   localStorage.removeItem('bret_token')
   sessionStorage.removeItem('bret_token')
-} catch {}
+} catch { }
 export default function App() {
   return (
     <Routes>
@@ -74,7 +75,14 @@ export default function App() {
           </AdminRoute>
         }
       />
-
+      <Route
+        path="/admin/duplicates"
+        element={
+          <AdminRoute>
+            <DuplicatesQueuePage />
+          </AdminRoute>
+        }
+      />
       {/* Candidate portal */}
       <Route
         path="/portal"
@@ -109,7 +117,7 @@ export default function App() {
           </UserRoute>
         }
       />
-      
+
 
       {/* Public */}
       <Route path="/login" element={<LoginPage />} />

@@ -216,7 +216,8 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 // Token expired or invalid
   if (response.status === 401) {
     clearToken()
-    window.location.replace ('/login')
+    const next = encodeURIComponent(window.location.pathname + window.location.search)
+    window.location.replace(`/login?next=${next}`)
     return Promise.reject(new ApiError(401, 'Unauthorized'))
   }
 

@@ -133,19 +133,26 @@ export default function PortalAssessmentPage() {
 
   if (session.status === 'submitted') {
     return (
-      <PortalLayout title="Assessment">
+      <PortalLayout title="Assessment Complete">
         <div className="bg-white shadow rounded-lg p-6 space-y-3 max-w-md dark:bg-gray-800 dark:border dark:border-gray-700">
-          <p className="text-sm text-gray-700 dark:text-gray-200">This questionnaire has already been submitted.</p>
+          <h2 className="text-lg font-bold text-green-700 dark:text-green-400">Success!</h2>
+          <p className="text-sm text-gray-700 dark:text-gray-200">
+            Thank you for completing the BRET Assessment. Your customized report has been generated and emailed to you.
+          </p>
           <Link
             to={`/portal/sessions/${sessionId}/results`}
             className="inline-block bg-blue-600 dark:bg-blue-300 text-white dark:text-black rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-400"
           >
             View Results
           </Link>
+          <p className="text-sm text-gray-700 dark:text-gray-200 mt-4">
+            Please check your inbox (and spam folder) for a secure link to view your report.
+          </p>
         </div>
       </PortalLayout>
     )
   }
+
 
   if (form && !form.is_active) {
     return (

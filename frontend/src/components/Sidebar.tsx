@@ -10,6 +10,7 @@ export default function Sidebar() {
     { to: '/users', label: 'Users', icon: '👥' },
     { to: '/forms', label: 'Questionnaires', icon: '📋' },
     { to: '/sessions', label: 'Sessions & Activity', icon: '📊' },
+    { to: '/admin/duplicates', label: 'Duplicate Queue', icon: '⚠️' },
   ]
 
   function handleLogout() {

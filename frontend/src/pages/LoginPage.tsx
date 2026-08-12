@@ -36,6 +36,8 @@ export default function LoginPage() {
   const hasSpecialChar = /[^A-Za-z0-9]/.test(password)
   const isPasswordStrong = hasMinLength && hasLowercase && hasUppercase && hasDigit && hasSpecialChar
   const [rememberMe, setRememberMe] = useState(false)
+  const params = new URLSearchParams(location.search)
+  const redirectTo = params.get('next') || '/portal'
 
   useEffect(() => {
     clearToken()
@@ -69,7 +71,7 @@ export default function LoginPage() {
           : await login(email, password)
 
       setToken(result.access_token, rememberMe)
-      navigate('/portal', { replace: true })
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.')
     } finally {

@@ -1,9 +1,11 @@
 -- Generated schema.sql from SQLAlchemy models
 DROP TABLE IF EXISTS `responses`;
+DROP TABLE IF EXISTS `duplicate_flags`;
 DROP TABLE IF EXISTS `session_activity_logs`;
 DROP TABLE IF EXISTS `section_scores`;
 DROP TABLE IF EXISTS `report_statements`;
 DROP TABLE IF EXISTS `questions`;
+DROP TABLE IF EXISTS `applicant_registry`;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 DROP TABLE IF EXISTS `behavioural_factors`;
 DROP TABLE IF EXISTS `audit_logs`;
@@ -90,7 +92,7 @@ CREATE TABLE assessment_sessions (
 
 CREATE TABLE audit_logs (
 	id INTEGER NOT NULL AUTO_INCREMENT, 
-	action ENUM('USER_REGISTER','USER_LOGIN','USER_LOGOUT','DATA_EXPORT','ACCOUNT_DELETE','PASSWORD_RESET_REQUEST','PASSWORD_RESET_COMPLETE','ADMIN_VIEW_USER','ADMIN_VIEW_SESSION','CONSENT_GIVEN') NOT NULL, 
+	action ENUM('USER_REGISTER','USER_LOGIN','USER_LOGOUT','DATA_EXPORT','ACCOUNT_DELETE','PASSWORD_RESET_REQUEST','PASSWORD_RESET_COMPLETE','ADMIN_VIEW_USER','ADMIN_VIEW_SESSION','CONSENT_GIVEN','DUPLICATE_FLAGGED','DUPLICATE_REVIEWED') NOT NULL, 
 	user_id INTEGER, 
 	target_user_id INTEGER, 
 	ip_address VARCHAR(45), 
@@ -126,6 +128,24 @@ CREATE TABLE password_reset_tokens (
 	PRIMARY KEY (id), 
 	FOREIGN KEY(user_id) REFERENCES users (id) ON DELETE CASCADE, 
 	UNIQUE (token_hash)
+)
+
+;
+
+
+CREATE TABLE applicant_registry (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	email VARCHAR(255) NOT NULL, 
+	email_hash VARCHAR(64) NOT NULL, 
+	phone VARCHAR(50), 
+	phone_hash VARCHAR(64), 
+	name_normalized VARCHAR(255) NOT NULL, 
+	address_normalized TEXT, 
+	original_user_id INTEGER NOT NULL, 
+	session_id INTEGER NOT NULL, 
+	created_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(session_id) REFERENCES assessment_sessions (id)
 )
 
 ;
@@ -193,6 +213,27 @@ CREATE TABLE session_activity_logs (
 	created_at DATETIME NOT NULL, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(session_id) REFERENCES assessment_sessions (id) ON DELETE CASCADE
+)
+
+;
+
+
+CREATE TABLE duplicate_flags (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	new_session_id INTEGER NOT NULL, 
+	new_user_id INTEGER NOT NULL, 
+	prior_registry_id INTEGER NOT NULL, 
+	prior_session_id INTEGER NOT NULL, 
+	match_type ENUM('EMAIL','PHONE','NAME_ADDRESS') NOT NULL, 
+	match_confidence ENUM('EXACT','FUZZY') NOT NULL, 
+	status ENUM('PENDING','APPROVED','REJECTED') NOT NULL, 
+	reviewed_by INTEGER, 
+	reviewed_at DATETIME, 
+	review_note TEXT, 
+	created_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(new_session_id) REFERENCES assessment_sessions (id), 
+	FOREIGN KEY(prior_registry_id) REFERENCES applicant_registry (id)
 )
 
 ;

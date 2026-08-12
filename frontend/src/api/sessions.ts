@@ -1,5 +1,6 @@
 import { apiRequest } from './client'
 
+
 export interface Session {
   id: number
   user_id: number
@@ -159,6 +160,12 @@ export interface SessionReport {
   sections: ReportSection[];
 }
 
-export async function getSessionReport(sessionId: number): Promise<SessionReport> {
-  return apiRequest<SessionReport>(`/sessions/${sessionId}/report`);
+export async function getSessionReport(sessionId: number, reportToken?: string): Promise<SessionReport> {
+  const qs = reportToken ? `?report_token=${encodeURIComponent(reportToken)}` : ''
+  return apiRequest<SessionReport>(`/sessions/${sessionId}/report${qs}`);
 }
+
+export async function resendReportEmail(sessionId: number): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(`/sessions/${sessionId}/resend-report`, { method: 'POST' })
+}
+

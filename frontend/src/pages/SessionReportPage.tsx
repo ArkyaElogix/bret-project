@@ -36,6 +36,7 @@ function getDerivedTakeaways(report: SessionReport) {
   const strongest = sortedByScore.slice(0, 3);
   const weakest = sortedByLowScore.slice(0, 3);
 
+  
   return {
     focusArea: `Your strongest patterns revolve around ${strongest.map((factor) => factor.factor_name).join(', ')}. The biggest growth opportunity is to bring more intentional balance to ${weakest.map((factor) => factor.factor_name).join(', ')}.`,
     strengths: strongest.map((factor) => `${factor.factor_name} (${factor.score}/5)`).join(' • '),
@@ -567,6 +568,9 @@ export function SessionReportPage() {
   const [error, setError] = useState<string | null>(null);
   const [slideIndex, setSlideIndex] = useState(0);
   const [viewMode, setViewMode] = useState<'slides' | 'full'>('slides');
+  const params = new URLSearchParams(window.location.search)
+  const reportToken = params.get('report_token') || undefined
+
 
   useEffect(() => {
     if (!id) return;
@@ -574,7 +578,7 @@ export function SessionReportPage() {
     setLoading(true);
     setError(null);
 
-    getSessionReport(Number(id))
+    getSessionReport(Number(id), reportToken)
       .then((data) => {
         setReport(data);
         setSlideIndex(0);
