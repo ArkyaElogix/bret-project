@@ -1,4 +1,5 @@
-
+from apscheduler.schedulers.background import BackgroundScheduler
+from cleanup_single_use import cleanup_single_use_accounts
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -41,3 +42,12 @@ async def add_no_store_headers(request, call_next):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+# Initialize APScheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(cleanup_single_use_accounts, 'interval', minutes=30)
+scheduler.start()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    scheduler.shutdown()

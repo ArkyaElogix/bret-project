@@ -332,3 +332,45 @@ async def create_single_use_user(
     
     # Return user (NOT password)
     return new_user
+
+@router.post("/{user_id}/single-use/unlock", response_model=UserOut)
+async def unlock_single_use_user(
+    user_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Admin unlock a locked single-use account.
+    Allows one more login/submission attempt.
+    """
+    # Verify admin
+    if current_user.role != "ADMIN":
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Verify single-use and locked
+    if not target_user.is_single_use or target_user.single_use_status != "locked":
+        raise HTTPException(
+            status_code=400,
+            detail="User is not a locked single-use account"
+        )
+    
+    # Unlock
+    target_user.single_use_status = "admin_unlocked"
+    
+    # Audit log
+    audit_log = AuditLog(
+        user_id=current_user.id,
+        action=AuditAction.SINGLE_USE_ADMIN_UNLOCK,
+        resource_type="USER",
+        resource_id=target_user.id,
+        details={"target_email": target_user.email}
+    )
+    db.add(audit_log)
+    db.commit()
+    db.refresh(target_user)
+    
+    return target_user

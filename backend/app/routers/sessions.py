@@ -614,6 +614,31 @@ def start_or_resume_session(
     db.commit()
     return session
 
+@router.post("/")
+async def create_session(
+    session_data: SessionCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new session."""
+    
+    session = Session(
+        user_id=current_user.id,
+        form_id=session_data.form_id,
+        # ... existing session fields ...
+    )
+    db.add(session)
+    db.commit()
+    
+    # NEW: Start single-use clock
+    if current_user.is_single_use and not current_user.assessment_started_at:
+        current_user.assessment_started_at = datetime.utcnow()
+        current_user.deletion_scheduled_at = datetime.utcnow() + timedelta(hours=12)
+        db.commit()
+    
+    db.refresh(session)
+    return session
+
 @router.get("/me", response_model=list[SessionOut])
 def list_my_sessions(
     status_filter: str | None = None,
@@ -755,6 +780,49 @@ def submit_session(
 
     return session
 
+@router.post("/{session_id}/submit")
+async def submit_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks
+):
+    """Submit a session."""
+    
+    session = db.query(Session).filter(
+        Session.id == session_id,
+        Session.user_id == current_user.id
+    ).first()
+    
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # ... existing submission logic (scoring, duplicates, email task) ...
+    
+    # NEW: Lock single-use account
+    auto_logout = False
+    if current_user.is_single_use:
+        current_user.single_use_status = "locked"
+        auto_logout = True
+        
+        # Audit log
+        audit_log = AuditLog(
+            user_id=current_user.id,
+            action=AuditAction.SINGLE_USE_LOCKED,
+            resource_type="SESSION",
+            resource_id=session.id,
+            details={"event": "submission_locked_account"}
+        )
+        db.add(audit_log)
+    
+    db.commit()
+    
+    # Return response with auto_logout flag
+    return {
+        "message": "Session submitted",
+        "session": session,
+        "auto_logout": auto_logout  # NEW FIELD
+    }
 
 
 @router.get("/{session_id}/scores", response_model=list[SectionScoreOut])
