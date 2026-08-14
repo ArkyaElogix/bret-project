@@ -240,13 +240,12 @@ class User(Base):
 
     sessions = relationship("AssessmentSession", back_populates="user", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", foreign_keys="AuditLog.user_id", back_populates="user")
-    is_single_use: Mapped[bool] = mapped_column(Boolean, default=False)
-    single_use_status: Mapped[Optional[str]] = mapped_column(
-        Enum('pending_registration', 'active', 'locked', 'admin_unlocked'),
-        nullable=True
-    )
-    deletion_scheduled_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    assessment_started_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
+    # Single-use account tracking
+    is_single_use = Column(Boolean, default=False)
+    single_use_status = Column(String(50), nullable=True)  # 'pending_registration', 'active', 'locked', 'admin_unlocked'
+    deletion_scheduled_at = Column(DateTime, nullable=True)
+    assessment_started_at = Column(DateTime, nullable=True)
 
 class AssessmentSession(Base):
     __tablename__ = "assessment_sessions"

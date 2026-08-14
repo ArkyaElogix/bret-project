@@ -15,8 +15,28 @@ export interface User {
   phone?: string;
   consent_given_at?: string;
   created_at?: string;
+  is_single_use?: boolean;
+  single_use_status?: 'pending_registration' | 'active' | 'locked' | 'admin_unlocked' | null;
+  deletion_scheduled_at?: string | null;
+  assessment_started_at?: string | null;
 }
 
+export async function createSingleUseUser(
+  email: string,
+  account_type: 'BASIC' | 'EXECUTIVE',
+  name?: string
+): Promise<User> {
+  return apiRequest<User>('/users/single-use', {
+    method: 'POST',
+    body: { email, account_type, name },
+  })
+}
+
+export async function unlockSingleUseUser(id: number): Promise<User> {
+  return apiRequest<User>(`/users/${id}/single-use/unlock`, {
+    method: 'POST',
+  })
+}
 /**
  * Admin-only: list all users.
  */

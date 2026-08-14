@@ -71,7 +71,13 @@ export function isTokenValid(): boolean {
 
   try {
     const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-    const payload = JSON.parse(atob(base64))
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    const payload = JSON.parse(json)
     const exp = payload?.exp
 
     if (typeof exp !== 'number') return false
@@ -101,30 +107,32 @@ export function getToken(): string | null {
 }
 
 export function setToken(token: string, remember = false) {
+  // Candidate login always uses the candidate slot, even when an admin is
+  // intentionally entering the candidate portal.
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY)
   sessionStorage.removeItem(USER_TOKEN_KEY)
   localStorage.removeItem(USER_TOKEN_KEY)
-  
-  // Prevent admin tokens from ever being saved to localStorage
-  // even if "Remember Me" is checked, to prevent lingering admin access.
-  const isTokenAdmin = parseTokenRole(token) === 'ADMIN'
-  
-  if (remember && !isTokenAdmin) {
+
+  const isAdminCandidateSession = parseTokenRole(token) === 'ADMIN'
+
+  if (remember && !isAdminCandidateSession) {
     localStorage.setItem(USER_TOKEN_KEY, token)
   } else {
     sessionStorage.setItem(USER_TOKEN_KEY, token)
   }
+
   notifyAuthChange()
 }
 
 export function setAdminToken(token: string) {
-  // Always session-only and isolated
-  sessionStorage.removeItem(ADMIN_TOKEN_KEY)
-  sessionStorage.setItem(ADMIN_TOKEN_KEY, token)
-  // Ensure no leftover persisted user token can masquerade as admin
+  // Admin portal sessions are separate and always session-only.
+  sessionStorage.removeItem(USER_TOKEN_KEY)
   localStorage.removeItem(USER_TOKEN_KEY)
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY)
+
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token)
   notifyAuthChange()
 }
-
 export function clearToken() {
   sessionStorage.removeItem(ADMIN_TOKEN_KEY)
   sessionStorage.removeItem(USER_TOKEN_KEY)
@@ -140,6 +148,34 @@ export function clearToken() {
 
 export type Role = 'ADMIN' | 'USER'
 
+export function getTokenPayload(): Record<string, unknown> | null {
+  const token = getToken()
+  if (!token) return null
+
+  const parts = token.split('.')
+  if (parts.length !== 3) return null
+
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
+export function requiresProfileCompletion(): boolean {
+  return Boolean(getTokenPayload()?.requires_profile_completion)
+}
+
+export function adminUnlockActive(): boolean {
+  return Boolean(getTokenPayload()?.admin_unlock_active)
+}
 /**
  * Decode the JWT's "role" claim client-side. Used by route guards for an
  * instant, synchronous role check without a network call. Returns null if
@@ -213,13 +249,15 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   body: options.body ? JSON.stringify(options.body) : undefined,
 })
 
-// Token expired or invalid
-  if (response.status === 401) {
-    clearToken()
-    const next = encodeURIComponent(window.location.pathname + window.location.search)
-    window.location.replace(`/login?next=${next}`)
-    return Promise.reject(new ApiError(401, 'Unauthorized'))
-  }
+const isLoginRequest =
+  path === '/auth/login' || path === '/auth/admin/login'
+
+if (response.status === 401 && !isLoginRequest) {
+  clearToken()
+  const next = encodeURIComponent(window.location.pathname + window.location.search)
+  window.location.replace(`/login?next=${next}`)
+  return Promise.reject(new ApiError(401, 'Unauthorized'))
+}
 
   if (!response.ok) {
     let detail = response.statusText

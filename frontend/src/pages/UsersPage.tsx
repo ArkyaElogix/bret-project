@@ -9,6 +9,8 @@ import {
   changeUserType,
   getAuditLog,
   AuditLog,
+  createSingleUseUser,
+  unlockSingleUseUser,
 } from '../api/users'
 import { listSessions, Session } from '../api/sessions'
 import { ApiError } from '../api/client'
@@ -40,6 +42,15 @@ export default function UsersPage() {
   const [newAccountType, setNewAccountType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const [singleUseName, setSingleUseName] = useState('')
+  const [singleUseEmail, setSingleUseEmail] = useState('')
+  const [singleUseAccountType, setSingleUseAccountType] = useState<'BASIC' | 'EXECUTIVE'>('BASIC')
+  const [creatingSingleUse, setCreatingSingleUse] = useState(false)
+  const [singleUseError, setSingleUseError] = useState<string | null>(null)
+  const [singleUseSuccess, setSingleUseSuccess] = useState<string | null>(null)
+
+  const [unlockingUserId, setUnlockingUserId] = useState<number | null>(null)
+  const [unlockError, setUnlockError] = useState<{ id: number; message: string } | null>(null)
 
   // Inline delete confirmation (mirrors FormsPage)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
@@ -65,6 +76,14 @@ export default function UsersPage() {
   const [auditLoading, setAuditLoading] = useState(false)
   const [auditError, setAuditError] = useState<string | null>(null)
   const [auditVisible, setAuditVisible] = useState(false)
+
+  function getSingleUseStatusLabel(status?: User['single_use_status']) {
+  if (status === 'pending_registration') return 'Pending registration'
+  if (status === 'active') return 'Active'
+  if (status === 'locked') return 'Locked'
+  if (status === 'admin_unlocked') return 'Admin unlocked'
+  return 'Single-use'
+}
 
   async function loadData() {
     setLoading(true)
@@ -122,6 +141,31 @@ export default function UsersPage() {
       setCreating(false)
     }
   }
+
+    async function handleCreateSingleUse(e: FormEvent) {
+    e.preventDefault()
+    setSingleUseError(null)
+    setSingleUseSuccess(null)
+    setCreatingSingleUse(true)
+
+    try {
+      const created = await createSingleUseUser(
+        singleUseEmail,
+        singleUseAccountType,
+        singleUseName || undefined
+      )
+      setSingleUseSuccess(`Credentials sent to ${created.email}`)
+      setSingleUseName('')
+      setSingleUseEmail('')
+      setSingleUseAccountType('BASIC')
+      await loadData()
+    } catch (err) {
+      setSingleUseError(err instanceof ApiError ? err.message : 'Failed to create single-use user.')
+    } finally {
+      setCreatingSingleUse(false)
+    }
+  }
+
   async function handleChangeType(id: number, newType: 'BASIC' | 'EXECUTIVE') {
     setUpdatingTypeUserId(id)
     setTypeUpdateError(null)
@@ -135,6 +179,23 @@ export default function UsersPage() {
       })
     } finally {
       setUpdatingTypeUserId(null)
+    }
+  }
+
+    async function handleUnlockSingleUse(id: number) {
+    setUnlockingUserId(id)
+    setUnlockError(null)
+
+    try {
+      await unlockSingleUseUser(id)
+      await loadData()
+    } catch (err) {
+      setUnlockError({
+        id,
+        message: err instanceof ApiError ? err.message : 'Failed to unlock single-use user.',
+      })
+    } finally {
+      setUnlockingUserId(null)
     }
   }
 
@@ -204,19 +265,57 @@ export default function UsersPage() {
             <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <span
-              className={`text-xs px-2 py-1 rounded-full ${ROLE_STYLES[user.role]} dark:text-gray-900`}
-            >
-              {user.role === 'ADMIN' ? 'Admin' : 'User'}
-            </span>
+  <span
+    className={`text-xs px-2 py-1 rounded-full ${
+      user.role === 'ADMIN' ? ROLE_STYLES.ADMIN : ROLE_STYLES.USER
+    } dark:text-gray-900`}
+  >
+    {user.role === 'ADMIN' ? 'Admin' : 'User'}
+  </span>
 
-            {user.role === 'USER' && (
-              <span
-                className={`text-xs px-2 py-1 rounded-full ${ACCOUNT_TYPE_STYLES[user.account_type]} dark:text-gray-900`}
-              >
-                {user.account_type === 'BASIC' ? 'Basic' : 'Executive'}
-              </span>
+  {user.role === 'USER' && (
+    <span
+      className={`text-xs px-2 py-1 rounded-full ${
+        user.account_type === 'EXECUTIVE'
+          ? ACCOUNT_TYPE_STYLES.EXECUTIVE
+          : ACCOUNT_TYPE_STYLES.BASIC
+      } dark:text-gray-900`}
+    >
+      {user.account_type === 'BASIC' ? 'Basic' : 'Executive'}
+    </span>
+  )}
+                        {user.is_single_use && (
+              <>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    user.single_use_status === 'locked'
+                      ? 'bg-red-100 text-red-700'
+                      : user.single_use_status === 'active'
+                        ? 'bg-green-100 text-green-700'
+                        : user.single_use_status === 'admin_unlocked'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-amber-100 text-amber-700'
+                  } dark:text-gray-900`}
+                >
+                  {getSingleUseStatusLabel(user.single_use_status)}
+                </span>
+
+                {user.deletion_scheduled_at && (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Deletes {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(user.deletion_scheduled_at))}
+                  </span>
+                )}
+              </>
             )}
+            {user.is_single_use && user.single_use_status === 'locked' && (
+                  <button
+                    onClick={() => handleUnlockSingleUse(user.id)}
+                    disabled={unlockingUserId === user.id}
+                    className="text-xs border border-blue-300 text-blue-600 rounded px-3 py-1 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900/30 disabled:opacity-50"
+                  >
+                    {unlockingUserId === user.id ? 'Unlocking...' : 'Unlock'}
+                  </button>
+                )}
             {!isChangingPassword && (
               <>
                 {/* ADD THIS BUTTON FOR PRODUCT TYPE */}
@@ -319,6 +418,9 @@ export default function UsersPage() {
         {deleteError?.id === user.id && (
           <p className="text-xs text-red-600">{deleteError.message}</p>
         )}
+                {unlockError?.id === user.id && (
+          <p className="text-xs text-red-600">{unlockError.message}</p>
+        )}
       </div>
     )
   }
@@ -405,7 +507,61 @@ export default function UsersPage() {
             {creating ? 'Creating...' : 'Create user'}
           </button>
         </form>
+        <form
+          onSubmit={handleCreateSingleUse}
+          className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700"
+        >
+          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            Create a single-use candidate
+          </h2>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Name</label>
+              <input
+                type="text"
+                value={singleUseName}
+                onChange={(e) => setSingleUseName(e.target.value)}
+                placeholder="Optional"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={singleUseEmail}
+                onChange={(e) => setSingleUseEmail(e.target.value)}
+                placeholder="candidate@example.com"
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">Account Type</label>
+            <select
+              value={singleUseAccountType}
+              onChange={(e) => setSingleUseAccountType(e.target.value as 'BASIC' | 'EXECUTIVE')}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="BASIC">Basic</option>
+              <option value="EXECUTIVE">Executive</option>
+            </select>
+          </div>
+
+          {singleUseError && <p className="text-sm text-red-600 dark:text-red-300">{singleUseError}</p>}
+          {singleUseSuccess && <p className="text-sm text-green-600 dark:text-green-300">{singleUseSuccess}</p>}
+
+          <button
+            type="submit"
+            disabled={creatingSingleUse}
+            className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+          >
+            {creatingSingleUse ? 'Sending...' : 'Send invitation'}
+          </button>
+        </form>
         {/* Loading / error for the whole page */}
         {loading && (
           <p className="p-6 text-sm text-gray-500 bg-white shadow rounded-lg dark:bg-gray-800 dark:border dark:border-gray-700">

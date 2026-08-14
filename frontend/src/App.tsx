@@ -16,17 +16,17 @@ import { SessionReportPage } from './pages/SessionReportPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import DuplicatesQueuePage from './pages/DuplicatesQueuePage'
-
+import CompleteRegistrationPage from './pages/CompleteRegistrationPage'
+import AssessmentCompletePage from './pages/AssessmentCompletePage'
 
 try {
   localStorage.removeItem('bret_token')
   sessionStorage.removeItem('bret_token')
-} catch { }
+} catch {}
+
 export default function App() {
   return (
     <Routes>
-      {/* Admin portal */}
-
       <Route
         path="/users"
         element={
@@ -83,7 +83,7 @@ export default function App() {
           </AdminRoute>
         }
       />
-      {/* Candidate portal */}
+
       <Route
         path="/portal"
         element={
@@ -100,7 +100,6 @@ export default function App() {
           </UserRoute>
         }
       />
-      <Route path="/sessions/:id/report" element={<SessionReportPage />} />
       <Route
         path="/portal/sessions/:id"
         element={
@@ -117,9 +116,21 @@ export default function App() {
           </UserRoute>
         }
       />
+      <Route path="/sessions/:id/report" element={<SessionReportPage />} />
+      <Route
+        path="/complete-registration"
+        element={<Navigate to="/portal" replace />}
+      />
+      <Route
+        path="/complete-registration/:sessionId"
+        element={
+          <UserRoute>
+            <CompleteRegistrationPage />
+          </UserRoute>
+        }
+      />
+      <Route path="/assessment-complete" element={<AssessmentCompletePage />} />
 
-
-      {/* Public */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route path="/" element={<Navigate to="/forms" replace />} />

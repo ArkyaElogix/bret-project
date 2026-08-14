@@ -15,7 +15,8 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USER = os.getenv("SMTP_USER", "")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 MAIL_FROM = os.getenv("MAIL_FROM", "noreply@bret.app")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+# Use the LAN-accessible frontend by default so emailed links work off-machine.
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://192.168.1.103:5173").rstrip("/")
 
 REPORT_TOKEN_EXPIRE_MINUTES = int(os.getenv("REPORT_TOKEN_EXPIRE_MINUTES", "720"))
 
@@ -129,22 +130,47 @@ def send_report_email_with_pdf(to_email: str, user_name: str, session_id: int, p
 
 
 async def send_single_use_invitation_email(email: str, password: str, name: str):
-    """Send single-use account invitation with auto-generated password."""
-    subject = "Your Assessment Invitation"
-    
-    html_content = f"""
-    <html>
-        <body>
-            <h2>Welcome to your assessment</h2>
-            <p>Hi {name},</p>
-            <p>Your account has been created for a one-time assessment.</p>
-            <h3>Login Details:</h3>
-            <p><strong>Email:</strong> {email}</p>
-            <p><strong>Password:</strong> {password}</p>
-            <p><a href="http://your-domain/login">Click here to login</a></p>
-            <p><strong>Important:</strong> This password is shown only this one time. After you complete your assessment, this account will be automatically deleted.</p>
-        </body>
-    </html>
+    login_url = f"{FRONTEND_URL}/login"
+
+    if not SMTP_HOST:
+        print(
+            f"\n[DEV] Single-use invitation for {email}:\n"
+            f"  Login: {login_url}\n"
+            f"  Password: {password}\n"
+        )
+        return
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = "Your BRET Assessment Invitation"
+    msg["From"] = MAIL_FROM
+    msg["To"] = email
+
+    text_body = (
+        f"Hello {name},\n\n"
+        f"Your one-time BRET assessment account has been created.\n\n"
+        f"Login: {login_url}\n"
+        f"Email: {email}\n"
+        f"Password: {password}\n\n"
+        f"Complete your registration before starting the assessment."
+    )
+
+    html_body = f"""
+    <html><body>
+      <h2>Your BRET Assessment Invitation</h2>
+      <p>Hello {name},</p>
+      <p>Your one-time assessment account has been created.</p>
+      <p><strong>Email:</strong> {email}</p>
+      <p><strong>Password:</strong> {password}</p>
+      <p><a href="{login_url}">Login to start</a></p>
+      <p>This account is intended for a single assessment attempt.</p>
+    </body></html>
     """
-    
-    await send_email(email=email, subject=subject, html_content=html_content)
+
+    msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
+
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(SMTP_USER, SMTP_PASSWORD)
+        smtp.sendmail(MAIL_FROM, email, msg.as_string())

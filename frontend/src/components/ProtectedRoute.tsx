@@ -114,7 +114,7 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
   const allowed = useAuthGuard('ADMIN')
 
   if (allowed === null) return null
-  if (!allowed) return <Navigate to="/login" replace />
+  if (!allowed) return <Navigate to="/admin/login" replace />
 
   return <>{children}</>
 }

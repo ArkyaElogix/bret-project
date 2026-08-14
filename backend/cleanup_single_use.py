@@ -7,9 +7,9 @@ from datetime import datetime
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from app.models.models import User, AuditLog, AuditAction, ApplicantRegistry
-from app.database import DATABASE_URL
+from app.database import SQLALCHEMY_DATABASE_URL
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
 
 def cleanup_single_use_accounts():

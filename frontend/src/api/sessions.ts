@@ -9,6 +9,7 @@ export interface Session {
   form_name: string
   status: 'in_progress' | 'submitted'
   submitted_at: string | null
+  auto_logout?: boolean
 }
 
 /**

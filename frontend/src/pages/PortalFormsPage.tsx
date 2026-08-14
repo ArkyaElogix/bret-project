@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { listForms, Form } from '../api/forms'
 import { listMySessions, startSession, Session } from '../api/sessions'
-import { ApiError } from '../api/client'
+import { ApiError, adminUnlockActive, requiresProfileCompletion } from '../api/client'
 import PortalLayout from '../components/PortalLayout'
 
 export default function PortalFormsPage() {
@@ -18,6 +18,15 @@ export default function PortalFormsPage() {
 
   const [starting, setStarting] = useState(false)
   const [startError, setStartError] = useState<{ id: number; message: string } | null>(null)
+  const location = useLocation()
+  const routeNotice = (location.state as { notice?: string } | null)?.notice ?? null
+  const topNotice =
+    routeNotice ||
+    (requiresProfileCompletion()
+      ? 'Complete registration after you start an assessment.'
+      : adminUnlockActive()
+        ? 'Admin has enabled one login. Use it now or it expires.'
+        : null)
 
   async function loadData() {
     setLoading(true)
@@ -67,12 +76,19 @@ export default function PortalFormsPage() {
     }).format(new Date(value))
   }
 
-  async function handleStart(form: Form, priorClaimed = false, priorDetails = '') {
+    async function handleStart(form: Form, priorClaimed = false, priorDetails = '') {
     setStarting(true)
     setStartError(null)
     try {
       const session = await startSession(form.id, priorClaimed, priorDetails)
       await loadData()
+      setShowAttemptModal(null)
+
+      if (requiresProfileCompletion()) {
+        navigate(`/complete-registration/${session.id}`)
+        return
+      }
+
       navigate(`/portal/sessions/${session.id}`)
     } catch (err) {
       setStartError({
@@ -84,12 +100,19 @@ export default function PortalFormsPage() {
     }
   }
 
-  async function handleStartAgain(form: Form) {
+    async function handleStartAgain(form: Form) {
     setStarting(true)
     setStartError(null)
     try {
       const session = await startSession(form.id)
       await loadData()
+      setShowAttemptModal(null)
+
+      if (requiresProfileCompletion()) {
+        navigate(`/complete-registration/${session.id}`)
+        return
+      }
+
       navigate(`/portal/sessions/${session.id}`)
     } catch (err) {
       setStartError({
@@ -108,7 +131,11 @@ export default function PortalFormsPage() {
           These are the assessments currently available to you. You can only work on one assessment at a time — finish
           any in-progress assessment before starting a new one.
         </p>
-
+        {topNotice && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+            {topNotice}
+          </div>
+        )}
         {/* In-progress warning banner */}
         {anyInProgress && (
           <div className="bg-amber-50 border border-amber-200 dark:text-amber-300 dark:bg-yellow-900 dark:border-amber-900 text-amber-800 rounded-lg p-4 text-sm">

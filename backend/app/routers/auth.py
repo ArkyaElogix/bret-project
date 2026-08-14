@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 
 from app.database import get_db
 from app.models.models import (
-    User, UserRole, AccountType, PasswordResetToken, AuditLog, AuditAction
+    User, UserRole, AccountType, PasswordResetToken, AuditLog, AuditAction, AssessmentSession
 )
 from app.services.email_service import send_reset_email
 from app.schemas import (
@@ -65,54 +65,10 @@ def _client_ip(request: Request) -> str | None:
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
-@router.post("/login")
-async def login(
-    credentials: LoginRequest,
-    db: Session = Depends(get_db)
-):
-    """Candidate login (non-admin)."""
-    user = db.query(User).filter(User.email == credentials.email).first()
-    
-    if not user or not verify_password(credentials.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # NEW: Single-use account gate
-    if user.is_single_use:
-        if user.single_use_status == "locked":
-            raise HTTPException(
-                status_code=403,
-                detail="ACCOUNT_LOCKED"
-            )
-        
-        # Track JWT flags
-        jwt_flags = {}
-        if user.single_use_status == "pending_registration":
-            jwt_flags["requires_profile_completion"] = True
-        elif user.single_use_status == "admin_unlocked":
-            jwt_flags["admin_unlock_active"] = True
-    else:
-        jwt_flags = {}
-    
-    # Generate JWT with flags
-    access_token = create_access_token(
-        data={
-            "sub": str(user.id),
-            "email": user.email,
-            **jwt_flags  # Include flags in JWT
-        }
-    )
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": user
-    }
-    
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == payload.email).first()
 
-    # Guard: wrong password OR soft-deleted account — same error to prevent enumeration
     if (
         not user
         or not verify_password(payload.password, user.password_hash)
@@ -120,11 +76,24 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
     ):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
+    if user.is_single_use:
+        if user.single_use_status == "locked":
+            raise HTTPException(status_code=403, detail="ACCOUNT_LOCKED")
+
+        jwt_flags = {}
+        if user.single_use_status == "pending_registration":
+            jwt_flags["requires_profile_completion"] = True
+        elif user.single_use_status == "admin_unlocked":
+            jwt_flags["admin_unlock_active"] = True
+    else:
+        jwt_flags = {}
+
     user.last_accessed_at = datetime.utcnow()
     _write_audit(db, AuditAction.USER_LOGIN, user_id=user.id, ip=_client_ip(request))
     db.commit()
 
-    token = create_access_token(user)
+    
+    token = create_access_token(user, extra_claims=jwt_flags)
     return TokenResponse(access_token=token, role=user.role.value)
 
 
@@ -199,11 +168,12 @@ def register_candidate(
     token = create_access_token(user)
     return TokenResponse(access_token=token, role=user.role.value)
 
-@router.post("/complete-registration")
-async def complete_registration(
-    request: CompleteRegistrationRequest,
+@router.post("/complete-registration", response_model=UserOut)
+def complete_registration(
+    payload: CompleteRegistrationRequest,
+    http_request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Complete single-use account registration.
@@ -213,51 +183,85 @@ async def complete_registration(
     if not current_user.is_single_use or current_user.single_use_status != "pending_registration":
         raise HTTPException(status_code=400, detail="Not a pending registration account")
     
-    if not request.consent_accepted:
+    if not payload.consent_accepted:
         raise HTTPException(status_code=400, detail="Consent is required")
     
-    # Update user profile
-    current_user.phone = request.phone
-    current_user.address = request.address
-    current_user.country = request.country
-    current_user.age = request.age
-    current_user.profession = request.profession
-    current_user.income_range = request.income_range
+    session = (
+        db.query(AssessmentSession)
+        .filter(
+            AssessmentSession.id == payload.session_id,
+            AssessmentSession.user_id == current_user.id,
+        )
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    current_user.phone = payload.phone
+    current_user.address = payload.address
+    current_user.country = payload.country
+    current_user.age = payload.age
+    current_user.profession = payload.profession
+    current_user.income_range = payload.income_range
     current_user.consent_given_at = datetime.utcnow()
     
-    # NEW: Run early duplicate detection
-    duplicate_check = check_and_flag_duplicates(current_user)
+    flags= check_and_flag_duplicates(session, current_user, db)
     
-    if duplicate_check.get("is_duplicate"):
-        # Don't set status to active, keep pending/reject
+    if flags:
+        current_user.single_use_status = "locked"
+        _write_audit(
+            db,
+            AuditAction.DUPLICATE_FLAGGED,
+            user_id=current_user.id,
+            target_user_id=current_user.id,
+            ip=_client_ip(http_request),
+            detail={"flag_count": len(flags), "phase": "complete_registration"},
+        )
+        _write_audit(
+            db,
+            AuditAction.SINGLE_USE_LOCKED,
+            user_id=current_user.id,
+            target_user_id=current_user.id,
+            ip=_client_ip(http_request),
+            detail={"event": "duplicate_detected"},
+        )
         db.commit()
         raise HTTPException(
             status_code=409,
-            detail="DUPLICATE_DETECTED",
+            detail={
+                "code": "DUPLICATE_DETECTED",
+                "flags": [
+                    {
+                        "id": flag.id,
+                        "match_type": flag.match_type.value,
+                        "match_confidence": flag.match_confidence.value,
+                        "prior_registry_id": flag.prior_registry_id,
+                        "prior_session_id": flag.prior_session_id,
+                    }
+                    for flag in flags
+                ],
+            },
             # Return flag details so frontend can show them
             # (adjust based on your check_and_flag_duplicates return structure)
         )
     
     # If clean, write pre-registration to applicant_registry
-    register_applicant(current_user, db)
+    register_applicant(session, current_user, db)
     
     # Set status to active
     current_user.single_use_status = "active"
     
-    db.commit()
-    db.refresh(current_user)
+    
     
     # Audit log
-    audit_log = AuditLog(
-        user_id=current_user.id,
-        action=AuditAction.SINGLE_USE_CREATED,  # Or a new action if desired
-        resource_type="USER",
-        resource_id=current_user.id,
-        details={"event": "registration_completed"}
+    _write_audit(
+        db,
+        AuditAction.SINGLE_USE_CREATED,  # Or a new action if desired
+        ip= _client_ip(http_request),
+        detail={"event": "registration_completed", "session_id": session.id},
     )
-    db.add(audit_log)
     db.commit()
-    
+    db.refresh(current_user)
     return current_user
 
 @router.get("/me", response_model=UserOut)
@@ -270,7 +274,7 @@ def get_me(current_user: User = Depends(get_current_user)):
 def forgot_password(
     payload: ForgotPasswordRequest, request: Request, db: Session = Depends(get_db)
 ):
-    user = db.query(User).filter(User.email == request.email).first()
+    user = db.query(User).filter(User.email == payload.email).first()
     if not user:
         # Don't reveal if email exists
         return {"message": "If email exists, reset link has been sent"}
@@ -348,40 +352,34 @@ def reset_password(
     return {"message": "Password reset successfully. You can now log in with your new password."}
 
 
-@router.post("/logout", status_code=204)
+
+
+@router.post("/logout")
 def logout(
     request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
-):
-    _write_audit(db, AuditAction.USER_LOGOUT,
-                 user_id=current_user.id, ip=_client_ip(request))
-    current_user.token_version += 1
-    db.commit()
-
-@router.post("/logout")
-async def logout(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
     """
     Logout user.
     For admin-unlocked single-use accounts, consumes the unlock.
     """
     # If admin-unlocked single-use, lock them
+    _write_audit(db, AuditAction.USER_LOGOUT, user_id=current_user.id, ip=_client_ip(request))
     if current_user.is_single_use and current_user.single_use_status == "admin_unlocked":
         current_user.single_use_status = "locked"
         
         # Audit log
-        audit_log = AuditLog(
+        _write_audit(
+            db,
+            AuditAction.SINGLE_USE_LOCKED,
             user_id=current_user.id,
-            action=AuditAction.SINGLE_USE_LOCKED,
-            resource_type="USER",
-            resource_id=current_user.id,
-            details={"event": "logout_consumed_admin_unlock"}
+            target_user_id=current_user.id,
+            ip=_client_ip(request),
+            detail={"event": "logout_consumed_admin_unlock"},
         )
-        db.add(audit_log)
-    
+        
+    current_user.token_version += 1
     db.commit()
     
     return {"message": "Logged out"}

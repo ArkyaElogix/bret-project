@@ -15,7 +15,7 @@ from app.security import hash_password, verify_password
 from app.auth import require_admin, get_current_user
 import secrets
 from app.schemas import SingleUseUserCreate
-
+from app.services.email_service import send_single_use_invitation_email
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -275,7 +275,7 @@ def get_audit_log(
         .all()
     )
 
-@router.post("/single-use", response_model=UserOut)
+@router.post("/single-use", response_model=UserOut, status_code=201)
 async def create_single_use_user(
     user_data: SingleUseUserCreate,
     current_user: User = Depends(get_current_user),
@@ -286,7 +286,7 @@ async def create_single_use_user(
     Auto-generates password, sends invitation email.
     """
     # Verify current user is admin
-    if current_user.role != "ADMIN":
+    if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
     
     # Check email not already in use
@@ -301,8 +301,8 @@ async def create_single_use_user(
     new_user = User(
         email=user_data.email,
         name=user_data.name or user_data.email.split('@')[0],
-        hashed_password=hash_password(auto_password),
-        role="USER",
+        password_hash=hash_password(auto_password),
+        role=UserRole.USER,
         is_single_use=True,
         single_use_status="pending_registration",
         token_version=0,
@@ -321,11 +321,10 @@ async def create_single_use_user(
     
     # Audit log
     audit_log = AuditLog(
-        user_id=current_user.id,
         action=AuditAction.SINGLE_USE_CREATED,
-        resource_type="USER",
-        resource_id=new_user.id,
-        details={"email": new_user.email, "account_type": new_user.account_type}
+        user_id=current_user.id,
+        target_user_id=new_user.id,
+        detail=json.dumps({"email": new_user.email, "account_type": user_data.account_type}),
     )
     db.add(audit_log)
     db.commit()
@@ -344,7 +343,7 @@ async def unlock_single_use_user(
     Allows one more login/submission attempt.
     """
     # Verify admin
-    if current_user.role != "ADMIN":
+    if current_user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Admin only")
     
     target_user = db.query(User).filter(User.id == user_id).first()
@@ -363,11 +362,10 @@ async def unlock_single_use_user(
     
     # Audit log
     audit_log = AuditLog(
-        user_id=current_user.id,
         action=AuditAction.SINGLE_USE_ADMIN_UNLOCK,
-        resource_type="USER",
-        resource_id=target_user.id,
-        details={"target_email": target_user.email}
+        user_id=current_user.id,
+        target_user_id=target_user.id,
+        detail=json.dumps({"target_email": target_user.email}),
     )
     db.add(audit_log)
     db.commit()

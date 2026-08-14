@@ -9,7 +9,7 @@ import {
 import { listBehaviouralTypes, BehaviouralType } from '../api/behavioralTypes'
 import { listQuestions, Question } from '../api/questions'
 import { getForm, Form } from '../api/forms'
-import { ApiError } from '../api/client'
+import { ApiError, clearToken } from '../api/client'
 import PortalLayout from '../components/PortalLayout'
 import AssessmentStepper from '../components/AssessmentStepper'
 
@@ -95,7 +95,7 @@ export default function PortalAssessmentPage() {
     }
   }
 
-  async function handleSubmit() {
+    async function handleSubmit() {
     if (form && !form.is_active) {
       setSubmitError('This assessment is no longer available.')
       return
@@ -103,8 +103,15 @@ export default function PortalAssessmentPage() {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      await submitSession(sessionId)
-      navigate(`/portal/sessions/${sessionId}/results`)
+      const result = await submitSession(sessionId)
+
+      if (result.auto_logout) {
+        clearToken()
+        navigate('/assessment-complete', { replace: true })
+        return
+      }
+
+      navigate(`/portal/sessions/${sessionId}/results`, { replace: true })
     } catch (err) {
       setSubmitError(err instanceof ApiError ? err.message : 'Failed to submit assessment.')
     } finally {

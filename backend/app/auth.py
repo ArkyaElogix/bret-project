@@ -32,7 +32,8 @@ optional_bearer_scheme = HTTPBearer(auto_error=False)
 
 
 
-def create_access_token(user: User) -> str:
+def create_access_token(user: User, extra_claims: dict | None = None) -> str:
+
     expire = datetime.utcnow() + timedelta(minutes=JWT_EXPIRE_MINUTES)
     # "role" is included so the frontend can branch on it without an extra
     # network call, but the DB-loaded user remains the source of truth —
@@ -44,6 +45,8 @@ def create_access_token(user: User) -> str:
         "token_version": user.token_version,
         "exp": expire,
     }
+    if extra_claims:
+        payload.update(extra_claims)
     return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
 
 

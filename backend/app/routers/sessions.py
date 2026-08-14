@@ -34,6 +34,9 @@ from app.models.models import (
     OptionLetter,
     SessionActivityAction,
     SessionActivityLog,
+    AuditLog,
+    AuditAction,
+    ApplicantRegistry,
 )
 from app.schemas import (
     SessionStartRequest,
@@ -395,6 +398,85 @@ def delayed_cache_report(session_id: int, ai_report: dict, is_test_bypass: bool)
     finally:
         db.close()
 
+def _is_complete_ai_report(ai_report: dict | None) -> bool:
+    if not ai_report:
+        return False
+
+    return all(
+        key in ai_report
+        for key in [
+            "overall_observations",
+            "action_agenda",
+            "drives_profile",
+        ]
+    )
+
+
+def ensure_ai_report_cached(
+    session_id: int,
+    db: Session,
+    *,
+    force: bool = False,
+) -> dict | None:
+    """
+    Generate and cache the AI report for a submitted session.
+
+    Uses a row-level lock briefly to prevent duplicate AI/cache writers.
+    The expensive AI call happens after the lock is released.
+    """
+    use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
+    if not use_ai:
+        return None
+
+    try:
+        session = (
+            db.query(AssessmentSession)
+            .filter(AssessmentSession.id == session_id)
+            .first()
+        )
+
+        if not session or session.status != SessionStatus.submitted:
+            return None
+
+        if session.ai_report_data and not force:
+            return session.ai_report_data
+
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print(f"AI report cache pre-check failed for session {session_id}: {e}")
+        return None
+
+    try:
+        ai_service = AIReportService()
+        ai_report = ai_service.generate_report(session_id, db)
+
+        if not _is_complete_ai_report(ai_report):
+            print(f"AI report incomplete for session {session_id}; not caching.")
+            return ai_report
+
+        existing = (
+            db.query(AssessmentSession)
+            .filter(AssessmentSession.id == session_id)
+            .first()
+        )
+
+        if not existing or existing.status != SessionStatus.submitted:
+            return None
+
+        if existing.ai_report_data and not force:
+            return existing.ai_report_data
+
+        existing.ai_report_data = ai_report
+        db.commit()
+        db.refresh(existing)
+
+        return existing.ai_report_data
+
+    except Exception as e:
+        db.rollback()
+        print(f"AI report generation/cache failed for session {session_id}: {e}")
+        return None
 
 @router.get("/{session_id}/report", response_model=SessionReportOut)
 def get_session_report(
@@ -428,39 +510,24 @@ def get_session_report(
         if session.status != SessionStatus.submitted:
             raise HTTPException(status_code=400, detail="Session is not submitted yet")
 
-    use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
+        is_test_bypass = bool(
+        current_user is not None
+        and current_user.role == UserRole.ADMIN
+        and session.user_id == current_user.id
+    )
 
-    if use_ai:
+    ai_report = ensure_ai_report_cached(session_id, db, force=is_test_bypass)
+
+    if ai_report:
         try:
-            is_test_bypass = bool(
-                current_user is not None
-                and current_user.role == UserRole.ADMIN
-                and session.user_id == current_user.id
-            )
-            
-            ai_report = None
-            
-            # Use cached report if it exists and we are not bypassing
-            if session.ai_report_data and not is_test_bypass:
-                ai_report = session.ai_report_data
-            else:
-                # Generate new report
-                ai_service = AIReportService()
-                ai_report = ai_service.generate_report(session_id, db)
-                
-                # Send the caching task to the background to wait 60 seconds
-                background_tasks.add_task(delayed_cache_report, session_id, ai_report, is_test_bypass)
-
-            # Format the raw AI dictionary for the UI
             ai_sections = _format_ai_report_for_response(ai_report, db)
-            
             basic_payload = _build_basic_report_payload(session, db)
-            
+
             static_sections = [
                 s for s in basic_payload["sections"]
                 if s["section_code"] in ("LETTER", "DEF")
             ]
-            
+
             return {
                 "session": session,
                 "user": basic_payload["user"],
@@ -468,8 +535,8 @@ def get_session_report(
                 "sections": static_sections + ai_sections,
             }
         except Exception as e:
-            print(f"AI report generation failed: {e}")
-    
+            print(f"AI report formatting failed: {e}")
+
     return _build_basic_report_payload(session, db)
 
 
@@ -490,20 +557,19 @@ async def generate_and_email_pdf_task(session_id: int, user_email: str, user_nam
         if not session or session.status != SessionStatus.submitted:
             return
 
-        use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
+        ai_report = ensure_ai_report_cached(session_id, db)
         report_payload = None
 
-        if use_ai and session.ai_report_data:
-            # We have cached AI data
-            ai_sections = _format_ai_report_for_response(session.ai_report_data, db)
+        if ai_report:
+            ai_sections = _format_ai_report_for_response(ai_report, db)
             basic_payload = _build_basic_report_payload(session, db)
             static_sections = [
                 s for s in basic_payload["sections"]
                 if s["section_code"] in ("LETTER", "DEF")
             ]
+
             report_payload = {
-                "session": session, # Note: SQLAlchemy object won't serialize easily without Pydantic.
-                                    # But we can just use the schema dump below.
+                "session": session,
                 "user": basic_payload["user"],
                 "form": basic_payload["form"],
                 "sections": static_sections + ai_sections,
@@ -529,7 +595,12 @@ async def generate_and_email_pdf_task(session_id: int, user_email: str, user_nam
     finally:
         db.close()
 
-
+def generate_ai_report_cache_task(session_id: int):
+    db = SessionLocal()
+    try:
+        ensure_ai_report_cached(session_id, db)
+    finally:
+        db.close()
 
 def _ensure_form_available_for_new_session(form: Form) -> None:
     if not form.is_active:
@@ -577,6 +648,10 @@ def start_or_resume_session(
         .first()
     )
     if existing_for_form:
+        if current_user.is_single_use and not current_user.assessment_started_at:
+            now = datetime.utcnow()
+            current_user.assessment_started_at = now
+            current_user.deletion_scheduled_at = now + timedelta(hours=12)
         _log_activity(db, existing_for_form.id, SessionActivityAction.SESSION_RESUME) # <--- ADD THIS
         db.commit()
         return existing_for_form
@@ -610,6 +685,10 @@ def start_or_resume_session(
     db.add(session)
     db.commit()
     db.refresh(session)
+    if current_user.is_single_use and not current_user.assessment_started_at:
+        now = datetime.utcnow()
+        current_user.assessment_started_at = now
+        current_user.deletion_scheduled_at = now + timedelta(hours=12)
     _log_activity(db, session.id, SessionActivityAction.SESSION_START)
     db.commit()
     return session
@@ -754,75 +833,54 @@ def submit_session(
     db.refresh(session)
 
     calculate_and_store_scores(session_id, db)
+    background_tasks.add_task(generate_ai_report_cache_task, session.id)
 
-    # --- Phase 2: Duplicates & Email ---
+        # --- Phase 2: Duplicates, single-use lock, and email ---
     from app.services.duplicate_service import check_and_flag_duplicates, register_applicant
     import json
 
-    # 1. Check for duplicates
     flags = check_and_flag_duplicates(session, current_user, db)
     if flags:
-        from app.models.models import AuditAction, AuditLog
         audit = AuditLog(
             action=AuditAction.DUPLICATE_FLAGGED,
             user_id=current_user.id,
             target_user_id=current_user.id,
-            detail=json.dumps({"flag_count": len(flags)})
+            detail=json.dumps({"flag_count": len(flags), "phase": "submit_session"}),
         )
         db.add(audit)
         db.commit()
 
-    # 2. Register permanent applicant record
-    register_applicant(session, current_user, db)
-    
-    # 3. Queue the report email background task (with PDF generation)
-    background_tasks.add_task(generate_and_email_pdf_task, session.id, current_user.email, current_user.name)
+    existing_registry = (
+        db.query(ApplicantRegistry)
+        .filter(
+            ApplicantRegistry.original_user_id == current_user.id,
+            ApplicantRegistry.session_id == session.id,
+        )
+        .first()
+    )
+    if not existing_registry:
+        register_applicant(session, current_user, db)
 
-    return session
-
-@router.post("/{session_id}/submit")
-async def submit_session(
-    session_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks
-):
-    """Submit a session."""
-    
-    session = db.query(Session).filter(
-        Session.id == session_id,
-        Session.user_id == current_user.id
-    ).first()
-    
-    if not session:
-        raise HTTPException(status_code=404, detail="Session not found")
-    
-    # ... existing submission logic (scoring, duplicates, email task) ...
-    
-    # NEW: Lock single-use account
     auto_logout = False
     if current_user.is_single_use:
         current_user.single_use_status = "locked"
         auto_logout = True
-        
-        # Audit log
-        audit_log = AuditLog(
-            user_id=current_user.id,
-            action=AuditAction.SINGLE_USE_LOCKED,
-            resource_type="SESSION",
-            resource_id=session.id,
-            details={"event": "submission_locked_account"}
+        db.add(
+            AuditLog(
+                action=AuditAction.SINGLE_USE_LOCKED,
+                user_id=current_user.id,
+                target_user_id=current_user.id,
+                detail=json.dumps({"event": "submission_locked_account", "session_id": session.id}),
+            )
         )
-        db.add(audit_log)
+        db.commit()
+
+    background_tasks.add_task(generate_and_email_pdf_task, session.id, current_user.email, current_user.name)
+
+    setattr(session, "auto_logout", auto_logout)
+    return session
     
-    db.commit()
-    
-    # Return response with auto_logout flag
-    return {
-        "message": "Session submitted",
-        "session": session,
-        "auto_logout": auto_logout  # NEW FIELD
-    }
+
 
 
 @router.get("/{session_id}/scores", response_model=list[SectionScoreOut])

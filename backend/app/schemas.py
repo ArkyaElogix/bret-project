@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo
+from pydantic import BaseModel, ConfigDict, field_validator, ValidationInfo, EmailStr
 from datetime import datetime
 
 # class BehaviouralTypeCreate(BaseModel):
@@ -94,6 +94,7 @@ class SessionOut(BaseModel):
     form_name: str
     status: str
     submitted_at: datetime | None = None
+    auto_logout: bool = False
     model_config = ConfigDict(from_attributes=True)
 
 
@@ -238,8 +239,7 @@ class UserOut(BaseModel):
     assessment_started_at: Optional[datetime] = None
     
 
-    class Config:
-        from_attributes = True
+    
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -421,6 +421,7 @@ class SingleUseUserCreate(BaseModel):
     name: Optional[str] = None
 
 class CompleteRegistrationRequest(BaseModel):
+    session_id: int
     phone: str
     address: str
     country: str

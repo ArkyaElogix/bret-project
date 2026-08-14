@@ -61,3 +61,28 @@ export async function resetPassword(token: string, newPassword: string): Promise
     body: { token, new_password: newPassword },
   })
 }
+
+export async function completeRegistration(
+  sessionId: number,
+  phone: string,
+  address: string,
+  country: string,
+  age: number,
+  profession: string,
+  incomeRange: string,
+  consentAccepted: boolean,
+): Promise<User> {
+  return apiRequest<User>('/auth/complete-registration', {
+    method: 'POST',
+    body: {
+      session_id: sessionId,
+      phone,
+      address,
+      country,
+      age,
+      profession,
+      income_range: incomeRange,
+      consent_accepted: consentAccepted,
+    },
+  })
+}
