@@ -17,6 +17,8 @@ from datetime import datetime, timedelta
 from app.services.ai_report_service import AIReportService
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import update
+from sqlalchemy.exc import DatabaseError
 from app.database import get_db, SessionLocal
 from app.models.models import (
     AssessmentSession,
@@ -37,6 +39,8 @@ from app.models.models import (
     AuditLog,
     AuditAction,
     ApplicantRegistry,
+    DuplicateFlag,
+    ReportStatus,
 )
 from app.schemas import (
     SessionStartRequest,
@@ -412,69 +416,172 @@ def _is_complete_ai_report(ai_report: dict | None) -> bool:
     )
 
 
+REPORT_WAIT_TIMEOUT_SECONDS = int(os.getenv("REPORT_WAIT_TIMEOUT_SECONDS", "300"))
+REPORT_WAIT_POLL_SECONDS = float(os.getenv("REPORT_WAIT_POLL_SECONDS", "1.5"))
+
+
+def _claim_report_generation(session_id: int, db: Session, *, force: bool = False) -> str:
+    now = datetime.utcnow()
+
+    try:
+        if force:
+            stmt = (
+                update(AssessmentSession)
+                .where(AssessmentSession.id == session_id)
+                .where(AssessmentSession.status == SessionStatus.submitted)
+                .values(
+                    report_status=ReportStatus.generating,
+                    report_started_at=now,
+                    report_completed_at=None,
+                    report_error=None,
+                    ai_report_data=None,
+                )
+            )
+        else:
+            stmt = (
+                update(AssessmentSession)
+                .where(AssessmentSession.id == session_id)
+                .where(AssessmentSession.status == SessionStatus.submitted)
+                .where(AssessmentSession.report_status.in_([
+                    ReportStatus.not_started,
+                    ReportStatus.failed,
+                ]))
+                .values(
+                    report_status=ReportStatus.generating,
+                    report_started_at=now,
+                    report_completed_at=None,
+                    report_error=None,
+                )
+            )
+
+        result = db.execute(stmt)
+        db.commit()
+
+        if result.rowcount == 1:
+            return "claimed"
+
+    except DatabaseError as e:
+        db.rollback()
+        print(f"Report claim failed for session {session_id}: {e}")
+        return "generating"
+
+    db.rollback()
+    db.expire_all()
+
+    session = db.query(AssessmentSession).filter(
+        AssessmentSession.id == session_id
+    ).first()
+    db.commit()
+
+    if not session or session.status != SessionStatus.submitted:
+        return "unavailable"
+
+    if session.ai_report_data and session.report_status == ReportStatus.complete:
+        return "complete"
+
+    if session.report_status == ReportStatus.generating:
+        return "generating"
+
+    if session.report_status == ReportStatus.failed:
+        return "unavailable"
+
+    return "unavailable"
+
+def _wait_for_cached_ai_report(session_id: int, db: Session, timeout_seconds: int) -> dict | None:
+    deadline = time.monotonic() + timeout_seconds
+
+    while time.monotonic() < deadline:
+        db.rollback()
+        db.expire_all()
+
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.id == session_id
+        ).first()
+        db.commit()
+
+        if not session:
+            return None
+
+        if session.report_status == ReportStatus.complete and session.ai_report_data:
+            return session.ai_report_data
+
+        if session.report_status == ReportStatus.failed:
+            return None
+
+        time.sleep(REPORT_WAIT_POLL_SECONDS)
+
+    return None
+
 def ensure_ai_report_cached(
     session_id: int,
     db: Session,
     *,
     force: bool = False,
+    wait: bool = False,
+    timeout_seconds: int = REPORT_WAIT_TIMEOUT_SECONDS,
 ) -> dict | None:
     """
-    Generate and cache the AI report for a submitted session.
+    Idempotent AI report generation.
 
-    Uses a row-level lock briefly to prevent duplicate AI/cache writers.
-    The expensive AI call happens after the lock is released.
+    One caller claims generation. Other callers either return cached data or wait
+    for the active generation to finish.
     """
     use_ai = os.getenv("USE_AI_REPORT", "true").lower() == "true"
     if not use_ai:
         return None
 
-    try:
-        session = (
-            db.query(AssessmentSession)
-            .filter(AssessmentSession.id == session_id)
-            .first()
-        )
+    claim = _claim_report_generation(session_id, db, force=force)
 
-        if not session or session.status != SessionStatus.submitted:
-            return None
+    if claim == "complete":
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.id == session_id
+        ).first()
+        return session.ai_report_data if session else None
 
-        if session.ai_report_data and not force:
-            return session.ai_report_data
+    if claim == "generating":
+        if wait:
+            return _wait_for_cached_ai_report(session_id, db, timeout_seconds)
+        return None
 
-        db.commit()
-    except Exception as e:
-        db.rollback()
-        print(f"AI report cache pre-check failed for session {session_id}: {e}")
+    if claim != "claimed":
         return None
 
     try:
         ai_service = AIReportService()
         ai_report = ai_service.generate_report(session_id, db)
 
-        if not _is_complete_ai_report(ai_report):
-            print(f"AI report incomplete for session {session_id}; not caching.")
-            return ai_report
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.id == session_id
+        ).first()
 
-        existing = (
-            db.query(AssessmentSession)
-            .filter(AssessmentSession.id == session_id)
-            .first()
-        )
-
-        if not existing or existing.status != SessionStatus.submitted:
+        if not session or session.status != SessionStatus.submitted:
             return None
 
-        if existing.ai_report_data and not force:
-            return existing.ai_report_data
+        if not _is_complete_ai_report(ai_report):
+            session.report_status = ReportStatus.failed
+            session.report_error = "AI report returned incomplete data."
+            db.commit()
+            return None
 
-        existing.ai_report_data = ai_report
+        session.ai_report_data = ai_report
+        session.report_status = ReportStatus.complete
+        session.report_completed_at = datetime.utcnow()
+        session.report_error = None
         db.commit()
-        db.refresh(existing)
 
-        return existing.ai_report_data
+        return ai_report
 
     except Exception as e:
         db.rollback()
+
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.id == session_id
+        ).first()
+        if session:
+            session.report_status = ReportStatus.failed
+            session.report_error = str(e)[:2000]
+            db.commit()
+
         print(f"AI report generation/cache failed for session {session_id}: {e}")
         return None
 
@@ -487,6 +594,7 @@ def get_session_report(
     current_user: User | None = Depends(get_optional_user),  # keep current_user for normal flow
 ):
     # If a report_token is provided, validate it and bypass owner check
+    is_test_bypass = False
     if report_token:
         try:
             payload = jose_jwt.decode(report_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
@@ -516,7 +624,13 @@ def get_session_report(
         and session.user_id == current_user.id
     )
 
-    ai_report = ensure_ai_report_cached(session_id, db, force=is_test_bypass)
+    ai_report = ensure_ai_report_cached(
+        session_id,
+        db,
+        force=is_test_bypass,
+        wait=True,
+        timeout_seconds=REPORT_WAIT_TIMEOUT_SECONDS,
+    )
 
     if ai_report:
         try:
@@ -546,48 +660,56 @@ from app.services.email_service import send_report_email_with_pdf
 from app.services.pdf_service import generate_pdf_from_report_data
 
 async def generate_and_email_pdf_task(session_id: int, user_email: str, user_name: str):
-    """
-    Waits 60 seconds (so AI can finish), builds the report JSON, generates a PDF, and emails it.
-    """
-    await asyncio.sleep(240)  # Wait 4 minute for AI report to be cached
-    
+    await asyncio.sleep(1)
+
     db = SessionLocal()
     try:
-        session = db.query(AssessmentSession).filter(AssessmentSession.id == session_id).first()
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.id == session_id
+        ).first()
+
         if not session or session.status != SessionStatus.submitted:
             return
 
-        ai_report = ensure_ai_report_cached(session_id, db)
-        report_payload = None
+        ai_report = ensure_ai_report_cached(
+            session_id,
+            db,
+            wait=True,
+            timeout_seconds=REPORT_WAIT_TIMEOUT_SECONDS,
+        )
 
-        if ai_report:
-            ai_sections = _format_ai_report_for_response(ai_report, db)
-            basic_payload = _build_basic_report_payload(session, db)
-            static_sections = [
-                s for s in basic_payload["sections"]
-                if s["section_code"] in ("LETTER", "DEF")
-            ]
+        if not ai_report:
+            print(f"Report email not sent for session {session_id}: AI report was not completed.")
+            return
 
-            report_payload = {
-                "session": session,
-                "user": basic_payload["user"],
-                "form": basic_payload["form"],
-                "sections": static_sections + ai_sections,
-            }
-        else:
-            report_payload = _build_basic_report_payload(session, db)
-        
-        # Serialize the payload properly using our Pydantic schema so it's clean JSON
-        # for the Node.js script.
+        db.expire_all()
+        session = db.query(AssessmentSession).filter(
+            AssessmentSession.id == session_id
+        ).first()
+
+        ai_sections = _format_ai_report_for_response(ai_report, db)
+        basic_payload = _build_basic_report_payload(session, db)
+        static_sections = [
+            s for s in basic_payload["sections"]
+            if s["section_code"] in ("LETTER", "DEF")
+        ]
+
+        report_payload = {
+            "session": session,
+            "user": basic_payload["user"],
+            "form": basic_payload["form"],
+            "sections": static_sections + ai_sections,
+        }
+
         report_out = SessionReportOut(**report_payload)
         report_json = report_out.model_dump(mode="json")
-        
+
         try:
             pdf_bytes = generate_pdf_from_report_data(report_json)
         except Exception as e:
-            print(f"Failed to generate PDF: {e}")
-            pdf_bytes = b"" # Fallback: send email without PDF if generation fails
-            
+            print(f"Failed to generate PDF for session {session_id}: {e}")
+            return
+
         send_report_email_with_pdf(user_email, user_name, session_id, pdf_bytes)
 
     except Exception as e:
@@ -598,7 +720,7 @@ async def generate_and_email_pdf_task(session_id: int, user_email: str, user_nam
 def generate_ai_report_cache_task(session_id: int):
     db = SessionLocal()
     try:
-        ensure_ai_report_cached(session_id, db)
+        ensure_ai_report_cached(session_id, db, wait=False)
     finally:
         db.close()
 
@@ -691,31 +813,6 @@ def start_or_resume_session(
         current_user.deletion_scheduled_at = now + timedelta(hours=12)
     _log_activity(db, session.id, SessionActivityAction.SESSION_START)
     db.commit()
-    return session
-
-@router.post("/")
-async def create_session(
-    session_data: SessionCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Create a new session."""
-    
-    session = Session(
-        user_id=current_user.id,
-        form_id=session_data.form_id,
-        # ... existing session fields ...
-    )
-    db.add(session)
-    db.commit()
-    
-    # NEW: Start single-use clock
-    if current_user.is_single_use and not current_user.assessment_started_at:
-        current_user.assessment_started_at = datetime.utcnow()
-        current_user.deletion_scheduled_at = datetime.utcnow() + timedelta(hours=12)
-        db.commit()
-    
-    db.refresh(session)
     return session
 
 @router.get("/me", response_model=list[SessionOut])
@@ -833,7 +930,7 @@ def submit_session(
     db.refresh(session)
 
     calculate_and_store_scores(session_id, db)
-    background_tasks.add_task(generate_ai_report_cache_task, session.id)
+    
 
         # --- Phase 2: Duplicates, single-use lock, and email ---
     from app.services.duplicate_service import check_and_flag_duplicates, register_applicant
@@ -875,13 +972,30 @@ def submit_session(
         )
         db.commit()
 
-    background_tasks.add_task(generate_and_email_pdf_task, session.id, current_user.email, current_user.name)
+    response_payload = {
+        "id": session.id,
+        "user_id": session.user_id,
+        "user_name": session.user_name,
+        "form_id": session.form_id,
+        "form_name": session.form_name,
+        "status": session.status.value if hasattr(session.status, "value") else session.status,
+        "submitted_at": session.submitted_at,
+        "auto_logout": auto_logout,
+    }
+    task_session_id = session.id
+    task_user_email = current_user.email
+    task_user_name = current_user.name
 
-    setattr(session, "auto_logout", auto_logout)
-    return session
+
+    background_tasks.add_task(
+        generate_and_email_pdf_task,
+        task_session_id,
+        task_user_email,
+        task_user_name,
+    )
+
+    return response_payload
     
-
-
 
 @router.get("/{session_id}/scores", response_model=list[SectionScoreOut])
 def get_session_scores(
@@ -1004,6 +1118,19 @@ def delete_session(
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
+    # 1. Get registry entries for this session
+    registry_entries = db.query(ApplicantRegistry).filter(
+        ApplicantRegistry.session_id == session_id
+    ).all()
+    registry_ids = [r.id for r in registry_entries]
+
+    # 2. Delete DuplicateFlag rows referencing those registry entries as "prior"
+    if registry_ids:
+        db.query(DuplicateFlag).filter(
+            DuplicateFlag.prior_registry_id.in_(registry_ids)
+        ).delete(synchronize_session=False)
+
+    # 3. Now safe to delete session (CASCADE handles the rest)
     db.delete(session)
     db.commit()
 
@@ -1373,7 +1500,6 @@ def resend_report_email(
     if not user:
         raise HTTPException(status_code=404, detail="Associated user not found")
 
-    from app.services.email_service import send_report_email_with_pdf
-    background_tasks.add_task(send_report_email_with_pdf, user.email, user.name, session.id, b'')
+    background_tasks.add_task(generate_and_email_pdf_task,session.id,user.email,user.name)
     
     return {"message": "Report email queued for delivery."}

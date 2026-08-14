@@ -11,6 +11,7 @@ import {
   AuditLog,
   createSingleUseUser,
   unlockSingleUseUser,
+  cleanupSingleUseUsers,
 } from '../api/users'
 import { listSessions, Session } from '../api/sessions'
 import { ApiError } from '../api/client'
@@ -48,6 +49,9 @@ export default function UsersPage() {
   const [creatingSingleUse, setCreatingSingleUse] = useState(false)
   const [singleUseError, setSingleUseError] = useState<string | null>(null)
   const [singleUseSuccess, setSingleUseSuccess] = useState<string | null>(null)
+  const [cleanupRunning, setCleanupRunning] = useState(false)
+  const [cleanupMessage, setCleanupMessage] = useState<string | null>(null)
+  const [cleanupError, setCleanupError] = useState<string | null>(null)
 
   const [unlockingUserId, setUnlockingUserId] = useState<number | null>(null)
   const [unlockError, setUnlockError] = useState<{ id: number; message: string } | null>(null)
@@ -142,7 +146,7 @@ export default function UsersPage() {
     }
   }
 
-    async function handleCreateSingleUse(e: FormEvent) {
+  async function handleCreateSingleUse(e: FormEvent) {
     e.preventDefault()
     setSingleUseError(null)
     setSingleUseSuccess(null)
@@ -163,6 +167,24 @@ export default function UsersPage() {
       setSingleUseError(err instanceof ApiError ? err.message : 'Failed to create single-use user.')
     } finally {
       setCreatingSingleUse(false)
+    }
+  }
+
+  async function handleCleanupSingleUse() {
+    setCleanupRunning(true)
+    setCleanupMessage(null)
+    setCleanupError(null)
+
+    try {
+      const result = await cleanupSingleUseUsers()
+      setCleanupMessage(
+        `Cleanup complete: checked ${result.checked}, deleted ${result.deleted}, skipped ${result.skipped}.`
+      )
+      await loadData()
+    } catch (err) {
+      setCleanupError(err instanceof ApiError ? err.message : 'Failed to run single-use cleanup.')
+    } finally {
+      setCleanupRunning(false)
     }
   }
 
@@ -511,9 +533,19 @@ export default function UsersPage() {
           onSubmit={handleCreateSingleUse}
           className="bg-white shadow rounded-lg p-6 space-y-4 dark:bg-gray-800 dark:border dark:border-gray-700"
         >
-          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">
-            Create a single-use candidate
-          </h2>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">
+              Create a single-use candidate
+            </h2>
+            <button
+              type="button"
+              onClick={handleCleanupSingleUse}
+              disabled={cleanupRunning}
+              className="border border-red-300 text-red-700 rounded px-3 py-1.5 text-xs font-medium hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-900/30 disabled:opacity-50"
+            >
+              {cleanupRunning ? 'Running cleanup...' : 'Run Expired Cleanup'}
+            </button>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -553,6 +585,8 @@ export default function UsersPage() {
 
           {singleUseError && <p className="text-sm text-red-600 dark:text-red-300">{singleUseError}</p>}
           {singleUseSuccess && <p className="text-sm text-green-600 dark:text-green-300">{singleUseSuccess}</p>}
+          {cleanupError && <p className="text-sm text-red-600 dark:text-red-300">{cleanupError}</p>}
+          {cleanupMessage && <p className="text-sm text-green-600 dark:text-green-300">{cleanupMessage}</p>}
 
           <button
             type="submit"

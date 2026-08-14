@@ -37,6 +37,19 @@ export async function unlockSingleUseUser(id: number): Promise<User> {
     method: 'POST',
   })
 }
+
+export interface SingleUseCleanupResult {
+  checked: number
+  deleted: number
+  skipped: number
+  warnings: string[]
+}
+
+export async function cleanupSingleUseUsers(): Promise<SingleUseCleanupResult> {
+  return apiRequest<SingleUseCleanupResult>('/users/single-use/cleanup', {
+    method: 'POST',
+  })
+}
 /**
  * Admin-only: list all users.
  */

@@ -16,6 +16,7 @@ from app.auth import require_admin, get_current_user
 import secrets
 from app.schemas import SingleUseUserCreate
 from app.services.email_service import send_single_use_invitation_email
+from app.services.single_use_cleanup import cleanup_expired_single_use_accounts
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -331,6 +332,17 @@ async def create_single_use_user(
     
     # Return user (NOT password)
     return new_user
+
+
+@router.post("/single-use/cleanup")
+def cleanup_single_use_users(
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """
+    Admin-only: manually run expired single-use account cleanup.
+    """
+    return cleanup_expired_single_use_accounts(db)
 
 @router.post("/{user_id}/single-use/unlock", response_model=UserOut)
 async def unlock_single_use_user(

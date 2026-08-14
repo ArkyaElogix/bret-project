@@ -55,6 +55,11 @@ class SessionStatus(str, enum.Enum):
     in_progress = "in_progress"
     submitted = "submitted"
 
+class ReportStatus(str, enum.Enum):
+    not_started = "not_started"
+    generating = "generating"
+    complete = "complete"
+    failed = "failed"
 
 class AccountType(str, enum.Enum):
     BASIC = "BASIC"
@@ -270,6 +275,19 @@ class AssessmentSession(Base):
     section_scores = relationship(
         "SectionScore", back_populates="session", cascade="all, delete-orphan"
     )
+    activity_logs = relationship(
+        "SessionActivityLog",
+        back_populates="session",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+    duplicate_flags = relationship(
+        "DuplicateFlag",
+        foreign_keys="DuplicateFlag.new_session_id",
+        back_populates="new_session",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
     expires_at = Column(DateTime, nullable=True)
     prior_attempt_claimed = Column(Boolean, nullable=False, default=False)
     prior_attempt_details = Column(Text, nullable=True)
@@ -280,7 +298,14 @@ class AssessmentSession(Base):
     @property
     def form_name(self) -> str:
         return self.form.name if self.form else "Unknown Assessment"
-
+    report_status = Column(
+        Enum(ReportStatus),
+        nullable=False,
+        default=ReportStatus.not_started,
+    )
+    report_started_at = Column(DateTime, nullable=True)
+    report_completed_at = Column(DateTime, nullable=True)
+    report_error = Column(Text, nullable=True)
 # Add enum to the top imports if not present
 # import enum
 
@@ -301,8 +326,7 @@ class SessionActivityLog(Base):
     detail     = Column(Text, nullable=True)  # JSON blob
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
-    session = relationship("AssessmentSession", backref="activity_logs")
-
+    session = relationship("AssessmentSession", back_populates="activity_logs")
 
 class Response(Base):
     __tablename__ = "responses"
@@ -428,18 +452,26 @@ class ApplicantRegistry(Base):
     # Original user ID is kept even after the user is anonymized (no ForeignKey)
     original_user_id = Column(Integer, nullable=False)
     
-    session_id = Column(Integer, ForeignKey("assessment_sessions.id"), nullable=False)
+    session_id = Column(
+        Integer,
+        ForeignKey("assessment_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    session = relationship("AssessmentSession", foreign_keys=[session_id])
+    session = relationship("AssessmentSession", foreign_keys=[session_id], passive_deletes=True)
 
 class DuplicateFlag(Base):
     __tablename__ = "duplicate_flags"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    new_session_id = Column(Integer, ForeignKey("assessment_sessions.id"), nullable=False)
+    new_session_id = Column(
+        Integer,
+        ForeignKey("assessment_sessions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     new_user_id = Column(Integer, nullable=False)
-    prior_registry_id = Column(Integer, ForeignKey("applicant_registry.id"), nullable=False)
+    prior_registry_id = Column(Integer, ForeignKey("applicant_registry.id", ondelete="SET NULL"), nullable=True)
     prior_session_id = Column(Integer, nullable=False)
     
     match_type = Column(Enum(MatchType), nullable=False)
@@ -451,5 +483,9 @@ class DuplicateFlag(Base):
     review_note = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    new_session = relationship("AssessmentSession", foreign_keys=[new_session_id])
+    new_session = relationship(
+        "AssessmentSession",
+        foreign_keys=[new_session_id],
+        back_populates="duplicate_flags",
+    )
     prior_registry = relationship("ApplicantRegistry", foreign_keys=[prior_registry_id])
