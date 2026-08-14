@@ -211,7 +211,7 @@ What this factor measures: {angle}
 
 Rules:
 - Maximum {max_words} words. This is a hard limit, not a target.
-- Exactly 1-2 short sentences.
+- Exactly 3-4 short sentences.
 - Second person ("You..."), plain everyday language, no jargon.
 - Base the tone strictly on the score_label given above (do not invent a
   different intensity).
@@ -249,7 +249,7 @@ Scores (factor_name, score out of 5): {json.dumps([{'factor_name': s['factor_nam
 
 Rules:
 - Maximum 45 words. Hard limit.
-- 2 sentences only.
+- Max 5 sentences.
 - Start with the candidate's first name.
 - Plain, clear language. No metaphors, no flowery phrasing.
 - Reflect the actual relative scores given (higher score = stronger pull),
@@ -259,7 +259,7 @@ Rules:
         composite_text = self._call(
             system="You write concise, plain-language behavioral summaries. You never exceed the requested word limit.",
             user=composite_prompt,
-            max_tokens=90,
+            max_tokens=130,
             temperature=0.6,
         )
 
@@ -313,8 +313,8 @@ adapts to change and new environments.
 Scores (factor_name, score out of 5): {json.dumps([{'factor_name': s['factor_name'], 'score': s['score']} for s in section_b_scores])}
 
 Rules:
-- Maximum 60 words. Hard limit.
-- 2 sentences only.
+- Maximum 120 words. Hard limit.
+- Max 5 sentences.
 - Plain, clear language, no metaphors.
 - Base the description strictly on the relative scores given.
 """.strip()
@@ -322,7 +322,7 @@ Rules:
         composite_text = self._call(
             system="You write concise, plain-language behavioral summaries about adaptability to change. You never exceed the requested word limit.",
             user=composite_prompt,
-            max_tokens=90,
+            max_tokens=120,
             temperature=0.6,
         )
 
@@ -376,8 +376,8 @@ communication style -- how they connect with and influence others.
 Scores (factor_name, score out of 5): {json.dumps([{'factor_name': s['factor_name'], 'score': s['score']} for s in section_c_scores])}
 
 Rules:
-- Maximum 60 words. Hard limit.
-- 2 sentences only.
+- Maximum 120 words. Hard limit.
+- Max 5 sentences.
 - Plain, clear language, no metaphors.
 - Base the description strictly on the relative scores given.
 """.strip()
@@ -385,7 +385,7 @@ Rules:
         composite_text = self._call(
             system="You write concise, plain-language summaries of communication style. You never exceed the requested word limit.",
             user=composite_prompt,
-            max_tokens=90,
+            max_tokens=120,
             temperature=0.6,
         )
 
@@ -434,8 +434,8 @@ leadership, team, motivation, change, stress.
 Scores: {json.dumps(all_scores)}
 
 Rules for EACH insight:
-- Maximum 80 words. Hard limit.
-- 3-4 sentences max.
+- Maximum 120 words. Hard limit.
+- 5-6 sentences max.
 - Plain language, no jargon, do not restate raw scores as numbers.
 - Refer to "you", not the candidate's name.
 
@@ -446,7 +446,7 @@ motivation, change, stress. Each value is a single short string.
         raw = self._call(
             system="You write short, plain-language behavioral insights and always return valid JSON matching the requested schema exactly.",
             user=orientation_prompt,
-            max_tokens=220,
+            max_tokens=300,
             temperature=0.6,
             json_mode=True,
         )
@@ -545,16 +545,16 @@ Scores: {json.dumps(all_scores)}
 Return ONLY a JSON object with exactly this shape:
 
 {{
-  "focus_areas": [list of exactly 3 short phrases, each 15 words or fewer],
+  "focus_areas": [list of exactly 3 short phrases, each 30 words or fewer],
   "roadmap": {{
-    "30": "one short action, maximum 40 words",
-    "60": "one short action, maximum 40 words",
-    "90": "one short action, maximum 40 words"
+    "30": "one short action, maximum 80 words",
+    "60": "one short action, maximum 80 words",
+    "90": "one short action, maximum 80 words"
   }},
   "ssc": {{
-    "start": "one short action to start, maximum 25 words",
-    "stop": "one short behavior to stop, maximum 25 words",
-    "continue": "one short behavior to continue, maximum 25 words"
+    "start": "one short action to start, maximum 40 words",
+    "stop": "one short behavior to stop, maximum 40 words",
+    "continue": "one short behavior to continue, maximum 40 words"
   }}
 }}
 
