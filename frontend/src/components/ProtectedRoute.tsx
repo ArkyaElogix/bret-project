@@ -44,6 +44,7 @@ import {
   getAuthChangeEventName,
   getRoleFromToken,
   isTokenValid,
+  requiresProfileCompletion,
 } from '../api/client'
 import { getMe } from '../api/auth'
 
@@ -125,9 +126,13 @@ export function UserRoute({ children }: { children: React.ReactNode }) {
   if (allowed === null) return null
   if (!allowed) return <Navigate to="/login" replace />
 
-  return <>{children}</>
-}
+  if (
+    requiresProfileCompletion() &&
+    window.location.pathname !== '/portal' &&
+    !window.location.pathname.startsWith('/complete-registration/')
+  ) {
+    return <Navigate to="/portal" replace />
+  }
 
-export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  return <UserRoute>{children}</UserRoute>
+  return <>{children}</>
 }

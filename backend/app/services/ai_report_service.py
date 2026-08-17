@@ -16,9 +16,6 @@ class AIReportService:
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model = "gpt-4o-mini"
 
-    # ------------------------------------------------------------------
-    # Entry point
-    # ------------------------------------------------------------------
     def generate_report(self, session_id: int, db: Session) -> Dict[str, Any]:
         """Generate AI-powered report for a completed session."""
 
@@ -33,9 +30,6 @@ class AIReportService:
         report = self._generate_sections(context)
         return report
 
-    # ------------------------------------------------------------------
-    # Context building (unchanged logic, just tidied)
-    # ------------------------------------------------------------------
     def _build_context(self, session_id: int, db: Session) -> Dict[str, Any]:
         """Build comprehensive context for AI to generate report."""
 
@@ -112,7 +106,6 @@ class AIReportService:
         return context
 
     def _analyze_scores(self, scores: List[Dict]) -> Dict:
-        """Analyze score patterns for AI context."""
         summary = {
             "highest_scoring_factors": [],
             "lowest_scoring_factors": [],
@@ -146,32 +139,30 @@ class AIReportService:
 
         return summary
 
-    # ------------------------------------------------------------------
-    # Section orchestration
-    # ------------------------------------------------------------------
     def _generate_sections(self, context: Dict) -> Dict[str, Any]:
         """Generate all sections using the available methods."""
 
         section_a = [s for s in context["scores"] if s["section_code"] == "A"]
 
+        product_type = str(context.get("candidate", {}).get("product_type", "")).upper()
+
+        orientation_insights = {}
+        if product_type != "BASIC":
+            orientation_insights = self._generate_orientation_insights(context)
+
         report = {
             "drives_profile": self._generate_drives_profile_with_template(context, section_a),
             "conditioning_profile": self._generate_conditioning_profile(context),
             "communication_profile": self._generate_communication_profile(context),
-            "orientation_insights": self._generate_orientation_insights(context),
+            "orientation_insights": orientation_insights,
             "overall_observations": self._generate_overall_observations(context),
             "action_agenda": self._generate_action_agenda(context)
         }
 
         return report
 
-    # ------------------------------------------------------------------
-    # Shared helpers
-    # ------------------------------------------------------------------
     def _call(self, system: str, user: str, max_tokens: int, temperature: float,
                json_mode: bool = False) -> str:
-        """Single place to call the completions API so token/temperature
-        discipline is consistent everywhere."""
         kwargs = dict(
             model=self.model,
             messages=[
@@ -190,17 +181,6 @@ class AIReportService:
     @staticmethod
     def _factor_prompt(factor_name: str, score: int, score_label: str, max_words: int,
                         angle: str) -> str:
-        """
-        Generic, name-agnostic template for a single factor description.
-
-        IMPORTANT: this deliberately contains NO example text tied to real
-        factor names (Altruistic/Emotional/Power/etc). Earlier versions of
-        this prompt included concrete "Altruistic (Moderate): ..." style
-        examples as few-shot guidance, and the model was pattern-matching
-        against that fixed example content rather than the actual factor
-        name + score passed in below -- causing descriptions to bleed
-        across unrelated factors. Keep this generic.
-        """
         return f"""
 Write a short behavioral description for exactly ONE factor. Do not mention
 or reference any other factor.
@@ -219,7 +199,6 @@ Rules:
 """.strip()
 
     def _get_score_label(self, score: int) -> str:
-        """Convert numeric score to label."""
         labels = {
             5: "Very Strong",
             4: "Strong",
@@ -230,12 +209,7 @@ Rules:
         }
         return labels.get(score, "Moderate")
 
-    # ------------------------------------------------------------------
-    # Drives Profile (Section A)
-    # ------------------------------------------------------------------
     def _generate_drives_profile_with_template(self, context: Dict, scores: List) -> Dict:
-        """Generate drives profile with concise, template-driven text."""
-
         if not scores:
             return {}
 
@@ -293,11 +267,7 @@ Rules:
             "factors": factor_descriptions
         }
 
-    # ------------------------------------------------------------------
-    # Conditioning Profile (Section B)
-    # ------------------------------------------------------------------
     def _generate_conditioning_profile(self, context: Dict) -> Dict:
-        """Generate the conditioning (Section B) profile."""
         section_b_scores = [
             s for s in context["scores"]
             if s["section_name"] == "Conditioned"
@@ -356,11 +326,7 @@ Rules:
             "factors": factor_descriptions
         }
 
-    # ------------------------------------------------------------------
-    # Communication Profile (Section C)
-    # ------------------------------------------------------------------
     def _generate_communication_profile(self, context: Dict) -> Dict:
-        """Generate the communication (Section C) profile."""
         section_c_scores = [
             s for s in context["scores"]
             if s["section_name"] == "Learned"
@@ -419,62 +385,113 @@ Rules:
             "factors": factor_descriptions
         }
 
-    # ------------------------------------------------------------------
-    # Orientation insights
-    # ------------------------------------------------------------------
-    def _generate_orientation_insights(self, context: Dict) -> Dict[str, str]:
-        """Generate short orientation insights (Leadership, Team, Motivation, etc.)."""
+    def _generate_orientation_insights(self, context: Dict) -> Dict[str, Dict[str, str]]:
+        """Generate short orientation insights with style label + body text."""
 
         all_scores = context["scores"]
 
         orientation_prompt = f"""
-Based on the assessment scores below, write ONE short insight for each of:
+Based on the assessment scores below, write one short insight for each of:
 leadership, team, motivation, change, stress.
 
 Scores: {json.dumps(all_scores)}
 
 Rules for EACH insight:
-- Maximum 120 words. Hard limit.
-- 5-6 sentences max.
-- Plain language, no jargon, do not restate raw scores as numbers.
+- Return a JSON object with exactly these keys: leadership, team, motivation, change, stress.
+- Each value must be an object with exactly two keys:
+  1) "label": a short style label, 2-5 words, plain language
+  2) "body": a single short paragraph, maximum 120 words, 3-5 sentences
+- Body must be plain language, no jargon, no raw numbers.
 - Refer to "you", not the candidate's name.
+- Keep each body text grounded in the score patterns, not generic filler.
 
-Return ONLY a JSON object with exactly these keys: leadership, team,
-motivation, change, stress. Each value is a single short string.
+Return ONLY valid JSON.
 """.strip()
 
         raw = self._call(
             system="You write short, plain-language behavioral insights and always return valid JSON matching the requested schema exactly.",
             user=orientation_prompt,
-            max_tokens=300,
+            max_tokens=350,
             temperature=0.6,
             json_mode=True,
         )
 
+        def normalize_entry(key: str, default_label: str, default_body: str) -> Dict[str, str]:
+            try:
+                payload = json.loads(raw)
+            except Exception:
+                payload = {}
+
+            item = payload.get(key, {})
+            if isinstance(item, dict):
+                label = str(item.get("label") or default_label).strip()
+                body = str(item.get("body") or default_body).strip()
+            elif isinstance(item, str):
+                label = default_label
+                body = item.strip() or default_body
+            else:
+                label = default_label
+                body = default_body
+
+            return {
+                "label": label[:60],
+                "body": body[:500]
+            }
+
         try:
             data = json.loads(raw)
             return {
-                "leadership": data.get("leadership", "Leads in a way that reflects your overall behavioral pattern."),
-                "team": data.get("team", "Engages with teams in a way that reflects your overall behavioral pattern."),
-                "motivation": data.get("motivation", "Motivated by goals that align with your top-scoring drives."),
-                "change": data.get("change", "Adapts to change at a pace shaped by your conditioning scores."),
-                "stress": data.get("stress", "Manages stress in a way shaped by your overall profile."),
+                "leadership": normalize_entry(
+                    "leadership",
+                    "Leadership Style",
+                    "Your leadership style is shaped by a clear mix of instinct and awareness. You tend to lead with intention when the goal is clear, and you can adjust your approach when the situation calls for more support or more direction."
+                ),
+                "team": normalize_entry(
+                    "team",
+                    "Team Orientation",
+                    "You connect with people in a balanced way, and your team presence depends on the setting. You are generally thoughtful and collaborative, but you can become more effective when you speak up early and make your preferences clear."
+                ),
+                "motivation": normalize_entry(
+                    "motivation",
+                    "Motivation Driver",
+                    "Your motivation is strongest when the work lines up with purpose, momentum, and personal meaning. You tend to stay engaged when goals feel relevant and when your effort leads to visible progress."
+                ),
+                "change": normalize_entry(
+                    "change",
+                    "Change Driver",
+                    "You respond to change best when it feels manageable and clear. You adapt through observation and gradual adjustment, and you are more effective when transitions come with enough context and support."
+                ),
+                "stress": normalize_entry(
+                    "stress",
+                    "Stress Response",
+                    "You handle pressure in a way shaped by your habits and defaults. Under stress, you may become more guarded or more internally focused, so steady reflection and a small reset routine help you stay effective."
+                )
             }
         except Exception:
             return {
-                "leadership": "Demonstrates a balanced leadership approach.",
-                "team": "Collaborative team orientation.",
-                "motivation": "Driven by meaningful objectives.",
-                "change": "Adaptable to change.",
-                "stress": "Manages stress effectively."
+                "leadership": {
+                    "label": "Leadership Style",
+                    "body": "You lead with a balanced mix of awareness and deliberate action. You tend to bring clarity and calm when the situation is uncertain, and your strongest leadership comes when your direction is grounded in purpose."
+                },
+                "team": {
+                    "label": "Team Orientation",
+                    "body": "You work well with others when there is trust and open communication. You tend to be thoughtful and collaborative, and you typically add value by listening carefully before making your own mark."
+                },
+                "motivation": {
+                    "label": "Motivation Driver",
+                    "body": "You are most motivated by work that has clear meaning and visible progress. When the goal feels relevant and energizing, you become more focused and resilient."
+                },
+                "change": {
+                    "label": "Change Driver",
+                    "body": "You adapt to change through observation and gradual adjustment. You tend to do best when there is enough information and a measured pace, which helps you stay steady while you transition."
+                },
+                "stress": {
+                    "label": "Stress Response",
+                    "body": "You manage pressure by relying on your internal pattern and your usual coping style. A short pause, a clear next step, and a calm reset tend to help you stay effective under strain."
+                }
             }
 
-    # ------------------------------------------------------------------
-    # Overall observations
-    # ------------------------------------------------------------------
     def _generate_overall_observations(self, context: Dict) -> Dict:
-        """Generate overall observations and key takeaways -- short and scannable."""
-
         all_scores = context["scores"]
         summary = context["score_summary"]
 
@@ -519,22 +536,7 @@ Return ONLY a JSON object with exactly these keys:
                 ]
             }
 
-    # ------------------------------------------------------------------
-    # Action agenda / IDP
-    # ------------------------------------------------------------------
     def _generate_action_agenda(self, context: Dict) -> Dict:
-        """
-        Generate a short, scannable development agenda.
-
-        NOTE on schema: the frontend (SessionReportPage.tsx) reads
-        roadmap['30'], roadmap['60'], roadmap['90'] as plain strings, and
-        ssc.start / ssc.stop / ssc['continue'] as plain strings. Earlier
-        prompts asked for "30_days"/"60_days"/"90_days" keys containing
-        arrays of {action, goal} objects, and ssc as arrays -- neither
-        matches what the UI reads, which is why those cards were rendering
-        oddly. Keep the keys and value types below exactly as specified.
-        """
-
         all_scores = context["scores"]
 
         prompt = f"""

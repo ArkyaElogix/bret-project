@@ -70,8 +70,6 @@ def calculate_and_store_scores(session_id: int, db: Session) -> list[SectionScor
         db.add(score_row)
         results.append(score_row)
 
-    db.commit()
-    for r in results:
-        db.refresh(r)
+    db.flush()
     return results
 

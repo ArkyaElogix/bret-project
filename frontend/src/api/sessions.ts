@@ -154,6 +154,20 @@ export interface ReportSection {
   factors: ReportFactor[];
 }
 
+export interface OrientationInsight {
+  label: string;
+  body: string;
+}
+
+export type OrientationInsightMap = {
+  [key: string]: OrientationInsight | string | undefined;
+  leadership?: OrientationInsight | string;
+  team?: OrientationInsight | string;
+  motivation?: OrientationInsight | string;
+  change?: OrientationInsight | string;
+  stress?: OrientationInsight | string;
+};
+
 export interface SessionReport {
   session: Session;
   user: { name: string; product_type: string };

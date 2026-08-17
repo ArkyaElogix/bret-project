@@ -16,7 +16,7 @@ from typing import Any, Dict, List
 from datetime import datetime, timedelta
 from app.services.ai_report_service import AIReportService
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import update
 from sqlalchemy.exc import DatabaseError
 from app.database import get_db, SessionLocal
@@ -421,7 +421,34 @@ REPORT_WAIT_POLL_SECONDS = float(os.getenv("REPORT_WAIT_POLL_SECONDS", "1.5"))
 
 
 def _claim_report_generation(session_id: int, db: Session, *, force: bool = False) -> str:
+    """
+    Idempotent report generation claim.
+    One caller claims generation. Other callers either return cached data or see it's generating.
+    Returns: "claimed", "complete", "generating", "unavailable"
+    """
     now = datetime.utcnow()
+
+    db.rollback()
+    db.expire_all()
+
+    session = db.query(AssessmentSession).filter(
+        AssessmentSession.id == session_id
+    ).first()
+
+    if not session:
+        return "unavailable"
+
+    if session.status != SessionStatus.submitted:
+        return "unavailable"
+
+    if session.ai_report_data and session.report_status == ReportStatus.complete:
+        return "complete"
+
+    if session.report_status == ReportStatus.generating:
+        return "generating"
+
+    if session.report_status == ReportStatus.failed and not force:
+        return "unavailable"
 
     try:
         if force:
@@ -453,39 +480,19 @@ def _claim_report_generation(session_id: int, db: Session, *, force: bool = Fals
                     report_error=None,
                 )
             )
-
         result = db.execute(stmt)
         db.commit()
 
         if result.rowcount == 1:
             return "claimed"
 
+        db.rollback()
+        return "generating"
+
     except DatabaseError as e:
         db.rollback()
         print(f"Report claim failed for session {session_id}: {e}")
         return "generating"
-
-    db.rollback()
-    db.expire_all()
-
-    session = db.query(AssessmentSession).filter(
-        AssessmentSession.id == session_id
-    ).first()
-    db.commit()
-
-    if not session or session.status != SessionStatus.submitted:
-        return "unavailable"
-
-    if session.ai_report_data and session.report_status == ReportStatus.complete:
-        return "complete"
-
-    if session.report_status == ReportStatus.generating:
-        return "generating"
-
-    if session.report_status == ReportStatus.failed:
-        return "unavailable"
-
-    return "unavailable"
 
 def _wait_for_cached_ai_report(session_id: int, db: Session, timeout_seconds: int) -> dict | None:
     deadline = time.monotonic() + timeout_seconds
@@ -683,7 +690,9 @@ async def generate_and_email_pdf_task(session_id: int, user_email: str, user_nam
             return
 
         db.expire_all()
-        session = db.query(AssessmentSession).filter(
+        session = db.query(AssessmentSession).options(
+            joinedload(AssessmentSession.user)
+        ).filter(
             AssessmentSession.id == session_id
         ).first()
 
@@ -926,8 +935,6 @@ def submit_session(
     session.status = SessionStatus.submitted
     session.submitted_at = datetime.utcnow()
     _log_activity(db, session_id, SessionActivityAction.SESSION_SUBMIT)
-    db.commit()
-    db.refresh(session)
 
     calculate_and_store_scores(session_id, db)
     
@@ -945,7 +952,6 @@ def submit_session(
             detail=json.dumps({"flag_count": len(flags), "phase": "submit_session"}),
         )
         db.add(audit)
-        db.commit()
 
     existing_registry = (
         db.query(ApplicantRegistry)
@@ -970,7 +976,9 @@ def submit_session(
                 detail=json.dumps({"event": "submission_locked_account", "session_id": session.id}),
             )
         )
-        db.commit()
+
+    db.commit()
+    db.refresh(session)
 
     response_payload = {
         "id": session.id,
@@ -1209,7 +1217,8 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
         sections.append(section)
     
     # Add orientation insights
-    orientation = ai_report.get("orientation_insights", {})
+        # Add orientation insights
+    orientation = ai_report.get("orientation_insights", {}) or {}
     if orientation:
         orientations_section = {
             "section_id": 0,
@@ -1217,17 +1226,30 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
             "section_name": "Orientation Insights",
             "factors": []
         }
+
         for key, value in orientation.items():
+            if isinstance(value, dict):
+                label = str(value.get("label") or key.replace("_", " ").title()).strip()
+                body = str(value.get("body") or "").strip()
+            else:
+                label = str(key.replace("_", " ").title()).strip()
+                body = str(value or "").strip()
+
+            if not body:
+                continue
+
             orientations_section["factors"].append({
                 "factor_id": 0,
-                "factor_name": key.replace("_", " ").title(),
+                "factor_name": label,
                 "raw_score": 0,
                 "score": 0,
                 "score_label": None,
-                "statement_title": f"{key.replace('_', ' ').title()} Orientation",
-                "statement": value
+                "statement_title": label,
+                "statement": body
             })
-        sections.append(orientations_section)
+
+        if orientations_section["factors"]:
+            sections.append(orientations_section)
     
     # Add overall observations
     observations = ai_report.get("overall_observations", {})

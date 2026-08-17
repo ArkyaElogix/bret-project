@@ -374,6 +374,86 @@ export const styles = StyleSheet.create({
     lineHeight: 1.6,
     color: colors.slate600,
   },
+
+    orientationPage: {
+    backgroundColor: '#f7fbff',
+    padding: 0,
+  },
+  orientationHeaderBar: {
+    backgroundColor: '#1f5eff',
+    height: 42,
+    paddingHorizontal: 22,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  orientationHeaderBadge: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  orientationBody: {
+    flexDirection: 'row',
+    gap: 18,
+    padding: 26,
+    flex: 1,
+    alignItems: 'stretch',
+  },
+  orientationContent: {
+    flex: 1.4,
+    justifyContent: 'flex-start',
+  },
+  orientationTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  orientationIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#1b4fd8',
+  },
+  orientationTitle: {
+    fontSize: 28,
+    fontWeight: 700,
+    color: '#0f172a',
+  },
+  orientationSubtitle: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: '#0f172a',
+    marginBottom: 12,
+  },
+  orientationDivider: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#dfe7f5',
+    marginBottom: 18,
+  },
+  orientationTextBox: {
+    backgroundColor: '#eaf3ff',
+    borderRadius: 12,
+    padding: 18,
+    minHeight: 180,
+  },
+  orientationText: {
+    fontSize: 13,
+    lineHeight: 1.7,
+    color: '#1e293b',
+  },
+  orientationImageWrap: {
+    width: 220,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  orientationImage: {
+    width: 220,
+    height: 220,
+    borderRadius: 16,
+    backgroundColor: '#dbeafe',
+  },
   pageFooter: {
     position: 'absolute',
     bottom: 16,

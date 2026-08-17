@@ -1,12 +1,32 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getSessionReport, type ReportFactor, type ReportSection, type SessionReport } from '../api/sessions';
+import { getSessionReport, type ReportFactor, type ReportSection, type SessionReport, type OrientationInsightMap } from '../api/sessions';
 import './report-template.css';
 import { pdf } from '@react-pdf/renderer';
 import { ReportPrintDocument } from './reportPrintDocument';
+import leadershipImage from './images/orientation/Leadership.jpeg';
+import teamImage from './images/orientation/Team.jpeg';
+import motivationImage from './images/orientation/Motivation.jpeg';
+import changeImage from './images/orientation/Change.jpeg';
+import stressImage from './images/orientation/Stress.jpeg';
 
 const SECTION_CODES_WITH_SUMMARY = ['A', 'B', 'C'];
 const BAR_COLORS = ['#1B4FD8', '#14B8A6', '#8B5CF6', '#F59E0B'];
+const ORIENTATION_IMAGE_MAP: OrientationInsightMap = {
+  leadership: leadershipImage,
+  team: teamImage,
+  motivation: motivationImage,
+  change: changeImage,
+  stress: stressImage,
+};
+
+function getOrientationImageSrc(factorName?: string | null): string {
+  const key = (factorName || '').toLowerCase().trim();
+  if (!key) return ORIENTATION_IMAGE_MAP.leadership as string;
+
+  const match = Object.keys(ORIENTATION_IMAGE_MAP).find((name) => key.includes(name));
+  return (match ? ORIENTATION_IMAGE_MAP[match] : ORIENTATION_IMAGE_MAP.leadership) as string;
+}
 
 
 function isCompositeFactor(factor: ReportFactor) {
@@ -178,6 +198,60 @@ async function handleDownloadPdf(report: SessionReport) {
 function parseJsonFactor(statement: string | null | undefined): any {
   if (!statement) return {};
   try { return JSON.parse(statement); } catch { return {}; }
+}
+
+function renderOrientationSection(section: ReportSection, index: number) {
+  const isExecutive =
+    String(section?.section_name || '').toLowerCase() === 'orientation insights'
+      ? true
+      : true;
+
+  if (!isExecutive || !section?.factors?.length) return null;
+
+  return (
+    <section key={index} className="bret-section bret-orientation-section">
+      <h2 className="bret-section-header">Orientation Insights</h2>
+
+      <div className="bret-orientation-grid">
+        {section.factors.map((factor, factorIndex) => {
+          const label = factor.factor_name || 'Orientation Insight';
+          const body = factor.statement || 'No insight available.';
+          const imageSrc = getOrientationImageSrc(label);
+
+          return (
+            <article key={`${index}-${factorIndex}`} className="bret-orientation-card">
+              <div className="bret-orientation-header">
+                <span className="bret-orientation-badge">✦</span>
+                <span className="bret-orientation-title">{label}</span>
+              </div>
+
+              <div className="bret-orientation-body">
+                <div className="bret-orientation-copy">
+                  <div className="bret-orientation-subtitle">
+                    {factor.statement_title || 'Behavioral Insight'}
+                  </div>
+                  <div className="bret-orientation-text-box">
+                    <p>{body}</p>
+                  </div>
+                </div>
+
+                <div className="bret-orientation-image-wrap">
+                  <img
+                    src={imageSrc}
+                    alt={label}
+                    className="bret-orientation-image"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = ORIENTATION_IMAGE_MAP.leadership as string;
+                    }}
+                  />
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
 
 function renderTakeawaysSection(report: SessionReport) {
@@ -402,6 +476,10 @@ function renderFullReport(report: SessionReport) {
   const overallObservations = report.sections.find(
     (section) => section.section_name === 'Overall Observations'
   );
+  const orientationSection = report.sections.find(
+    (section) => section.section_name === 'Orientation Insights'
+  );
+  const isExecutive = String(report.user?.product_type || '').toUpperCase() === 'EXECUTIVE';
 
   return (
     <>
@@ -438,6 +516,7 @@ function renderFullReport(report: SessionReport) {
       {report.sections.map((section, index) => {
         if (section.section_name === 'Discovery Letter') return null;
         if (section.section_name === 'Overall Observations') return null;
+        if (section.section_name === 'Orientation Insights') return null;
 
         if (
           section.section_code === 'DEF' ||
@@ -452,6 +531,12 @@ function renderFullReport(report: SessionReport) {
 
         return null;
       })}
+
+      {isExecutive && orientationSection && (
+        <>
+          {renderOrientationSection(orientationSection, 0)}
+        </>
+      )}
 
       {overallObservations && (
         <section className="bret-section">
@@ -516,7 +601,8 @@ function buildSlides(report: SessionReport): Slide[] {
 
   report.sections.forEach((section, index) => {
     if (section.section_name === 'Discovery Letter') return;
-    if (section.section_name === 'Overall Observations') return; // handled as its own slide below
+    if (section.section_name === 'Overall Observations') return;
+    if (section.section_name === 'Orientation Insights') return;
 
     if (section.section_code === 'DEF' || section.section_name.includes('Definitions')) {
       slides.push({
@@ -535,6 +621,22 @@ function buildSlides(report: SessionReport): Slide[] {
       });
     }
   });
+
+  const orientationSection = report.sections.find((section) => section.section_name === 'Orientation Insights');
+  if (String(report.user?.product_type || '').toUpperCase() === 'EXECUTIVE' && orientationSection && orientationSection.factors?.length) {
+    slides.push({
+      id: 'orientation-insights',
+      label: 'Orientation Insights',
+      node: renderOrientationSection(orientationSection, 0) || (
+        <section className="bret-section">
+          <h2 className="bret-section-header">Orientation Insights</h2>
+          <div className="bret-summary-card">
+            <p>No orientation insight data is available for this profile.</p>
+          </div>
+        </section>
+      ),
+    });
+  }
 
   const overallObservations = report.sections.find((section) => section.section_name === 'Overall Observations');
   if (overallObservations) {

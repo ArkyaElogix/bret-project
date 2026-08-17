@@ -256,7 +256,9 @@ def complete_registration(
     # Audit log
     _write_audit(
         db,
-        AuditAction.SINGLE_USE_CREATED,  # Or a new action if desired
+        AuditAction.SINGLE_USE_REGISTRATION_COMPLETED,
+        user_id=current_user.id,
+        target_user_id= current_user.id,  # Or a new action if desired
         ip= _client_ip(http_request),
         detail={"event": "registration_completed", "session_id": session.id},
     )

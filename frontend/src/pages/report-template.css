@@ -1064,3 +1064,105 @@
     flex-direction: column;
   }
 }
+
+.bret-orientation-section {
+  margin-top: 1rem;
+}
+
+.bret-orientation-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.bret-orientation-card {
+  background: #ffffff;
+  border: 1px solid #dfe7f5;
+  border-radius: 18px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+.bret-orientation-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+}
+
+.bret-orientation-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #eaf3ff;
+  color: #1b4fd8;
+  font-weight: 700;
+}
+
+.bret-orientation-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.bret-orientation-body {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.bret-orientation-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bret-orientation-subtitle {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #1e293b;
+  opacity: 0.8;
+}
+
+.bret-orientation-text-box {
+  background: #eaf3ff;
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 180px;
+}
+
+.bret-orientation-text-box p {
+  margin: 0;
+  color: #1e293b;
+  line-height: 1.75;
+  font-size: 0.97rem;
+}
+
+.bret-orientation-image-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+.bret-orientation-image {
+  width: min(100%, 220px);
+  height: 220px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid #dfe7f5;
+  background: #eef6ff;
+}
+
+@media (max-width: 900px) {
+  .bret-orientation-body {
+    grid-template-columns: 1fr;
+  }
+
+  .bret-orientation-image-wrap {
+    min-height: auto;
+  }
+}
