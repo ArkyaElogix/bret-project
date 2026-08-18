@@ -182,7 +182,7 @@ async function handleDownloadPdf(report: SessionReport) {
         ? 'http://localhost:8000'
         : 'http://192.168.1.103:8000');
 
-    const response = await fetch(`${API_BASE}/api/sessions/${report.session.id}/pdf`, {
+    const response = await fetch(`${API_BASE}/sessions/${report.session.id}/pdf`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
