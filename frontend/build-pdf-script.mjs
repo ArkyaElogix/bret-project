@@ -5,13 +5,19 @@ esbuild.build({
     bundle: true,
     platform: 'node',
     target: 'node20',
-    outfile: 'dist-pdf/renderReport.mjs', // <--- Change extension here
+    outfile: 'dist-pdf/renderReport.mjs',
     external: [
         '@react-pdf/renderer',
         'react',
         'react-dom'
     ],
-    format: 'esm', // <--- Change from 'cjs' to 'esm'
+    // ADD THIS LOADER SECTION:
+    loader: {
+        '.jpeg': 'dataurl',
+        '.jpg': 'dataurl',
+        '.png': 'dataurl'
+    },
+    format: 'esm',
 }).then(() => {
     console.log('PDF render script built to dist-pdf/renderReport.mjs');
 }).catch((err) => {
