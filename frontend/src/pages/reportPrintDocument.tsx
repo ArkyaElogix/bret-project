@@ -180,32 +180,30 @@ function ProfilePage({ section, index }: { section: ReportSection; index: number
   const summary = getSectionSummary(section);
   const realFactors = section.factors.filter((f) => !isCompositeFactor(f));
   const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0 }));
-  // First 2 go right (below composite insight), rest go left (below chart)
-  const rightFactors = realFactors.slice(0, 2);
-  const leftSpillFactors = realFactors.slice(2);
+  // First 2 go left (below the chart), rest go right (below composite insight)
+  const leftFactors = realFactors.slice(0, 2);
+  const rightSpillFactors = realFactors.slice(2);
   return (
     <Page size={PAGE_SIZE} style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.sectionHeader}>{section.section_name}</Text>
 
         <View style={styles.profileLayout}>
-          {/* LEFT COLUMN */}
           <View style={styles.profileLeft}>
             <View style={styles.chartArea}>
               <PdfBarChart data={chartData} />
               <Text style={styles.chartLegend}>Tendency Scale: Low (0-1) • Moderate (2-3) • High (4-5)</Text>
             </View>
-            {leftSpillFactors.map((factor, i) => (
+            {leftFactors.map((factor, i) => (
               <FactorBlock key={`left-${i}`} factor={factor} />
             ))}
           </View>
-          {/* RIGHT COLUMN */}
           <View style={styles.profileRight}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryCardLabel}>Composite Insight</Text>
               <Text style={styles.summaryCardText}>{summary}</Text>
             </View>
-            {rightFactors.map((factor, i) => (
+            {rightSpillFactors.map((factor, i) => (
               <FactorBlock key={`right-${i}`} factor={factor} />
             ))}
           </View>
@@ -318,59 +316,78 @@ function TakeawaysPage({ report, index }: { report: SessionReport; index: number
   const topStrengths = [...allFactors].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 3);
   const devPriorities = [...allFactors].sort((a, b) => (a.score || 0) - (b.score || 0)).slice(0, 4);
 
+  const overflowDevToRight = focusAreaText.length > 200 || devPriorities.length > 4;
+
   return (
-    <>
-      <Page size={PAGE_SIZE} style={styles.page}>
-        <Text style={styles.sectionHeader}>Key Takeaways</Text>
+  <>
+    <Page size={PAGE_SIZE} style={styles.page}>
+      <Text style={styles.sectionHeader}>Key Takeaways</Text>
 
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryCardLabel}>Overall Observations</Text>
-          <Text style={styles.summaryCardText}>{overallObservationsText}</Text>
-        </View>
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryCardLabel}>Overall Observations</Text>
+        <Text style={styles.summaryCardText}>{overallObservationsText}</Text>
+      </View>
 
-        <View style={styles.obsGrid}>
-          <View style={styles.obsCard}>
-            <Text style={styles.obsCardTitle}>Focus Areas</Text>
-            <Text style={[styles.summaryCardText, { fontWeight: 600, fontStyle: 'normal', color: '#1f2937' }]}>
-              {focusAreaText}
-            </Text>
+      <View style={styles.obsGrid}>
+        <View style={styles.obsCard}>
+          <Text style={styles.obsCardTitle}>Focus Areas</Text>
+          <Text style={styles.focusAreaText}>{focusAreaText}</Text>
 
-            <Text style={[styles.obsPill, styles.obsPillTeal]}>Strengths to Leverage</Text>
-            {topStrengths.map((f, i) => (
-              <Text key={i} style={styles.obsListItem}>
-                – {f.factor_name} ({f.score}/5)
-              </Text>
-            ))}
-
-            <Text style={[styles.obsPill, styles.obsPillRose]}>Development Priorities</Text>
-            {devPriorities.map((f, i) => (
-              <Text key={i} style={styles.obsListItem}>
-                – {f.factor_name} ({f.score}/5)
-              </Text>
-            ))}
-          </View>
-
-          <View style={styles.obsCard}>
-            <Text style={styles.obsCardTitle}>90-Day Roadmap</Text>
-            <View style={styles.roadmapRow}>
-              {roadmapPhases.map((phase, i) => (
-                <View key={i} style={[styles.roadmapPhase, phase.style]}>
-                  <Text style={styles.roadmapLabel}>{phase.label}</Text>
-                  {typeof phase.text === 'string' ? (
-                    <Text style={styles.roadmapText}>{phase.text}</Text>
-                  ) : (
-                    <View>
-                      {phase.text.action && <Text style={styles.roadmapText}>Action: {phase.text.action}</Text>}
-                      {phase.text.goal && <Text style={styles.roadmapText}>Goal: {phase.text.goal}</Text>}
-                    </View>
-                  )}
-                </View>
+          <View style={styles.subCardRow}>
+            <View style={[styles.subCard, styles.subCardTeal]}>
+              <Text style={styles.subCardLabel}>Strengths to Leverage</Text>
+              {topStrengths.map((f, i) => (
+                <Text key={i} style={styles.subCardListItem}>
+                  – {f.factor_name} ({f.score}/5)
+                </Text>
               ))}
             </View>
+
+            {!overflowDevToRight && (
+              <View style={[styles.subCard, styles.subCardRose]}>
+                <Text style={styles.subCardLabel}>Development Priorities</Text>
+                {devPriorities.map((f, i) => (
+                  <Text key={i} style={styles.subCardListItem}>
+                    – {f.factor_name} ({f.score}/5)
+                  </Text>
+                ))}
+              </View>
+            )}
           </View>
         </View>
-        <PageFooter page={index} />
-      </Page>
+
+        <View style={styles.obsCard}>
+          <Text style={styles.obsCardTitle}>90-Day Roadmap</Text>
+          <View style={styles.roadmapRow}>
+            {roadmapPhases.map((phase, i) => (
+              <View key={i} style={[styles.roadmapPhase, phase.style]}>
+                <Text style={styles.roadmapLabel}>{phase.label}</Text>
+                {typeof phase.text === 'string' ? (
+                  <Text style={styles.roadmapText}>{phase.text}</Text>
+                ) : (
+                  <View>
+                    {phase.text.action && <Text style={styles.roadmapText}>Action: {phase.text.action}</Text>}
+                    {phase.text.goal && <Text style={styles.roadmapText}>Goal: {phase.text.goal}</Text>}
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
+
+          {overflowDevToRight && (
+            <View style={[styles.subCard, styles.subCardRose, { marginTop: 10 }]}>
+              <Text style={styles.subCardLabel}>Development Priorities</Text>
+              {devPriorities.map((f, i) => (
+                <Text key={i} style={styles.subCardListItem}>
+                  – {f.factor_name} ({f.score}/5)
+                </Text>
+              ))}
+            </View>
+          )}
+        </View>
+      </View>
+      <PageFooter page={index} />
+    </Page>
 
       <Page size={PAGE_SIZE} style={styles.page}>
         <View style={styles.obsGrid}>

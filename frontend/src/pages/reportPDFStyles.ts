@@ -185,13 +185,13 @@ export const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: '#e7ebf3',
     borderLeft: `4px solid ${colors.summaryBorder}`,
-    padding: '12px 16px',
+    padding: '10px 14px',
     marginBottom: 12,
   },
   summaryCardLabel: {
     color: colors.blue,
     textTransform: 'uppercase',
-    fontSize: 12,
+    fontSize: 10,
     letterSpacing: 0.5,
     marginBottom: 6,
     fontWeight: 700,
@@ -199,7 +199,7 @@ export const styles = StyleSheet.create({
   summaryCardText: {
     fontStyle: 'italic',
     fontSize: 12,
-    lineHeight: 1.8,
+    lineHeight: 1.5,
     color: colors.slate600,
   },
 
@@ -256,13 +256,13 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
   profileLeft: {
-    width: '36%',
+    width: '45%',
     paddingRight: 10,
     flexDirection: 'column',
     overflow: 'hidden',
   },
   profileRight: {
-    width: '64%',
+    width: '55%',
     flexDirection: 'column',
     overflow: 'hidden',
     paddingLeft: 6,
@@ -390,16 +390,16 @@ export const styles = StyleSheet.create({
     marginBottom: 6,
   },
   orientationBody: {
-    flexDirection: 'row',
-    flex: 1,
-    gap: 20,
-    marginTop: 12,
-  },
+  flexDirection: 'row',
+  gap: 20,
+  marginTop: 12,
+  // removed flex: 1 -- was forcing the row to fill the whole remaining page
+},
   orientationLeft: {
-    flex: 1,
-    flexDirection: 'column',
-    gap: 10,
-  },
+  flex: 1,
+  flexDirection: 'column',
+  gap: 10,
+},
   orientationRight: {
     width: 220,
     borderRadius: 8,
@@ -412,16 +412,16 @@ export const styles = StyleSheet.create({
     objectFit: 'cover',
   },
   orientationContentCard: {
-    backgroundColor: '#EEF2FF',
-    borderRadius: 8,
-    padding: 16,
-    flex: 1,
-  },
-  orientationBodyText: {
-    fontSize: 11,
-    color: '#374151',
-    lineHeight: 1.6,
-  },
+  backgroundColor: '#EEF2FF',
+  borderRadius: 8,
+  padding: 18,
+  // removed flex: 1 -- card now sizes to its text instead of stretching
+},
+orientationBodyText: {
+  fontSize: 13,       // was 11
+  color: '#374151',
+  lineHeight: 1.7,     // was 1.6
+},
   orientationCategoryBadge: {
     backgroundColor: '#3B4FC8',
     borderRadius: 4,
@@ -445,5 +445,40 @@ export const styles = StyleSheet.create({
     fontSize: 8,
     color: colors.slate400,
   },
+  focusAreaText: {
+  fontSize: 10.5,
+  fontWeight: 600,
+  color: '#1f2937',
+  lineHeight: 1.5,
+  marginBottom: 8,
+},
+subCardRow: {
+  flexDirection: 'row',
+  gap: 10,
+  marginTop: 4,
+},
+subCard: {
+  flex: 1,
+  borderRadius: 8,
+  padding: 10,
+  flexDirection: 'column',
+  gap: 4,
+  borderTop: '3px solid transparent',
+},
+subCardTeal: { backgroundColor: '#f0fdfa', borderTopColor: '#14b8a6' },
+subCardRose: { backgroundColor: '#fff1f2', borderTopColor: '#e11d48' },
+subCardLabel: {
+  fontSize: 8.5,
+  fontWeight: 700,
+  letterSpacing: 0.5,
+  textTransform: 'uppercase',
+  color: colors.slate500,
+  marginBottom: 2,
+},
+subCardListItem: {
+  fontSize: 9.5,
+  color: colors.slate300,
+  lineHeight: 1.5,
+},
 });
 

@@ -143,17 +143,25 @@ class AIReportService:
         """Generate all sections using the available methods."""
 
         section_a = [s for s in context["scores"] if s["section_code"] == "A"]
-
         product_type = str(context.get("candidate", {}).get("product_type", "")).upper()
+
+        drives_profile = self._generate_drives_profile_with_template(context, section_a)
+        conditioning_profile = self._generate_conditioning_profile(context)
+        communication_profile = self._generate_communication_profile(context)
 
         orientation_insights = {}
         if product_type != "BASIC":
-            orientation_insights = self._generate_orientation_insights(context)
+            composite_insights = {
+                "drives": drives_profile.get("composite_insight", ""),
+                "conditioning": conditioning_profile.get("composite_insight", ""),
+                "communication": communication_profile.get("composite_insight", ""),
+            }
+            orientation_insights = self._generate_orientation_insights(context, composite_insights)
 
         report = {
-            "drives_profile": self._generate_drives_profile_with_template(context, section_a),
-            "conditioning_profile": self._generate_conditioning_profile(context),
-            "communication_profile": self._generate_communication_profile(context),
+            "drives_profile": drives_profile,
+            "conditioning_profile": conditioning_profile,
+            "communication_profile": communication_profile,
             "orientation_insights": orientation_insights,
             "overall_observations": self._generate_overall_observations(context),
             "action_agenda": self._generate_action_agenda(context)
@@ -385,33 +393,55 @@ Rules:
             "factors": factor_descriptions
         }
 
-    def _generate_orientation_insights(self, context: Dict) -> Dict[str, Dict[str, str]]:
-        """Generate short orientation insights with style label + body text."""
+    def _generate_orientation_insights(
+        self,
+        context: Dict,
+        composite_insights: Dict[str, str] | None = None,
+    ) -> Dict[str, Dict[str, str]]:
+        """Generate orientation insights with style label + body text, informed by
+        both the raw scores and the composite insights already written for the
+        Drives/Conditioning/Communication sections."""
 
         all_scores = context["scores"]
+        composite_insights = composite_insights or {}
+
+        composite_block = "\n".join(
+            f"- {label.title()} composite insight: {text}"
+            for label, text in composite_insights.items()
+            if text
+        ) or "None available."
 
         orientation_prompt = f"""
-Based on the assessment scores below, write one short insight for each of:
-leadership, team, motivation, change, stress.
+    Based on the assessment scores AND the composite insights below, write one
+    insight for each of: leadership, team, motivation, change, stress.
 
-Scores: {json.dumps(all_scores)}
+    Scores: {json.dumps(all_scores)}
 
-Rules for EACH insight:
-- Return a JSON object with exactly these keys: leadership, team, motivation, change, stress.
-- Each value must be an object with exactly two keys:
-  1) "label": a short style label, 2-5 words, plain language
-  2) "body": a single short paragraph, maximum 120 words, 3-5 sentences
-- Body must be plain language, no jargon, no raw numbers.
-- Refer to "you", not the candidate's name.
-- Keep each body text grounded in the score patterns, not generic filler.
+    Composite insights already written for this candidate (use these to add
+    substance and continuity -- each orientation insight should feel like it
+    builds on this picture of the person, not a generic restatement of the
+    scores):
+    {composite_block}
 
-Return ONLY valid JSON.
-""".strip()
+    Rules for EACH insight:
+    - Return a JSON object with exactly these keys: leadership, team, motivation, change, stress.
+    - Each value must be an object with exactly two keys:
+    1) "label": a short style label, 2-5 words, plain language
+    2) "body": 130-170 words, 6-8 sentences.
+    - Ground the body in BOTH the relevant score pattern and the composite
+    insights above -- connect this orientation back to the person's broader
+    drives, conditioning, and communication style rather than repeating the
+    same points across every category.
+    - Body must be plain language, no jargon, no raw numbers.
+    - Refer to "you", not the candidate's name.
+
+    Return ONLY valid JSON.
+    """.strip()
 
         raw = self._call(
-            system="You write short, plain-language behavioral insights and always return valid JSON matching the requested schema exactly.",
+            system="You write plain-language behavioral insights and always return valid JSON matching the requested schema exactly.",
             user=orientation_prompt,
-            max_tokens=350,
+            max_tokens=1100,
             temperature=0.6,
             json_mode=True,
         )
@@ -435,60 +465,40 @@ Return ONLY valid JSON.
 
             return {
                 "label": label[:60],
-                "body": body[:500]
+                "body": body[:1400]   # was 500 -- too short for a 130-170 word body
             }
 
         try:
             data = json.loads(raw)
             return {
                 "leadership": normalize_entry(
-                    "leadership",
-                    "Leadership Style",
+                    "leadership", "Leadership Style",
                     "Your leadership style is shaped by a clear mix of instinct and awareness. You tend to lead with intention when the goal is clear, and you can adjust your approach when the situation calls for more support or more direction."
                 ),
                 "team": normalize_entry(
-                    "team",
-                    "Team Orientation",
+                    "team", "Team Orientation",
                     "You connect with people in a balanced way, and your team presence depends on the setting. You are generally thoughtful and collaborative, but you can become more effective when you speak up early and make your preferences clear."
                 ),
                 "motivation": normalize_entry(
-                    "motivation",
-                    "Motivation Driver",
+                    "motivation", "Motivation Driver",
                     "Your motivation is strongest when the work lines up with purpose, momentum, and personal meaning. You tend to stay engaged when goals feel relevant and when your effort leads to visible progress."
                 ),
                 "change": normalize_entry(
-                    "change",
-                    "Change Driver",
+                    "change", "Change Driver",
                     "You respond to change best when it feels manageable and clear. You adapt through observation and gradual adjustment, and you are more effective when transitions come with enough context and support."
                 ),
                 "stress": normalize_entry(
-                    "stress",
-                    "Stress Response",
+                    "stress", "Stress Response",
                     "You handle pressure in a way shaped by your habits and defaults. Under stress, you may become more guarded or more internally focused, so steady reflection and a small reset routine help you stay effective."
                 )
             }
         except Exception:
             return {
-                "leadership": {
-                    "label": "Leadership Style",
-                    "body": "You lead with a balanced mix of awareness and deliberate action. You tend to bring clarity and calm when the situation is uncertain, and your strongest leadership comes when your direction is grounded in purpose."
-                },
-                "team": {
-                    "label": "Team Orientation",
-                    "body": "You work well with others when there is trust and open communication. You tend to be thoughtful and collaborative, and you typically add value by listening carefully before making your own mark."
-                },
-                "motivation": {
-                    "label": "Motivation Driver",
-                    "body": "You are most motivated by work that has clear meaning and visible progress. When the goal feels relevant and energizing, you become more focused and resilient."
-                },
-                "change": {
-                    "label": "Change Driver",
-                    "body": "You adapt to change through observation and gradual adjustment. You tend to do best when there is enough information and a measured pace, which helps you stay steady while you transition."
-                },
-                "stress": {
-                    "label": "Stress Response",
-                    "body": "You manage pressure by relying on your internal pattern and your usual coping style. A short pause, a clear next step, and a calm reset tend to help you stay effective under strain."
-                }
+                "leadership": {"label": "Leadership Style", "body": "You lead with a balanced mix of awareness and deliberate action. You tend to bring clarity and calm when the situation is uncertain, and your strongest leadership comes when your direction is grounded in purpose."},
+                "team": {"label": "Team Orientation", "body": "You work well with others when there is trust and open communication. You tend to be thoughtful and collaborative, and you typically add value by listening carefully before making your own mark."},
+                "motivation": {"label": "Motivation Driver", "body": "You are most motivated by work that has clear meaning and visible progress. When the goal feels relevant and energizing, you become more focused and resilient."},
+                "change": {"label": "Change Driver", "body": "You adapt to change through observation and gradual adjustment. You tend to do best when there is enough information and a measured pace, which helps you stay steady while you transition."},
+                "stress": {"label": "Stress Response", "body": "You manage pressure by relying on your internal pattern and your usual coping style. A short pause, a clear next step, and a calm reset tend to help you stay effective under strain."}
             }
 
     def _generate_overall_observations(self, context: Dict) -> Dict:

@@ -247,13 +247,13 @@ var styles = StyleSheet.create({
     marginBottom: 8
   },
   profileLeft: {
-    width: "36%",
+    width: "45%",
     paddingRight: 10,
     flexDirection: "column",
     overflow: "hidden"
   },
   profileRight: {
-    width: "64%",
+    width: "55%",
     flexDirection: "column",
     overflow: "hidden",
     paddingLeft: 6
