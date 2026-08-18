@@ -18,7 +18,8 @@ def generate_pdf_from_report_data(report_data: dict) -> bytes:
             ["node", PDF_SCRIPT_PATH],
             input=json.dumps(report_data).encode("utf-8"),
             capture_output=True,
-            check=True
+            check=True,
+            timeout=120
         )
         return process.stdout
     except subprocess.CalledProcessError as e:

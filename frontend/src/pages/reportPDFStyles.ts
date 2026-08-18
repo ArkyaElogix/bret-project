@@ -247,20 +247,27 @@ export const styles = StyleSheet.create({
     color: colors.slate600,
   },
 
-  // ── Profile layout: chart column + text column ──────────────
+  // ── Profile layout ──────────────
   profileLayout: {
     flexDirection: 'row',
     gap: 18,
   },
-  chartColumn: {
-    width: '34%',
-    border: `1px solid ${colors.border}`,
-    borderRadius: 12,
-    padding: 10,
+  chartArea: {
+    marginBottom: 8,
   },
-  textColumn: {
-    width: '66%',
+  profileLeft: {
+    width: '36%',
+    paddingRight: 10,
+    flexDirection: 'column',
+    overflow: 'hidden',
   },
+  profileRight: {
+    width: '64%',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    paddingLeft: 6,
+  },
+
   factorList: {
     flexDirection: 'column',
     gap: 8,
@@ -285,13 +292,15 @@ export const styles = StyleSheet.create({
     color: colors.slate900,
   },
   factorDescription: {
-    fontSize: 11,
-    lineHeight: 1.55,
+    fontSize: 10,
+    lineHeight: 1.45,
     color: colors.slate600,
+    flexWrap: 'wrap',
   },
+
   chartLegend: {
     fontSize: 9,
-    color: '#2269ccff',
+    color: '#113e7eff',
     textAlign: 'center',
     marginTop: 4,
   },
@@ -375,84 +384,56 @@ export const styles = StyleSheet.create({
     color: colors.slate600,
   },
 
-    orientationPage: {
-    backgroundColor: '#f7fbff',
-    padding: 0,
-  },
-  orientationHeaderBar: {
-    backgroundColor: '#1f5eff',
-    height: 42,
-    paddingHorizontal: 22,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  orientationHeaderBadge: {
-    color: '#ffffff',
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
+  orientationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
   },
   orientationBody: {
     flexDirection: 'row',
-    gap: 18,
-    padding: 26,
     flex: 1,
-    alignItems: 'stretch',
+    gap: 20,
+    marginTop: 12,
   },
-  orientationContent: {
-    flex: 1.4,
-    justifyContent: 'flex-start',
-  },
-  orientationTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  orientationLeft: {
+    flex: 1,
+    flexDirection: 'column',
     gap: 10,
-    marginBottom: 8,
   },
-  orientationIcon: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#1b4fd8',
-  },
-  orientationTitle: {
-    fontSize: 28,
-    fontWeight: 700,
-    color: '#0f172a',
-  },
-  orientationSubtitle: {
-    fontSize: 12,
-    fontStyle: 'italic',
-    color: '#0f172a',
-    marginBottom: 12,
-  },
-  orientationDivider: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#dfe7f5',
-    marginBottom: 18,
-  },
-  orientationTextBox: {
-    backgroundColor: '#eaf3ff',
-    borderRadius: 12,
-    padding: 18,
-    minHeight: 180,
-  },
-  orientationText: {
-    fontSize: 13,
-    lineHeight: 1.7,
-    color: '#1e293b',
-  },
-  orientationImageWrap: {
+  orientationRight: {
     width: 220,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   orientationImage: {
     width: 220,
-    height: 220,
-    borderRadius: 16,
-    backgroundColor: '#dbeafe',
+    height: 160,
+    borderRadius: 8,
+    objectFit: 'cover',
+  },
+  orientationContentCard: {
+    backgroundColor: '#EEF2FF',
+    borderRadius: 8,
+    padding: 16,
+    flex: 1,
+  },
+  orientationBodyText: {
+    fontSize: 11,
+    color: '#374151',
+    lineHeight: 1.6,
+  },
+  orientationCategoryBadge: {
+    backgroundColor: '#3B4FC8',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    alignSelf: 'flex-start',
+  },
+  orientationCategoryText: {
+    color: '#FFFFFF',
+    fontSize: 8,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
   pageFooter: {
     position: 'absolute',
@@ -465,3 +446,4 @@ export const styles = StyleSheet.create({
     color: colors.slate400,
   },
 });
+

@@ -7,20 +7,22 @@ import teamImage from './images/orientation/Team.jpeg';
 import motivationImage from './images/orientation/Motivation.jpeg';
 import changeImage from './images/orientation/Change.jpeg';
 import stressImage from './images/orientation/Stress.jpeg';
+import { getScoreLabel } from '../utils/scoreLabel';
 const SECTION_CODES_WITH_SUMMARY = ['A', 'B', 'C'];
 
-const ORIENTATION_IMAGE_MAP: OrientationInsightMap = {
-  leadership: leadershipImage,
-  team: teamImage,
-  motivation: motivationImage,
-  change: changeImage,
-  stress: stressImage,
+const ORIENTATION_IMAGE_MAP: Record<string, string> = {
+  'leadership style': leadershipImage,
+  'team orientation': teamImage,
+  'motivation driver': motivationImage,
+  'change driver': changeImage,
+  'stress response': stressImage,
 };
 
 function getOrientationImageSrc(factorName?: string | null): string {
-  const key = (factorName || '').toLowerCase().trim();
-  return (ORIENTATION_IMAGE_MAP[key] || ORIENTATION_IMAGE_MAP.leadership) as string;
+  const normalized = (factorName || '').toLowerCase().trim();
+  return ORIENTATION_IMAGE_MAP[normalized] ?? leadershipImage;
 }
+
 
 // ── Same helper logic as the on-screen report, ported as plain functions ──
 
@@ -43,11 +45,7 @@ function safeSectionText(section?: ReportSection | null, fallback = 'Content not
   return section?.factors?.[0]?.statement || fallback;
 }
 
-function getFactorScoreLabel(score: number) {
-  if (score >= 4) return 'Strong';
-  if (score >= 2) return 'Moderate';
-  return 'Weak';
-}
+
 
 function parseAiBullets(raw: string | null | undefined): string[] {
   if (!raw) return [];
@@ -165,38 +163,51 @@ function DefinitionsPage({ section, index }: { section: ReportSection; index: nu
   );
 }
 
+const FactorBlock = ({ factor }: { factor: ReportFactor }) => (
+  <View style={styles.factorItem}>
+    <View style={styles.factorHeaderRow}>
+      <Text style={styles.factorName}>{factor.factor_name}</Text>
+      <Text style={styles.factorScore}>({getScoreLabel(factor.score || 0)})</Text>
+    </View>
+    <Text style={styles.factorDescription}>
+      {factor.statement || 'Description not available.'}
+    </Text>
+  </View>
+);
+
+
 function ProfilePage({ section, index }: { section: ReportSection; index: number }) {
   const summary = getSectionSummary(section);
-  const factors = section.factors.filter((f) => !isCompositeFactor(f));
-  const chartData = factors.map((f) => ({ label: f.factor_name, score: f.score || 0 }));
-
+  const realFactors = section.factors.filter((f) => !isCompositeFactor(f));
+  const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0 }));
+  // First 2 go right (below composite insight), rest go left (below chart)
+  const rightFactors = realFactors.slice(0, 2);
+  const leftSpillFactors = realFactors.slice(2);
   return (
     <Page size={PAGE_SIZE} style={styles.page}>
       <View style={styles.section}>
         <Text style={styles.sectionHeader}>{section.section_name}</Text>
+
         <View style={styles.profileLayout}>
-          <View style={styles.chartColumn}>
-            <PdfBarChart data={chartData} />
-            <Text style={styles.chartLegend}>Tendency Scale: Low (0-1) • Moderate (2-3) • High (4-5)</Text>
+          {/* LEFT COLUMN */}
+          <View style={styles.profileLeft}>
+            <View style={styles.chartArea}>
+              <PdfBarChart data={chartData} />
+              <Text style={styles.chartLegend}>Tendency Scale: Low (0-1) • Moderate (2-3) • High (4-5)</Text>
+            </View>
+            {leftSpillFactors.map((factor, i) => (
+              <FactorBlock key={`left-${i}`} factor={factor} />
+            ))}
           </View>
-          <View style={styles.textColumn}>
+          {/* RIGHT COLUMN */}
+          <View style={styles.profileRight}>
             <View style={styles.summaryCard}>
               <Text style={styles.summaryCardLabel}>Composite Insight</Text>
               <Text style={styles.summaryCardText}>{summary}</Text>
             </View>
-            <View style={styles.factorList}>
-              {factors.map((factor, i) => (
-                <View key={i} style={styles.factorItem}>
-                  <View style={styles.factorHeaderRow}>
-                    <Text style={styles.factorName}>{factor.factor_name}</Text>
-                    <Text style={styles.factorScore}>({getFactorScoreLabel(factor.score || 0)})</Text>
-                  </View>
-                  <Text style={styles.factorDescription}>
-                    {factor.statement || 'Description not available.'}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            {rightFactors.map((factor, i) => (
+              <FactorBlock key={`right-${i}`} factor={factor} />
+            ))}
           </View>
         </View>
       </View>
@@ -211,30 +222,24 @@ function OrientationPage({ factor, index }: { factor: ReportFactor; index: numbe
   const imageSrc = getOrientationImageSrc(title);
 
   return (
-    <Page size={PAGE_SIZE} style={styles.orientationPage}>
-      <View style={styles.orientationHeaderBar}>
-        <Text style={styles.orientationHeaderBadge}>Orientation</Text>
+    <Page size={PAGE_SIZE} style={styles.page}>
+
+      <View style={styles.orientationHeader}>
+        <View style={styles.iconPlaceholderSmall} />
+        <Text style={styles.sectionHeader}>{title}</Text>
       </View>
 
       <View style={styles.orientationBody}>
-        <View style={styles.orientationContent}>
-          <View style={styles.orientationTitleRow}>
-            <View style={styles.orientationIcon} />
-            <Text style={styles.orientationTitle}>{title}</Text>
+        <View style={styles.orientationLeft}>
+          <View style={styles.orientationCategoryBadge}>
+            <Text style={styles.orientationCategoryText}>ORIENTATION</Text>
           </View>
-
-          <Text style={styles.orientationSubtitle}>
-            {factor.statement_title || 'Behavioral Insight'}
-          </Text>
-
-          <View style={styles.orientationDivider} />
-
-          <View style={styles.orientationTextBox}>
-            <Text style={styles.orientationText}>{body}</Text>
+          <View style={styles.orientationContentCard}>
+            <Text style={styles.orientationBodyText}>{body}</Text>
           </View>
         </View>
 
-        <View style={styles.orientationImageWrap}>
+        <View style={styles.orientationRight}>
           <Image src={imageSrc} style={styles.orientationImage} />
         </View>
       </View>
@@ -243,6 +248,7 @@ function OrientationPage({ factor, index }: { factor: ReportFactor; index: numbe
     </Page>
   );
 }
+
 
 function TakeawaysPage({ report, index }: { report: SessionReport; index: number }) {
   const fallback = {

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { Link, useParams } from 'react-router-dom';
 import { getSessionReport, type ReportFactor, type ReportSection, type SessionReport, type OrientationInsightMap } from '../api/sessions';
 import './report-template.css';
-import { pdf } from '@react-pdf/renderer';
-import { ReportPrintDocument } from './reportPrintDocument';
+import { getScoreLabel } from '../utils/scoreLabel';
+import { parseFactorContent } from '../utils/reportParseUtils';
 import leadershipImage from './images/orientation/Leadership.jpeg';
 import teamImage from './images/orientation/Team.jpeg';
 import motivationImage from './images/orientation/Motivation.jpeg';
@@ -40,11 +40,6 @@ function getSectionSummary(section: ReportSection) {
   return section.factors[0]?.statement || 'A reflective summary for this section will appear here once the AI layer is connected.';
 }
 
-function getFactorScoreLabel(score: number) {
-  if (score >= 4) return 'Strong';
-  if (score >= 2) return 'Moderate';
-  return 'Weak';
-}
 
 function getDerivedTakeaways(report: SessionReport) {
   const profileSections = report.sections.filter((section) => SECTION_CODES_WITH_SUMMARY.includes(section.section_code));
@@ -56,7 +51,7 @@ function getDerivedTakeaways(report: SessionReport) {
   const strongest = sortedByScore.slice(0, 3);
   const weakest = sortedByLowScore.slice(0, 3);
 
-  
+
   return {
     focusArea: `Your strongest patterns revolve around ${strongest.map((factor) => factor.factor_name).join(', ')}. The biggest growth opportunity is to bring more intentional balance to ${weakest.map((factor) => factor.factor_name).join(', ')}.`,
     strengths: strongest.map((factor) => `${factor.factor_name} (${factor.score}/5)`).join(' • '),
@@ -81,13 +76,13 @@ function getDerivedTakeaways(report: SessionReport) {
 function renderProfileSection(section: ReportSection, index: number) {
   const summary = getSectionSummary(section);
   const factors = section.factors.filter((factor) => !isCompositeFactor(factor));
-  
-  
+
+
 
   return (
     <section key={index} className="bret-section">
       <h2 className="bret-section-header">{section.section_name} <span className='rounded bg-blue-300'>✦</span> </h2>
-      
+
       <div className="bret-profile-layout">
         <aside className="bret-score-panel-vertical">
           <div className="bret-chart-wrapper">
@@ -109,7 +104,7 @@ function renderProfileSection(section: ReportSection, index: number) {
                         className="bret-vertical-bar-fill"
                         style={{
                           height: `${pct}%`,
-                          
+
                           background: BAR_COLORS[factorIndex % BAR_COLORS.length]
                         }}
                       />
@@ -136,7 +131,7 @@ function renderProfileSection(section: ReportSection, index: number) {
                 <div className="bret-factor-header">
                   <span className="bret-factor-name">{factor.factor_name}</span>
                   <span className="bret-factor-score">
-                    ({getFactorScoreLabel(factor.score || 0)})
+                    ({getScoreLabel(factor.score || 0)})
                   </span>
                 </div>
                 <p className="bret-factor-description">{factor.statement || 'Description not available.'}</p>
@@ -154,7 +149,7 @@ function renderDefinitionsSection(section: ReportSection, index: number) {
     <section key={index} className="bret-section">
       <h2 className="bret-section-header">{section.section_name}</h2>
       {section.section_definitions ? (
-        <div className="bret-definition-summary" style={{fontSize:'0.85em', padding:'20px', fontFamily:'Arial, sans-serif', color:'teal', fontWeight:'bold', fontStyle:'italic'}}>
+        <div className="bret-definition-summary" style={{ fontSize: '0.85em', padding: '20px', fontFamily: 'Arial, sans-serif', color: 'teal', fontWeight: 'bold', fontStyle: 'italic' }}>
           <p>{section.section_definitions}</p>
         </div>
       ) : null}
@@ -170,18 +165,36 @@ function renderDefinitionsSection(section: ReportSection, index: number) {
   );
 }
 
-function parseAiBullets(raw: string | null | undefined): string[] {
-  if (!raw) return [];
-  return raw
-    .split('\n')
-    .map((s) => s.replace(/^[•\-]\s*/, '').trim())
-    .filter(Boolean);
+function parseJsonFactor(statement: string | null | undefined): any {
+  if (!statement) return {};
+  try { return JSON.parse(statement); } catch { return {}; }
 }
 
 async function handleDownloadPdf(report: SessionReport) {
   try {
-    const blob = await pdf(<ReportPrintDocument report={report} />).toBlob();
+    // Use the same token key and base URL as the rest of the API client
+    const token = sessionStorage.getItem('bret_user_token')
+      ?? localStorage.getItem('bret_user_token')
+      ?? sessionStorage.getItem('bret_admin_token');
 
+    const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)
+      || ((['localhost', '127.0.0.1', '::1'].includes(window.location.hostname))
+        ? 'http://localhost:8000'
+        : 'http://192.168.1.103:8000');
+
+    const response = await fetch(`${API_BASE}/api/sessions/${report.session.id}/pdf`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Server returned ${response.status}: ${errText}`);
+    }
+
+    const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -192,13 +205,11 @@ async function handleDownloadPdf(report: SessionReport) {
     URL.revokeObjectURL(url);
   } catch (err) {
     console.error('PDF export failed:', err);
-    alert('PDF export failed. Please check the report data and try again.');
+    alert(`PDF export failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 }
-function parseJsonFactor(statement: string | null | undefined): any {
-  if (!statement) return {};
-  try { return JSON.parse(statement); } catch { return {}; }
-}
+
+
 
 function renderOrientationSection(section: ReportSection, index: number) {
   const isExecutive =
@@ -267,7 +278,7 @@ function renderTakeawaysSection(report: SessionReport) {
     f.factor_name?.toLowerCase().includes('takeaway')
   );
   const aiKeyTakeaways = keyTakeawaysFactor?.statement
-    ? parseAiBullets(keyTakeawaysFactor.statement)
+    ? parseFactorContent(keyTakeawaysFactor.statement).bullets
     : null;
 
   const agendaSection = report.sections.find(
@@ -286,7 +297,7 @@ function renderTakeawaysSection(report: SessionReport) {
   const aiRoadmap = parseJsonFactor(roadmapFactor?.statement);
   const aiSsc = parseJsonFactor(sscFactor?.statement);
   const aiFocusAreas = focusAreasFactor?.statement
-    ? parseAiBullets(focusAreasFactor.statement)
+    ? parseFactorContent(focusAreasFactor.statement).bullets
     : null;
 
   const focusAreaText = integratedFactor?.statement || fallback.focusArea;

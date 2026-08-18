@@ -16,6 +16,7 @@ from typing import Any, Dict, List
 from datetime import datetime, timedelta
 from app.services.ai_report_service import AIReportService
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import update
 from sqlalchemy.exc import DatabaseError
@@ -58,6 +59,7 @@ from app.schemas import (
 )
 from app.scoring import calculate_and_store_scores
 from app.auth import get_current_user, require_admin, get_optional_user,JWT_SECRET_KEY,JWT_ALGORITHM
+from app.services.pdf_service import generate_pdf_from_report_data
 
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
@@ -1093,6 +1095,50 @@ def list_all_sessions(
     if status_filter is not None:
         query = query.filter(AssessmentSession.status == status_filter)
     return query.order_by(AssessmentSession.created_at.desc()).all()
+
+@router.get("/{session_id}/pdf")
+def download_session_pdf(
+    session_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    session = _get_owned_session(session_id, db, current_user)
+    if session.status != SessionStatus.submitted:
+        raise HTTPException(status_code=400, detail="Session is not submitted yet")
+
+    ai_report = ensure_ai_report_cached(
+        session_id, db, wait=True, timeout_seconds=REPORT_WAIT_TIMEOUT_SECONDS,
+    )
+
+    if ai_report:
+        ai_sections = _format_ai_report_for_response(ai_report, db)
+        basic_payload = _build_basic_report_payload(session, db)
+        static_sections = [
+            s for s in basic_payload["sections"] if s["section_code"] in ("LETTER", "DEF")
+        ]
+        sections = static_sections + ai_sections
+        payload = {
+            "session": session,
+            "user": basic_payload["user"],
+            "form": basic_payload["form"],
+            "sections": sections,
+        }
+    else:
+        payload = _build_basic_report_payload(session, db)
+
+    report_out = SessionReportOut(**payload)
+    report_json = report_out.model_dump(mode="json")
+
+    try:
+        pdf_bytes = generate_pdf_from_report_data(report_json)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=BRET-Report-{session_id}.pdf"},
+    )
 
 
 @router.get("/{session_id}/full", response_model=SessionFullOut)
