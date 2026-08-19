@@ -144,6 +144,7 @@ export interface ReportFactor {
   score_label: string | null;
   statement_title: string | null;
   statement: string | null;
+  color?: string | null;
 }
 
 export interface ReportSection {

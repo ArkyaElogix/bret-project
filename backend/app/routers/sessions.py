@@ -80,6 +80,7 @@ def _build_basic_report_factor(
     score: int = 0,
     statement: str = "",
     title: str | None = None,
+    color: str | None = None,
 ) -> dict[str, Any]:
     return {
         "factor_id": factor_id,
@@ -89,6 +90,7 @@ def _build_basic_report_factor(
         "score_label": None,
         "statement_title": title,
         "statement": statement,
+        "color": color,
     }
 
 
@@ -1065,6 +1067,7 @@ def get_session_results(
                 factor_name=factor.name if factor else f"Factor {fid}",
                 score=score,
                 percentage=pct,
+                color=factor.color if factor else None,
             ))
         factor_results.sort(key=lambda r: r.score, reverse=True)
 
@@ -1249,6 +1252,10 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
             })
         
         # Add individual factors
+        _factor_color_map = {
+            f.name: f.color
+            for f in db.query(BehaviouralFactor).all()
+        }
         for factor in profile.get("factors", []):
             section["factors"].append({
                 "factor_id": 0,
@@ -1257,7 +1264,8 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
                 "score": factor.get("score",0),
                 "score_label": factor.get("score_label",""),
                 "statement_title": f"{factor['factor_name']} ({factor['score_label']})",
-                "statement": factor["description"]
+                "statement": factor["description"],
+                "color": _factor_color_map.get(factor["factor_name"]),
             })
         
         sections.append(section)
@@ -1436,17 +1444,18 @@ def _format_ai_report_for_response(ai_report: dict, db: Session) -> list:
 
             agenda_section["factors"].append({
                 "factor_id": 0,
-                "factor_name": "SSC Framework",
+                "factor_name": "3C Framework",
                 "raw_score": 0,
                 "score": 0,
                 "score_label": None,
-                "statement_title": "SSC Framework",
+                "statement_title": "3C Framework",
                 "statement": json.dumps({
-                    "start": ssc_str(ssc.get("start", "")),
-                    "stop": ssc_str(ssc.get("stop", "")),
+                    "commence": ssc_str(ssc.get("commence", "")),
+                    "cease": ssc_str(ssc.get("cease", "")),
                     "continue": ssc_str(ssc.get("continue", ""))
                 })
             })
+
         sections.append(agenda_section)
     return sections
 

@@ -511,7 +511,7 @@ function PdfBarChart({ data }) {
       const barHeight = Math.max(10, Math.round(d.score / 5 * CHART_HEIGHT));
       const x = AXIS_LABEL_WIDTH + i * (barWidth + BAR_GAP);
       const y = CHART_HEIGHT - barHeight;
-      const fill = barColors[i % barColors.length];
+      const fill = d.color ?? barColors[i % barColors.length];
       return /* @__PURE__ */ jsxs(React.Fragment, { children: [
         /* @__PURE__ */ jsx(Rect, { x, y, width: barWidth, height: barHeight, fill, rx: 3, ry: 3 }),
         /* @__PURE__ */ jsx(
@@ -663,7 +663,7 @@ function DefinitionsPage({ section, index }) {
 }
 var FactorBlock = ({ factor }) => /* @__PURE__ */ jsxs2(View2, { style: styles.factorItem, children: [
   /* @__PURE__ */ jsxs2(View2, { style: styles.factorHeaderRow, children: [
-    /* @__PURE__ */ jsx2(Text, { style: styles.factorName, children: factor.factor_name }),
+    /* @__PURE__ */ jsx2(Text, { style: [styles.factorName, factor.color ? { color: factor.color } : {}], children: factor.factor_name }),
     /* @__PURE__ */ jsxs2(Text, { style: styles.factorScore, children: [
       "(",
       getScoreLabel(factor.score || 0),
@@ -675,7 +675,7 @@ var FactorBlock = ({ factor }) => /* @__PURE__ */ jsxs2(View2, { style: styles.f
 function ProfilePage({ section, index }) {
   const summary = getSectionSummary(section);
   const realFactors = section.factors.filter((f) => !isCompositeFactor(f));
-  const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0 }));
+  const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0, color: f.color }));
   const leftFactors = realFactors.slice(0, 2);
   const rightSpillFactors = realFactors.slice(2);
   return /* @__PURE__ */ jsxs2(Page, { size: PAGE_SIZE, style: styles.page, children: [
@@ -749,7 +749,7 @@ function TakeawaysPage({ report, index }) {
   const agendaSection = report.sections.find((s) => s.section_name === "Action Agenda");
   const focusAreasFactor = agendaSection?.factors.find((f) => f.factor_name === "Focus Areas");
   const roadmapFactor = agendaSection?.factors.find((f) => f.factor_name === "Roadmap");
-  const sscFactor = agendaSection?.factors.find((f) => f.factor_name === "SSC Framework");
+  const sscFactor = agendaSection?.factors.find((f) => f.factor_name === "3C Framework");
   const aiRoadmap = parseJsonFactor(roadmapFactor?.statement);
   const aiSsc = parseJsonFactor(sscFactor?.statement);
   const aiFocusAreas = focusAreasFactor?.statement ? parseAiBullets(focusAreasFactor.statement) : null;
@@ -841,15 +841,15 @@ function TakeawaysPage({ report, index }) {
             "\u2013 ",
             item
           ] }, i)),
-          (aiSsc.start || aiSsc.stop || aiSsc["continue"]) && /* @__PURE__ */ jsxs2(Fragment, { children: [
-            /* @__PURE__ */ jsx2(Text, { style: [styles.obsPill, styles.obsPillGray, { marginTop: 10 }], children: "SSC Framework" }),
-            aiSsc.start && /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
-              "START \u2014 ",
-              aiSsc.start
+          (aiSsc.commence || aiSsc.cease || aiSsc["continue"]) && /* @__PURE__ */ jsxs2(Fragment, { children: [
+            /* @__PURE__ */ jsx2(Text, { style: [styles.obsPill, styles.obsPillGray, { marginTop: 10 }], children: "The 3 C's Framework" }),
+            aiSsc.commence && /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
+              "COMMENCE \u2014 ",
+              aiSsc.commence
             ] }),
-            aiSsc.stop && /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
-              "STOP \u2014 ",
-              aiSsc.stop
+            aiSsc.cease && /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
+              "CEASE \u2014 ",
+              aiSsc.cease
             ] }),
             aiSsc["continue"] && /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
               "CONTINUE \u2014 ",

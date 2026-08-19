@@ -66,6 +66,7 @@ class BehaviouralFactorOut(BaseModel):
     behavioural_type_id: int
     name: str
     order_index: int
+    color: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -357,6 +358,7 @@ class ReportFactorOut(BaseModel):
     score_label: str | None = None
     statement_title: str | None = None
     statement: str | None = None
+    color: str | None = None
 class ReportSectionOut(BaseModel):
     section_id: int
     section_code: str

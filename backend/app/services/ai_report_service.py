@@ -564,8 +564,8 @@ Return ONLY a JSON object with exactly this shape:
     "90": "one short action, maximum 80 words"
   }},
   "ssc": {{
-    "start": "one short action to start, maximum 40 words",
-    "stop": "one short behavior to stop, maximum 40 words",
+    "commence": "one short action to start, maximum 40 words",
+    "cease": "one short behavior to stop, maximum 40 words",
     "continue": "one short behavior to continue, maximum 40 words"
   }}
 }}
@@ -592,8 +592,8 @@ Rules:
                 "90": "Review progress and set the next goal."
             },
             "ssc": {
-                "start": "Ask for feedback on how you come across.",
-                "stop": "Stop putting off the harder conversations.",
+                "commence": "Ask for feedback on how you come across.",
+                "cease": "Stop putting off the harder conversations.",
                 "continue": "Keep leaning on your strongest natural patterns."
             }
         }
@@ -614,8 +614,8 @@ Rules:
 
             ssc_in = data.get("ssc", {})
             ssc = {
-                "start": str(ssc_in.get("start", fallback["ssc"]["start"]))[:150],
-                "stop": str(ssc_in.get("stop", fallback["ssc"]["stop"]))[:150],
+                "commence": str(ssc_in.get("start", fallback["ssc"]["start"]))[:150],
+                "cease": str(ssc_in.get("stop", fallback["ssc"]["stop"]))[:150],
                 "continue": str(ssc_in.get("continue", fallback["ssc"]["continue"]))[:150],
             }
 

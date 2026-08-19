@@ -166,7 +166,9 @@ function DefinitionsPage({ section, index }: { section: ReportSection; index: nu
 const FactorBlock = ({ factor }: { factor: ReportFactor }) => (
   <View style={styles.factorItem}>
     <View style={styles.factorHeaderRow}>
-      <Text style={styles.factorName}>{factor.factor_name}</Text>
+      <Text style={[styles.factorName, factor.color ? { color: factor.color } : {}]}>
+        {factor.factor_name}
+      </Text>
       <Text style={styles.factorScore}>({getScoreLabel(factor.score || 0)})</Text>
     </View>
     <Text style={styles.factorDescription}>
@@ -176,10 +178,11 @@ const FactorBlock = ({ factor }: { factor: ReportFactor }) => (
 );
 
 
+
 function ProfilePage({ section, index }: { section: ReportSection; index: number }) {
   const summary = getSectionSummary(section);
   const realFactors = section.factors.filter((f) => !isCompositeFactor(f));
-  const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0 }));
+  const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0, color: f.color }));
   // First 2 go left (below the chart), rest go right (below composite insight)
   const leftFactors = realFactors.slice(0, 2);
   const rightSpillFactors = realFactors.slice(2);
@@ -282,7 +285,7 @@ function TakeawaysPage({ report, index }: { report: SessionReport; index: number
   const agendaSection = report.sections.find((s) => s.section_name === 'Action Agenda');
   const focusAreasFactor = agendaSection?.factors.find((f) => f.factor_name === 'Focus Areas');
   const roadmapFactor = agendaSection?.factors.find((f) => f.factor_name === 'Roadmap');
-  const sscFactor = agendaSection?.factors.find((f) => f.factor_name === 'SSC Framework');
+  const sscFactor = agendaSection?.factors.find((f) => f.factor_name === '3C Framework');
 
   const aiRoadmap = parseJsonFactor(roadmapFactor?.statement);
   const aiSsc = parseJsonFactor(sscFactor?.statement);
@@ -399,11 +402,11 @@ function TakeawaysPage({ report, index }: { report: SessionReport; index: number
               </Text>
             ))}
 
-            {(aiSsc.start || aiSsc.stop || aiSsc['continue']) && (
+            {(aiSsc.commence || aiSsc.cease || aiSsc['continue']) && (
               <>
-                <Text style={[styles.obsPill, styles.obsPillGray, { marginTop: 10 }]}>SSC Framework</Text>
-                {aiSsc.start && <Text style={styles.obsListItem}>START — {aiSsc.start}</Text>}
-                {aiSsc.stop && <Text style={styles.obsListItem}>STOP — {aiSsc.stop}</Text>}
+                <Text style={[styles.obsPill, styles.obsPillGray, { marginTop: 10 }]}>The 3 C's Framework</Text>
+                {aiSsc.commence && <Text style={styles.obsListItem}>COMMENCE — {aiSsc.commence}</Text>}
+                {aiSsc.cease && <Text style={styles.obsListItem}>CEASE — {aiSsc.cease}</Text>}
                 {aiSsc['continue'] && <Text style={styles.obsListItem}>CONTINUE — {aiSsc['continue']}</Text>}
               </>
             )}

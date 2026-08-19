@@ -4,6 +4,7 @@ import React from 'react';
 type BarDatum = {
   label: string;
   score: number;
+  color?: string | null;
 };
 
 const CHART_HEIGHT = 130;
@@ -45,7 +46,7 @@ export function PdfBarChart({ data }: { data: BarDatum[] }) {
           const barHeight = Math.max(10, Math.round((d.score / 5) * CHART_HEIGHT));
           const x = AXIS_LABEL_WIDTH + i * (barWidth + BAR_GAP);
           const y = CHART_HEIGHT - barHeight;
-          const fill = barColors[i % barColors.length];
+          const fill = d.color ?? barColors[i % barColors.length];
 
           return (
             <React.Fragment key={d.label}>

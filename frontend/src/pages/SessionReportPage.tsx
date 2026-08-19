@@ -105,7 +105,8 @@ function renderProfileSection(section: ReportSection, index: number) {
                         style={{
                           height: `${pct}%`,
 
-                          background: BAR_COLORS[factorIndex % BAR_COLORS.length]
+                          background: factor.color ?? BAR_COLORS[factorIndex % BAR_COLORS.length]
+
                         }}
                       />
                     </div>
@@ -129,11 +130,17 @@ function renderProfileSection(section: ReportSection, index: number) {
             {factors.map((factor, factorIndex) => (
               <div key={factorIndex} className="bret-factor-item">
                 <div className="bret-factor-header">
-                  <span className="bret-factor-name">{factor.factor_name}</span>
+                  <span
+                    className="bret-factor-name"
+                    style={factor.color ? { color: factor.color } : undefined}
+                  >
+                    {factor.factor_name}
+                  </span>
                   <span className="bret-factor-score">
                     ({getScoreLabel(factor.score || 0)})
                   </span>
                 </div>
+
                 <p className="bret-factor-description">{factor.statement || 'Description not available.'}</p>
               </div>
             ))}
@@ -291,7 +298,7 @@ function renderTakeawaysSection(report: SessionReport) {
     (f) => f.factor_name === 'Roadmap'
   );
   const sscFactor = agendaSection?.factors.find(
-    (f) => f.factor_name === 'SSC Framework'
+    (f) => f.factor_name === '3C Framework'
   );
 
   const aiRoadmap = parseJsonFactor(roadmapFactor?.statement);
@@ -426,22 +433,22 @@ function renderTakeawaysSection(report: SessionReport) {
             ))}
           </ul>
 
-          {(aiSsc.start || aiSsc.stop || aiSsc['continue']) && (
+          {(aiSsc.commence || aiSsc.cease || aiSsc['continue']) && (
             <>
               <div className="bret-obs-pill bret-obs-pill--gray" style={{ marginTop: '16px' }}>
-                SSC FRAMEWORK
+                THE 3 C'S
               </div>
               <div className="bret-obs-ssc">
-                {aiSsc.start && (
+                {aiSsc.commence && (
                   <div className="bret-obs-ssc-item bret-obs-ssc--start">
-                    <span className="bret-obs-ssc-label">START</span>
-                    <p>{aiSsc.start}</p>
+                    <span className="bret-obs-ssc-label">COMMENCE</span>
+                    <p>{aiSsc.commence}</p>
                   </div>
                 )}
-                {aiSsc.stop && (
+                {aiSsc.cease && (
                   <div className="bret-obs-ssc-item bret-obs-ssc--stop">
-                    <span className="bret-obs-ssc-label">STOP</span>
-                    <p>{aiSsc.stop}</p>
+                    <span className="bret-obs-ssc-label">CEASE</span>
+                    <p>{aiSsc.cease}</p>
                   </div>
                 )}
                 {aiSsc['continue'] && (
@@ -453,6 +460,7 @@ function renderTakeawaysSection(report: SessionReport) {
               </div>
             </>
           )}
+
         </div>
 
         <div className="bret-obs-card">
