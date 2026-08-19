@@ -178,13 +178,13 @@ var styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: "#e7ebf3",
     borderLeft: `4px solid ${colors.summaryBorder}`,
-    padding: "12px 16px",
+    padding: "10px 14px",
     marginBottom: 12
   },
   summaryCardLabel: {
     color: colors.blue,
     textTransform: "uppercase",
-    fontSize: 12,
+    fontSize: 10,
     letterSpacing: 0.5,
     marginBottom: 6,
     fontWeight: 700
@@ -192,7 +192,7 @@ var styles = StyleSheet.create({
   summaryCardText: {
     fontStyle: "italic",
     fontSize: 12,
-    lineHeight: 1.8,
+    lineHeight: 1.5,
     color: colors.slate600
   },
   // ── Definitions grid (2-up) ──────────────────────────────────
@@ -378,9 +378,9 @@ var styles = StyleSheet.create({
   },
   orientationBody: {
     flexDirection: "row",
-    flex: 1,
     gap: 20,
     marginTop: 12
+    // removed flex: 1 -- was forcing the row to fill the whole remaining page
   },
   orientationLeft: {
     flex: 1,
@@ -401,13 +401,15 @@ var styles = StyleSheet.create({
   orientationContentCard: {
     backgroundColor: "#EEF2FF",
     borderRadius: 8,
-    padding: 16,
-    flex: 1
+    padding: 18
+    // removed flex: 1 -- card now sizes to its text instead of stretching
   },
   orientationBodyText: {
-    fontSize: 11,
+    fontSize: 13,
+    // was 11
     color: "#374151",
-    lineHeight: 1.6
+    lineHeight: 1.7
+    // was 1.6
   },
   orientationCategoryBadge: {
     backgroundColor: "#3B4FC8",
@@ -431,6 +433,41 @@ var styles = StyleSheet.create({
     justifyContent: "space-between",
     fontSize: 8,
     color: colors.slate400
+  },
+  focusAreaText: {
+    fontSize: 10.5,
+    fontWeight: 600,
+    color: "#1f2937",
+    lineHeight: 1.5,
+    marginBottom: 8
+  },
+  subCardRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 4
+  },
+  subCard: {
+    flex: 1,
+    borderRadius: 8,
+    padding: 10,
+    flexDirection: "column",
+    gap: 4,
+    borderTop: "3px solid transparent"
+  },
+  subCardTeal: { backgroundColor: "#f0fdfa", borderTopColor: "#14b8a6" },
+  subCardRose: { backgroundColor: "#fff1f2", borderTopColor: "#e11d48" },
+  subCardLabel: {
+    fontSize: 8.5,
+    fontWeight: 700,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    color: colors.slate500,
+    marginBottom: 2
+  },
+  subCardListItem: {
+    fontSize: 9.5,
+    color: colors.slate300,
+    lineHeight: 1.5
   }
 });
 
@@ -639,8 +676,8 @@ function ProfilePage({ section, index }) {
   const summary = getSectionSummary(section);
   const realFactors = section.factors.filter((f) => !isCompositeFactor(f));
   const chartData = realFactors.map((f) => ({ label: f.factor_name, score: f.score || 0 }));
-  const rightFactors = realFactors.slice(0, 2);
-  const leftSpillFactors = realFactors.slice(2);
+  const leftFactors = realFactors.slice(0, 2);
+  const rightSpillFactors = realFactors.slice(2);
   return /* @__PURE__ */ jsxs2(Page, { size: PAGE_SIZE, style: styles.page, children: [
     /* @__PURE__ */ jsxs2(View2, { style: styles.section, children: [
       /* @__PURE__ */ jsx2(Text, { style: styles.sectionHeader, children: section.section_name }),
@@ -650,14 +687,14 @@ function ProfilePage({ section, index }) {
             /* @__PURE__ */ jsx2(PdfBarChart, { data: chartData }),
             /* @__PURE__ */ jsx2(Text, { style: styles.chartLegend, children: "Tendency Scale: Low (0-1) \u2022 Moderate (2-3) \u2022 High (4-5)" })
           ] }),
-          leftSpillFactors.map((factor, i) => /* @__PURE__ */ jsx2(FactorBlock, { factor }, `left-${i}`))
+          leftFactors.map((factor, i) => /* @__PURE__ */ jsx2(FactorBlock, { factor }, `left-${i}`))
         ] }),
         /* @__PURE__ */ jsxs2(View2, { style: styles.profileRight, children: [
           /* @__PURE__ */ jsxs2(View2, { style: styles.summaryCard, children: [
             /* @__PURE__ */ jsx2(Text, { style: styles.summaryCardLabel, children: "Composite Insight" }),
             /* @__PURE__ */ jsx2(Text, { style: styles.summaryCardText, children: summary })
           ] }),
-          rightFactors.map((factor, i) => /* @__PURE__ */ jsx2(FactorBlock, { factor }, `right-${i}`))
+          rightSpillFactors.map((factor, i) => /* @__PURE__ */ jsx2(FactorBlock, { factor }, `right-${i}`))
         ] })
       ] })
     ] }),
@@ -732,6 +769,7 @@ function TakeawaysPage({ report, index }) {
   const allFactors = profileSections.flatMap((s) => s.factors.filter((f) => !isCompositeFactor(f)));
   const topStrengths = [...allFactors].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 3);
   const devPriorities = [...allFactors].sort((a, b) => (a.score || 0) - (b.score || 0)).slice(0, 4);
+  const overflowDevToRight = focusAreaText.length > 200 || devPriorities.length > 4;
   return /* @__PURE__ */ jsxs2(Fragment, { children: [
     /* @__PURE__ */ jsxs2(Page, { size: PAGE_SIZE, style: styles.page, children: [
       /* @__PURE__ */ jsx2(Text, { style: styles.sectionHeader, children: "Key Takeaways" }),
@@ -742,23 +780,29 @@ function TakeawaysPage({ report, index }) {
       /* @__PURE__ */ jsxs2(View2, { style: styles.obsGrid, children: [
         /* @__PURE__ */ jsxs2(View2, { style: styles.obsCard, children: [
           /* @__PURE__ */ jsx2(Text, { style: styles.obsCardTitle, children: "Focus Areas" }),
-          /* @__PURE__ */ jsx2(Text, { style: [styles.summaryCardText, { fontWeight: 600, fontStyle: "normal", color: "#1f2937" }], children: focusAreaText }),
-          /* @__PURE__ */ jsx2(Text, { style: [styles.obsPill, styles.obsPillTeal], children: "Strengths to Leverage" }),
-          topStrengths.map((f, i) => /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
-            "\u2013 ",
-            f.factor_name,
-            " (",
-            f.score,
-            "/5)"
-          ] }, i)),
-          /* @__PURE__ */ jsx2(Text, { style: [styles.obsPill, styles.obsPillRose], children: "Development Priorities" }),
-          devPriorities.map((f, i) => /* @__PURE__ */ jsxs2(Text, { style: styles.obsListItem, children: [
-            "\u2013 ",
-            f.factor_name,
-            " (",
-            f.score,
-            "/5)"
-          ] }, i))
+          /* @__PURE__ */ jsx2(Text, { style: styles.focusAreaText, children: focusAreaText }),
+          /* @__PURE__ */ jsxs2(View2, { style: styles.subCardRow, children: [
+            /* @__PURE__ */ jsxs2(View2, { style: [styles.subCard, styles.subCardTeal], children: [
+              /* @__PURE__ */ jsx2(Text, { style: styles.subCardLabel, children: "Strengths to Leverage" }),
+              topStrengths.map((f, i) => /* @__PURE__ */ jsxs2(Text, { style: styles.subCardListItem, children: [
+                "\u2013 ",
+                f.factor_name,
+                " (",
+                f.score,
+                "/5)"
+              ] }, i))
+            ] }),
+            !overflowDevToRight && /* @__PURE__ */ jsxs2(View2, { style: [styles.subCard, styles.subCardRose], children: [
+              /* @__PURE__ */ jsx2(Text, { style: styles.subCardLabel, children: "Development Priorities" }),
+              devPriorities.map((f, i) => /* @__PURE__ */ jsxs2(Text, { style: styles.subCardListItem, children: [
+                "\u2013 ",
+                f.factor_name,
+                " (",
+                f.score,
+                "/5)"
+              ] }, i))
+            ] })
+          ] })
         ] }),
         /* @__PURE__ */ jsxs2(View2, { style: styles.obsCard, children: [
           /* @__PURE__ */ jsx2(Text, { style: styles.obsCardTitle, children: "90-Day Roadmap" }),
@@ -774,7 +818,17 @@ function TakeawaysPage({ report, index }) {
                 phase.text.goal
               ] })
             ] })
-          ] }, i)) })
+          ] }, i)) }),
+          overflowDevToRight && /* @__PURE__ */ jsxs2(View2, { style: [styles.subCard, styles.subCardRose, { marginTop: 10 }], children: [
+            /* @__PURE__ */ jsx2(Text, { style: styles.subCardLabel, children: "Development Priorities" }),
+            devPriorities.map((f, i) => /* @__PURE__ */ jsxs2(Text, { style: styles.subCardListItem, children: [
+              "\u2013 ",
+              f.factor_name,
+              " (",
+              f.score,
+              "/5)"
+            ] }, i))
+          ] })
         ] })
       ] }),
       /* @__PURE__ */ jsx2(PageFooter, { page: index })
