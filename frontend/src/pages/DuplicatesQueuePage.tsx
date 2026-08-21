@@ -68,9 +68,17 @@ export default function DuplicatesQueuePage() {
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold uppercase text-gray-500 mb-2">Prior Record</p>
-                                    <p className="text-sm dark:text-gray-300">Prior Session ID: {flag.prior_session_id}</p>
-                                    <p className="text-sm dark:text-gray-300">Prior Registry ID: {flag.prior_registry_id}</p>
+                                    <p className="text-sm dark:text-gray-300">Prior Session ID: {flag.prior_session_id ?? 'N/A'}</p>
+                                    <p className="text-sm dark:text-gray-300">Prior Registry ID: {flag.prior_registry_id ?? 'N/A'}</p>
                                 </div>
+                                {flag.match_evidence && (
+                                    <div className="col-span-2 mt-4">
+                                        <p className="text-xs font-bold uppercase text-gray-500 mb-2">Match Evidence</p>
+                                        <pre className="text-xs whitespace-pre-wrap bg-white border border-gray-200 rounded p-3 overflow-auto dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                                            {JSON.stringify(flag.match_evidence, null, 2)}
+                                        </pre>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

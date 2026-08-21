@@ -235,6 +235,7 @@ def complete_registration(
                         "id": flag.id,
                         "match_type": flag.match_type.value,
                         "match_confidence": flag.match_confidence.value,
+                        "match_evidence": flag.match_evidence,
                         "prior_registry_id": flag.prior_registry_id,
                         "prior_session_id": flag.prior_session_id,
                     }

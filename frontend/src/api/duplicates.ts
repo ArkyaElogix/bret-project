@@ -8,6 +8,7 @@ export interface DuplicateFlag {
     prior_session_id: number
     match_type: string
     match_confidence: string
+    match_evidence: Record<string, any> | null
     status: string
     reviewed_by: number | null
     reviewed_at: string | null

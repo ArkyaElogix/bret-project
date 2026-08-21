@@ -399,18 +399,18 @@ class DuplicateFlagOut(BaseModel):
     id: int
     new_session_id: int
     new_user_id: int
-    prior_registry_id: int
-    prior_session_id: int
+    prior_registry_id: int | None = None
+    prior_session_id: int | None = None
     match_type: str
     match_confidence: str
+    match_evidence: dict | None = None
     status: str
     reviewed_by: int | None
     reviewed_at: datetime | None
     review_note: str | None
     created_at: datetime
-    
-    model_config = ConfigDict(from_attributes=True)
 
+    model_config = ConfigDict(from_attributes=True)
 
 class DuplicateReviewRequest(BaseModel):
     decision: str  # "APPROVED" or "REJECTED"

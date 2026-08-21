@@ -40,6 +40,7 @@ class MatchType(str, enum.Enum):
     EMAIL = "EMAIL"
     PHONE = "PHONE"
     NAME_ADDRESS = "NAME_ADDRESS"
+    PRIOR_ATTEMPT = "PRIOR_ATTEMPT"
 
 class MatchConfidence(str, enum.Enum):
     EXACT = "EXACT"
@@ -473,12 +474,14 @@ class DuplicateFlag(Base):
     )
     new_user_id = Column(Integer, nullable=False)
     prior_registry_id = Column(Integer, ForeignKey("applicant_registry.id", ondelete="SET NULL"), nullable=True)
-    prior_session_id = Column(Integer, nullable=False)
-    
+    prior_session_id = Column(Integer, nullable=True)
+
     match_type = Column(Enum(MatchType), nullable=False)
     match_confidence = Column(Enum(MatchConfidence), nullable=False)
+    match_evidence = Column(JSON, nullable=True)
+
     status = Column(Enum(DuplicateFlagStatus), nullable=False, default=DuplicateFlagStatus.PENDING)
-    
+
     reviewed_by = Column(Integer, nullable=True)
     reviewed_at = Column(DateTime, nullable=True)
     review_note = Column(Text, nullable=True)
