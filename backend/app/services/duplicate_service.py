@@ -35,6 +35,8 @@ def check_and_flag_duplicates(session: AssessmentSession, user: User, db: Sessio
     Checks for exact email/phone matches, and fuzzy name+address matches.
     Returns a list of DuplicateFlag rows created (empty = no match).
     """
+    if not user.is_single_use:
+        return []
     flags = []
 
     # --- Pass 1: Exact email match ---

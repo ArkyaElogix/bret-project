@@ -944,18 +944,21 @@ def submit_session(
     
 
         # --- Phase 2: Duplicates, single-use lock, and email ---
+    # --- Phase 2: Duplicates, single-use lock, and email ---
     from app.services.duplicate_service import check_and_flag_duplicates, register_applicant
     import json
 
-    flags = check_and_flag_duplicates(session, current_user, db)
-    if flags:
-        audit = AuditLog(
-            action=AuditAction.DUPLICATE_FLAGGED,
-            user_id=current_user.id,
-            target_user_id=current_user.id,
-            detail=json.dumps({"flag_count": len(flags), "phase": "submit_session"}),
-        )
-        db.add(audit)
+    flags = []
+    if current_user.is_single_use:
+        flags = check_and_flag_duplicates(session, current_user, db)
+        if flags:
+            audit = AuditLog(
+                action=AuditAction.DUPLICATE_FLAGGED,
+                user_id=current_user.id,
+                target_user_id=current_user.id,
+                detail=json.dumps({"flag_count": len(flags), "phase": "submit_session"}),
+            )
+            db.add(audit)
 
     existing_registry = (
         db.query(ApplicantRegistry)

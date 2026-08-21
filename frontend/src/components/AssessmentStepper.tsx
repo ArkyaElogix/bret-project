@@ -71,6 +71,20 @@ export default function AssessmentStepper({
     const totalQuestions = questions.length
     const answeredCount = questions.filter((q) => answers[q.id]).length
     const allAnswered = totalQuestions > 0 && answeredCount === totalQuestions
+    const questionStepMeta = useMemo(() => {
+        const meta = new Map<number, { stepIndex: number; sectionLabel: string }>()
+
+        steps.forEach((step, stepIndex) => {
+            step.questions.forEach((question) => {
+                meta.set(question.id, {
+                    stepIndex,
+                    sectionLabel: step.sectionLabel,
+                })
+            })
+        })
+
+        return meta
+    }, [steps])
 
     const handleNext = () => {
         setCurrentStep((prev) => Math.min(prev + 1, steps.length))
@@ -158,14 +172,15 @@ export default function AssessmentStepper({
                                 <div className="flex flex-wrap gap-2">
                                     {unansweredQuestions.map(q => {
                                         // Find which step this question belongs to and allow quick jumping
-                                        const stepIdx = steps.findIndex(s => s.questions.some(sq => sq.id === q.id))
+                                        const stepMeta = questionStepMeta.get(q.id)
+                                        const stepIdx = stepMeta?.stepIndex ?? steps.findIndex(s => s.questions.some(sq => sq.id === q.id))
                                         return (
                                             <button
                                                 key={q.id}
                                                 onClick={() => setCurrentStep(stepIdx)}
                                                 className="bg-white dark:bg-gray-700 border border-red-300 dark:border-red-500 text-red-700 dark:text-red-400 px-3 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/50 text-sm transition"
                                             >
-                                                Q {q.number}
+                                                {stepMeta?.sectionLabel ?? 'Section ?'} - Q {q.number}
                                             </button>
                                         )
                                     })}
